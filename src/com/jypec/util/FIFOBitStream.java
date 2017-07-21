@@ -127,6 +127,28 @@ public class FIFOBitStream implements BitStream {
 			break;
 		}
 	}
+	
+	@Override
+	public int getBits(int quantity, BitStreamConstants ordering) {
+		int result = 0;
+		switch (ordering) {
+		case ORDERING_LEFTMOST_FIRST:
+			for (int i = 0; i < quantity; i++) {
+				result >>= 1;
+				result &= LEFTMOST_BIT_MASK;
+				result |= getBitAsInt() << 31;
+			}
+			break;
+		case ORDERING_RIGHTMOST_FIRST:
+			for (int i = 0; i < quantity; i++) {
+				result <<= 1;
+				result |= getBitAsInt();
+			}
+			break;
+		}
+		
+		return result;
+	}
 
 	@Override
 	public int getNumberOfBits() {
@@ -164,6 +186,9 @@ public class FIFOBitStream implements BitStream {
 		
 		return output;
 	}
+
+
+
 
 
 

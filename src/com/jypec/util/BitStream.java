@@ -18,7 +18,22 @@ public interface BitStream {
 	 * @throws EmptyStreamException
 	 */
 	public Bit getBit();
+	
+	/**
+	 * Same as getBit but returning an integer in the interval [0, 1]
+	 * @return
+	 */
 	public int getBitAsInt();
+	
+	/**
+	 * Get the given quantity of bits as an integer that packs them
+	 * inserting from the MSB and shifting right or from the LSB
+	 * and shifting left
+	 * @param quantity
+	 * @param ordering
+	 * @return
+	 */
+	public int getBits(int quantity, BitStreamConstants ordering);
 	
 	/**
 	 * Puts a bit in the stream
@@ -50,4 +65,5 @@ public interface BitStream {
 	 * @return the contents of the stream in hex format. Zeros are appended if needed
 	 */
 	public String dumpHex();
+	
 }

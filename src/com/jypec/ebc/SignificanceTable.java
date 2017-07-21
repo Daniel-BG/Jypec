@@ -1,5 +1,6 @@
-package com.jypec.mq;
+package com.jypec.ebc;
 
+import com.jypec.ebc.mq.ContextLabel;
 import com.jypec.util.Bit;
 import com.jypec.util.Pair;
 
@@ -306,5 +307,20 @@ public class SignificanceTable {
 		} else {
 			return ContextLabel.SIXTEEN;
 		}
+	}
+	
+	/**
+	 * @param band
+	 * @param row
+	 * @param column
+	 * @return true if all contexts of the strip starting at the given location are ZERO
+	 */
+	public boolean isStripZeroContext(SubBand band, int row, int column) {
+		for (int j = 0; j < 4; j++) {
+			if (this.getSignificancePropagationContextAt(j + row, column, band) != ContextLabel.ZERO) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

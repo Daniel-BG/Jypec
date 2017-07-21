@@ -1,6 +1,6 @@
 package com.jypec.util;
 
-import com.jypec.mq.SubBand;
+import com.jypec.ebc.SubBand;
 
 /**
  * Class for the storage and manipulation of coding blocks that are coded
@@ -41,6 +41,21 @@ public class CodingBlock {
 	}
 
 	/**
+	 * Creates an empty codeblock to be filled when decoding
+	 * @param height
+	 * @param width
+	 * @param bitPlanes
+	 * @param band
+	 */
+	public CodingBlock(int height, int width, int bitPlanes, SubBand band) {
+		this.data = new int[height][width];
+		this.rows = height;
+		this.columns = width;
+		this.bitPlanes = bitPlanes;
+		this.band = band;
+	}
+
+	/**
 	 * @return the width, or number of columns, in this coding block
 	 */
 	public int getWidth() {
@@ -68,6 +83,14 @@ public class CodingBlock {
 	 */
 	public CodingPlane getBitPlane(int i) {
 		assert (i < this.bitPlanes);
-		return new CodingPlane(data, i, this.band);
+		return new CodingPlane(data, i, this.band, 0x2 << this.bitPlanes);
+	}
+	
+	/**
+	 * @return the data matrix inside this coding block. Note that if this data is modified, 
+	 * the block is modified too
+	 */
+	public int[][] getData() {
+		return this.data;
 	}
 }

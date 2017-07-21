@@ -1,4 +1,4 @@
-package com.jypec.mq;
+package com.jypec.ebc;
 
 /**
  * Enum for all the types of subbands possible. Subbands are made when a DWT is applied

@@ -1,4 +1,4 @@
-package com.jypec.mq;
+package com.jypec.ebc.mq;
 
 import com.jypec.util.Bit;
 
