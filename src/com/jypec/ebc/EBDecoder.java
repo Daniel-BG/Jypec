@@ -4,8 +4,6 @@ import com.jypec.ebc.mq.ContextLabel;
 import com.jypec.ebc.mq.MQArithmeticDecoder;
 import com.jypec.util.Bit;
 import com.jypec.util.BitStream;
-import com.jypec.util.debug.Logger;
-import com.jypec.util.debug.Logger.SeverityScale;
 import com.jypec.util.CodingBlock;
 import com.jypec.util.CodingPlane;
 import com.jypec.util.Pair;
@@ -43,25 +41,18 @@ public class EBDecoder {
 	 */
 	public void decode(BitStream input, CodingBlock output) {
 		this.initialize(input, output);
-		Logger.logger().log("Decoder initialized. Decoding " + input.getNumberOfBits() + " bits");
-		
 		int numberOfBitPlanes = output.getBitPlaneNumber();
 		
+		//decode first cleanup pass
 		CodingPlane plane = output.getBitPlane(numberOfBitPlanes - 1);
-		
-		Logger.logger().log("Decoding first band cleanup...");
 		this.decodeCleanup(input, plane);
-		Logger.logger().log("Initial decoding done!");
-		for (int i = numberOfBitPlanes - 2; i >= 0; i++) {
+		
+		//decode rest of passes over the remaining planes
+		for (int i = numberOfBitPlanes - 2; i >= 0; i--) {
 			plane = output.getBitPlane(i);
 			this.decodeSignificance(input, plane);
 			this.decodeRefinement(input, plane);
 			this.decodeCleanup(input, plane);
-			Logger.logger().log("Decoded plane: " + i);
-		}
-		
-		if (input.getNumberOfBits() > 0) {
-			Logger.logger().log("Still " + input.getNumberOfBits() + " bits unused after decoding!", SeverityScale.WARNING);
 		}
 	}
 	

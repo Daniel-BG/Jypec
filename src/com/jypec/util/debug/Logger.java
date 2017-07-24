@@ -1,7 +1,9 @@
 package com.jypec.util.debug;
 
 import java.io.PrintStream;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Logger to aid with tracing execution.
@@ -34,6 +36,8 @@ public class Logger {
 	
 	private LinkedList<String> messageLogs;
 	private PrintStream out, err;
+	
+	private Set<Class<? extends Object>> allowedClasses;
 
 	
 	/**
@@ -43,6 +47,7 @@ public class Logger {
 	 */
 	private Logger(PrintStream out, PrintStream err) {
 		this.messageLogs = new LinkedList<String>();
+		this.allowedClasses = new HashSet<Class<? extends Object>>();
 		this.out = out;
 		this.err = err;
 	}
@@ -58,8 +63,11 @@ public class Logger {
 	 * Log with the default SeverityScale
 	 * @param message
 	 */
-	public void log (String message) {
-		this.log(message, this.default_severity);
+	public void log (Class<? extends Object> sender, String message) {
+		this.log(sender, message, this.default_severity);
+	}
+	public void log (Object sender, String message) {
+		this.log(sender.getClass(), message, this.default_severity);
 	}
 	
 	/**
@@ -68,7 +76,11 @@ public class Logger {
 	 * @param message
 	 * @param sev
 	 */
-	public void log (String message, SeverityScale sev) {
+	public void log (Class<? extends Object> sender, String message, SeverityScale sev) {
+		if (!this.allowedClasses.contains(sender)) {
+			return; //do not log if class is not allowed to log
+		}
+		
 		if (this.log_messages) {
 			this.messageLogs.add(message);
 		}
@@ -92,6 +104,9 @@ public class Logger {
 			}
 			break;
 		}
+	}
+	public void log(Object sender, String message, SeverityScale sev) {
+		this.log(sender.getClass(), message, sev);
 	}
 	
 	/**
@@ -124,6 +139,17 @@ public class Logger {
 			this.default_severity = SeverityScale.values()[value];
 			break;
 		}
+	}
+	
+	/**
+	 * Allow objects of a certainc class to produce logs.
+	 * @param cls
+	 */
+	public void allowLogging(Class<? extends Object> cls) {
+		this.allowedClasses.add(cls);
+	}
+	public void allowLogging(Object o) {
+		this.allowLogging(o.getClass());
 	}
 	
 	

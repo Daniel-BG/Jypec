@@ -23,12 +23,12 @@ public class CodingPlane {
 	 * @param planeOffset: offset (from the LSB) that this plane refers to
 	 * @param band: which band this plane belongs to (needed for coding)
 	 */
-	public CodingPlane(int[][] data, int planeOffset, SubBand band, int signMask) {
+	public CodingPlane(int[][] data, int width, int height, int planeOffset, SubBand band, int signMask) {
 		assert(planeOffset >= 0 && planeOffset <= 30);
 		
 		this.data = data;
-		this.rows = this.data.length;
-		this.columns = this.data[0].length;
+		this.rows = height;
+		this.columns = width;
 		this.band = band;
 		this.bitMask = 0x1 << planeOffset;
 		this.signMask = signMask;
@@ -42,7 +42,7 @@ public class CodingPlane {
 	 * @return
 	 */
 	public int getFullStripsNumber() {
-		return this.rows / 4;
+		return this.rows >> 2;
 	}
 
 	/**

@@ -5,7 +5,6 @@ import java.util.EnumMap;
 import com.jypec.util.Bit;
 import com.jypec.util.BitStream;
 import com.jypec.util.BitTwiddling;
-import com.jypec.util.debug.Logger;
 
 /**
  * Implementation of the MQ arithmetic coder
@@ -96,7 +95,6 @@ public class MQArithmeticCoder {
 	 * @param context
 	 */
 	public void codeSymbol(Bit symbol, ContextLabel context, BitStream output) {
-		Logger.logger().log("Coding symbol: " + symbol + " w/ context: " + context);
 		//get the table associated to this context
 		MQProbabilityTable table = this.contextStates.get(context);
 		//get the elements needed from said table

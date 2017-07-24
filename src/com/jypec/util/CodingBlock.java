@@ -28,14 +28,16 @@ public class CodingBlock {
 	 * @see SubBand
 	 * @note MSB: most significant bit LSB: least significant bit
 	 */
-	public CodingBlock(int[][] data, int bitPlanes,SubBand band) {
+	public CodingBlock(int[][] data, int height, int width, int bitPlanes, SubBand band) {
 		//check validity of arguments
-		assert (bitPlanes > 0 && bitPlanes <= 31);
+		if (bitPlanes < 1 || bitPlanes > 31) {
+			throw new IllegalArgumentException("Number of bitplanes must be between 1 and 31 (both inclusive)");
+		}
 		
 		//assign internal variables
 		this.data = data;
-		this.rows = this.data.length;
-		this.columns = this.data[0].length;
+		this.rows = height;
+		this.columns = width;
 		this.bitPlanes = bitPlanes;
 		this.band = band;
 	}
@@ -82,8 +84,17 @@ public class CodingBlock {
 	 * @return
 	 */
 	public CodingPlane getBitPlane(int i) {
-		assert (i < this.bitPlanes);
-		return new CodingPlane(data, i, this.band, 0x2 << this.bitPlanes);
+		if (i < 0 || i >= this.bitPlanes) {
+			throw new IllegalArgumentException("Requested plane does not exist. Available: [0," + (this.bitPlanes - 1) + "]");
+		}
+		return new CodingPlane(data, this.columns, this.rows, i, this.band, this.getSignMask());
+	}
+	
+	/**
+	 * @return the mask to be used with the internal data to extract the sign bit
+	 */
+	private int getSignMask() {
+		return 0x1 << this.bitPlanes;
 	}
 	
 	/**

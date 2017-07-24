@@ -7,7 +7,6 @@ import com.jypec.util.BitStream;
 import com.jypec.util.CodingBlock;
 import com.jypec.util.CodingPlane;
 import com.jypec.util.Pair;
-import com.jypec.util.debug.Logger;
 
 /**
  * MQCoder that given an input block codes it into the
@@ -32,28 +31,22 @@ public class EBCoder {
 	 */ 
 	public void code(CodingBlock block, BitStream output) {
 		this.initialize(block.getWidth(), block.getHeight());
-		Logger.logger().log("Coder initialized!");
 		
 		int numberOfBitPlanes = block.getBitPlaneNumber();
 		
 		CodingPlane plane = block.getBitPlane(numberOfBitPlanes - 1);
 		
 		//fist bitplane is coded within a cleanup scheme
-		Logger.logger().log("Performing initial Cleanup...");
 		this.codeCleanup(plane, output);
-		Logger.logger().log("Initial Cleanup done!");
 		//rest of bitplanes are coded with a 3-step scheme
 		for (int i = numberOfBitPlanes - 2; i >= 0; i--) {
-			Logger.logger().log("Coding plane: " + i);
 			plane = block.getBitPlane(i);
 			this.codeSignificance(plane, output);
-			Logger.logger().log("\tSignificance propagation done!");
 			this.codeRefinement(plane, output);
-			Logger.logger().log("\tCode refinement done!");
 			this.codeCleanup(plane, output);
-			Logger.logger().log("\tCleanup done!");
 		}
-		
+		//end coding by dumping the remaining bits in the buffer
+		//and marking the end of the stream
 		this.coder.dumpRemainingBits(output);
 		this.coder.markEndOfStream(output);
 	}

@@ -7,7 +7,6 @@ import com.jypec.util.Bit;
 import com.jypec.util.BitStream;
 import com.jypec.util.BitTwiddling;
 import com.jypec.util.BitStream.BitStreamConstants;
-import com.jypec.util.debug.Logger;
 
 /**
  * Implementation of the MQ arithmetic decoder
@@ -146,7 +145,6 @@ public class MQArithmeticDecoder {
 			this.renormalizeOnce(input);
 		}
 		
-		Logger.logger().log("Decoded symbol: " + recoveredSymbol + " w/ context: " + context);
 		
 		return recoveredSymbol;
 	}
