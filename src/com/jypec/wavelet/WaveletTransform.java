@@ -132,8 +132,7 @@ public class WaveletTransform {
 	 * the signal. This saves around half of the operations needed.
 	 * @param s the signal that is to be transformed
 	 */
-	public static void forwardTransform(double[] s) {
-		int n = s.length;
+	public static void forwardTransform(double[] s, int n) {
 		//predict and update
 		predict(s, n, WaveletTransform.COEFF_PREDICT_1);		
 		update(s, n, WaveletTransform.COEFF_UPDATE_1);
@@ -150,8 +149,7 @@ public class WaveletTransform {
 	 * the original signal.
 	 * @param s
 	 */
-	public static void reverseTransform(double[] s) {
-		int n = s.length;
+	public static void reverseTransform(double[] s, int n) {
 		//unpack values
 		unpack(s, n);
 		//unscale values
