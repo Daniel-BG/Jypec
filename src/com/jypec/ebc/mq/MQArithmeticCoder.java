@@ -23,11 +23,16 @@ public class MQArithmeticCoder {
 	
 	
 	//books = JPEG2000 image compression fundamentals. David S. Michael W.
-	private int normalizedIntervalLength;	//A in the books
-	private int normalizedLowerBound;		//C in the books
-	private int tempByteBuffer;				//T bar in the books
-	private int countdownTimer;				//t bar in the books
-	private int codeBytesGenerated;			//L in the books
+	/** A in the books */
+	private int normalizedIntervalLength;
+	/** C in the books */
+	private int normalizedLowerBound;
+	/** T bar */
+	private int tempByteBuffer;			
+	/** t bar */
+	private int countdownTimer;			
+	/** L */
+	private int codeBytesGenerated;		
 	
 	
 	private EnumMap<ContextLabel, MQProbabilityTable> contextStates;

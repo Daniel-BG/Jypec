@@ -1,6 +1,6 @@
 package com.jypec.util;
 
-import java.util.Stack;
+import java.util.LinkedList;
 
 /**
  * Implements a BitStream in a FIFO way.
@@ -15,7 +15,7 @@ public class FIFOBitStream implements BitStream {
 	
 	
 	//where to store bits if it gets too big
-	Stack<Integer> storage;
+	LinkedList<Integer> storage;
 	//output is where we are taking bits from, input where we are putting them in
 	//bits might be taken from the input if they are asked for before the whole input fills up
 	int output, input;
@@ -26,7 +26,7 @@ public class FIFOBitStream implements BitStream {
 	int size;
 	
 	public FIFOBitStream() {
-		this.storage = new Stack<Integer>();
+		this.storage = new LinkedList<Integer>();
 		this.size = 0;
 		this.outputLeft = 0;
 		this.inputLeft = 32;
@@ -69,7 +69,7 @@ public class FIFOBitStream implements BitStream {
 		}
 		//check if there are bits in the intermediate storage
 		if (!storage.isEmpty()) {
-			output = storage.pop();
+			output = storage.removeFirst();
 			outputLeft = 32;
 			return removeBitFromOutput();
 		}
@@ -96,7 +96,7 @@ public class FIFOBitStream implements BitStream {
 			inputLeft--;
 		//else push a value to the queue and restart the input
 		} else {
-			storage.push(input);
+			storage.addLast(input);
 			input = bit;
 			inputLeft = 31;
 		}
