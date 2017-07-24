@@ -55,6 +55,7 @@ public class EBCoder {
 		}
 		
 		this.coder.dumpRemainingBits(output);
+		this.coder.markEndOfStream(output);
 	}
 	
 	/**

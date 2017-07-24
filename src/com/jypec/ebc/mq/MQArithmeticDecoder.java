@@ -65,6 +65,8 @@ public class MQArithmeticDecoder {
 	 */
 	private void fillLSBs(BitStream input) {
 		this.lastByteRead = input.getBits(8, BitStreamConstants.ORDERING_RIGHTMOST_FIRST);
+
+		//Logger.logger().log("Removing: " + Integer.toHexString(this.lastByteRead));
 		this.countdownTimer = 8;
 		if (this.codeBytesRead == this.maxCodeBytesToRead || (this.tempByteBuffer == 0xff && this.lastByteRead > 0x8f)) {
 			this.normalizedLowerBound += 0xff;

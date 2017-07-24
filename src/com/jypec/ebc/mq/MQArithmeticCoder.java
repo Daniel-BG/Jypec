@@ -71,6 +71,10 @@ public class MQArithmeticCoder {
 		this.transferByte(output);
 	}
 	
+	public void markEndOfStream(BitStream output) {
+		output.putBits(MQConstants.BYTE_MARKER, 8, BitStream.BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+		output.putBits(MQConstants.BYTE_END_OF_MQ_CODER, 8, BitStream.BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+	}
 	
 	/**
 	 * Code an integer with the given context
