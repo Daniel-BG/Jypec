@@ -1,4 +1,4 @@
-package com.jypec.wavelet;
+package com.jypec.util.arrays;
 
 public class MatrixTransforms {
 

@@ -1,9 +1,23 @@
 package com.jypec.wavelet;
 
-public class BidimensionalWaveletTransform {
+import com.jypec.util.arrays.MatrixTransforms;
 
+/**
+ * Extend a 1-D wavelet to 2-D
+ * @author Daniel
+ *
+ */
+public class BidimensionalWavelet {
+
+	private Wavelet baseWavelet;
 	
-	
+	/**
+	 * Create a Bidimensional wavelet
+	 * @param baseWavelet: 1-D wavelet that is to be applied in both dimensions
+	 */
+	public BidimensionalWavelet(Wavelet baseWavelet) {
+		this.baseWavelet = baseWavelet;
+	}
 	
 	
 	/**
@@ -14,15 +28,15 @@ public class BidimensionalWaveletTransform {
 	 * @param width
 	 * @param height
 	 */
-	public static void forwardTransform(double[][] s, int width, int height) {
+	public void forwardTransform(double[][] s, int width, int height) {
 		//transform along one axis
 		for (int i = 0; i < height; i++) {
-			WaveletTransform.forwardTransform(s[i], width);
+			this.baseWavelet.forwardTransform(s[i], width);
 		}
 		//transpose and transform along the other axis
 		double[][] tmp = MatrixTransforms.transpose(s, width, height);
 		for (int j = 0; j < width; j++) {
-			WaveletTransform.forwardTransform(tmp[j], height);
+			this.baseWavelet.forwardTransform(tmp[j], height);
 		}
 		//retranspose and return
 		s = MatrixTransforms.transpose(tmp, height, width);
@@ -34,15 +48,15 @@ public class BidimensionalWaveletTransform {
 	 * @param width
 	 * @param height
 	 */
-	public static void reverseTransform(double[][] s, int width, int height) {
+	public void reverseTransform(double[][] s, int width, int height) {
 		//transform along one axis
 		for (int i = 0; i < height; i++) {
-			WaveletTransform.reverseTransform(s[i], width);
+			this.baseWavelet.reverseTransform(s[i], width);
 		}
 		//transpose and transform along the other axis
 		double[][] tmp = MatrixTransforms.transpose(s, width, height);
 		for (int j = 0; j < width; j++) {
-			WaveletTransform.reverseTransform(tmp[j], height);
+			this.baseWavelet.reverseTransform(tmp[j], height);
 		}
 		//retranspose and return
 		s = MatrixTransforms.transpose(tmp, height, width);
