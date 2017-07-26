@@ -68,7 +68,7 @@ public class MQArithmeticDecoder {
 		//Logger.logger().log("Removing: " + Integer.toHexString(this.lastByteRead));
 		this.countdownTimer = 8;
 		if (this.codeBytesRead == this.maxCodeBytesToRead || (this.tempByteBuffer == 0xff && this.lastByteRead > 0x8f)) {
-			this.normalizedLowerBound += 0xff;
+			//this.normalizedLowerBound += 0xff;
 		} else {
 			if (this.tempByteBuffer == 0xff) {
 				this.countdownTimer = 7;

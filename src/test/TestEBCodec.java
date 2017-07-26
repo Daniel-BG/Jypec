@@ -60,7 +60,7 @@ public class TestEBCodec {
 	 * @param height
 	 * @param value
 	 */
-	private void fillDataWithValue(int[][] data, int width, int height, int value) {
+	public static void fillDataWithValue(int[][] data, int width, int height, int value) {
 		for (int i = 0; i < height; i++) { 
 			for (int j = 0; j < width; j++) {
 				data[i][j] = value;
@@ -78,7 +78,7 @@ public class TestEBCodec {
 	 * @param depth
 	 * @param r
 	 */
-	private void randomizeData(int[][] data, int width, int height, int depth, Random r) {
+	public static void randomizeData(int[][] data, int width, int height, int depth, Random r) {
 		int limit = 0x1 << (depth - 1);
 		
 		for (int i = 0; i < height; i++) {
@@ -107,11 +107,11 @@ public class TestEBCodec {
 		int width = 64, height = 64, depth = 1;
 		int[][] data = new int[height][width];
 		for (depth = 1; depth < 32; depth++) {
-			this.fillDataWithValue(data, width, height, 0);
+			fillDataWithValue(data, width, height, 0);
 			assertTrue("Failed testing with zeroes at depth: " + depth, this.testEncoding(data, width, height, depth, SubBand.HH));
-			this.fillDataWithValue(data, width, height, (-1) & (0xffffffff >>> (31 - depth)));
+			fillDataWithValue(data, width, height, (-1) & (0xffffffff >>> (31 - depth)));
 			assertTrue("Failed testing with ones at depth: " + depth, this.testEncoding(data, width, height, depth, SubBand.HH));
-			this.randomizeData(data, width, height, depth, r);
+			randomizeData(data, width, height, depth, r);
 			assertTrue("Failed testing with random at depth: " + depth, this.testEncoding(data, width, height, depth, SubBand.HH));
 		}
 	}
@@ -125,11 +125,11 @@ public class TestEBCodec {
 		int MAX_SIZE = 64;
 		int [][] data = new int[MAX_SIZE][MAX_SIZE];
 		for (int size = 1; size <= 64; size++) {
-			this.fillDataWithValue(data, size, size, 0);
+			fillDataWithValue(data, size, size, 0);
 			assertTrue("Failed testing with zeroes at depth: " + depth, this.testEncoding(data, size, size, depth, SubBand.HH));
-			this.fillDataWithValue(data, size, size, (-1) & (0xffffffff >>> (31 - depth)));
+			fillDataWithValue(data, size, size, (-1) & (0xffffffff >>> (31 - depth)));
 			assertTrue("Failed testing with ones at depth: " + depth, this.testEncoding(data, size, size, depth, SubBand.HH));
-			this.randomizeData(data, size, size, depth, r);
+			randomizeData(data, size, size, depth, r);
 			assertTrue("Failed testing with random at depth: " + depth, this.testEncoding(data, size, size, depth, SubBand.HH));
 		}
 	}
@@ -143,11 +143,11 @@ public class TestEBCodec {
 		int width = 64, height = 64, depth = 16;
 		int [][] data = new int[height][width];
 		for (int i = 0; i < subBands.length; i++) {
-			this.fillDataWithValue(data, width, height, 0);
+			fillDataWithValue(data, width, height, 0);
 			this.testEncoding(data, width, height, depth, subBands[i]);
-			this.fillDataWithValue(data, width, height, (-1) & (0xffffffff >>> (31 - depth)));
+			fillDataWithValue(data, width, height, (-1) & (0xffffffff >>> (31 - depth)));
 			this.testEncoding(data, width, height, depth, subBands[i]);
-			this.randomizeData(data, width, height, depth, r);
+			randomizeData(data, width, height, depth, r);
 			this.testEncoding(data, width, height, depth, subBands[i]);
 		}
 	}
@@ -162,11 +162,11 @@ public class TestEBCodec {
 		int[] depths = {4, 4, 4, 4, 1, 25, 21, 3, 12, 7, 16, 3, 3, 6};
 		int [][] data = new int[64][64];
 		for (int i = 0; i < widths.length; i++) {
-			this.fillDataWithValue(data, widths[i], heights[i], 0);
+			fillDataWithValue(data, widths[i], heights[i], 0);
 			this.testEncoding(data, widths[i], heights[i], depths[i], SubBand.HH);
-			this.fillDataWithValue(data, widths[i], heights[i], (-1) & (0xffffffff >>> (31 - depths[i])));
+			fillDataWithValue(data, widths[i], heights[i], (-1) & (0xffffffff >>> (31 - depths[i])));
 			this.testEncoding(data, widths[i], heights[i], depths[i], SubBand.HH);
-			this.randomizeData(data, widths[i], heights[i], depths[i], r);
+			randomizeData(data, widths[i], heights[i], depths[i], r);
 			this.testEncoding(data, widths[i], heights[i], depths[i], SubBand.HH);
 		}
 

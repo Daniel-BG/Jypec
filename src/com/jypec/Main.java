@@ -2,8 +2,12 @@ package com.jypec;
 
 import java.util.Random;
 
-import com.jypec.wavelet.Wavelet;
-import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
+import com.jypec.ebc.EBCoder;
+import com.jypec.ebc.SubBand;
+import com.jypec.ebc.data.CodingBlock;
+import com.jypec.util.BitStream;
+import com.jypec.util.FIFOBitStream;
+import test.TestEBCodec;
 
 /**
  * Tests go here
@@ -13,23 +17,17 @@ import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
 public class Main {
 
 	public static void main(String[] args) {
-		Wavelet testWavelet = new KernelCdf97WaveletTransform();
+		int size = 8;
+		int[][] data = new int[size][size];
+		TestEBCodec.randomizeData(data, size, size, 16, new Random(2));
 		
-		Random r = new Random(1);
-		for (int i = 1; i < 200; i++) {
-			double[] s = new double[i];
-			double[] res = new double[i];
-			for (int j = 0; j < s.length; j++) {
-				s[j] = r.nextGaussian() * 1000;
-				res[j] = s[j];
-			}
-			
-			testWavelet.forwardTransform(s, i);
-			testWavelet.reverseTransform(s, i);
-			
-			System.out.println(i + " done");
-		}
+		//Code it
+		CodingBlock block = new CodingBlock(data, size, size, 16, SubBand.HH);
+		BitStream output = new FIFOBitStream();
+		EBCoder coder = new EBCoder();
+		coder.code(block, output);
 		
+		System.out.println(output.dumpHex());
 	}
 
 }
