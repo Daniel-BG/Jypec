@@ -1,6 +1,7 @@
-package com.jypec.util;
+package com.jypec.ebc.data;
 
 import com.jypec.ebc.SubBand;
+import com.jypec.util.Bit;
 
 /**
  * Class that stores a single coding plane from a coding block

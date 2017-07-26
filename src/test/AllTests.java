@@ -8,7 +8,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
 	TestEBCodec.class,
-	TestWaveletTransform.class
+	TestWaveletTransform.class,
+	TestQuantizer.class
 })
 
 

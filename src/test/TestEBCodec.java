@@ -9,8 +9,8 @@ import static org.junit.Assert.assertTrue;
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.SubBand;
+import com.jypec.ebc.data.CodingBlock;
 import com.jypec.util.BitStream;
-import com.jypec.util.CodingBlock;
 import com.jypec.util.FIFOBitStream;
 import com.jypec.util.debug.Logger;
 

@@ -1,4 +1,4 @@
-package com.jypec.util;
+package com.jypec.ebc.data;
 
 import com.jypec.ebc.SubBand;
 

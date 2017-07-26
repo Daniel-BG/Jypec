@@ -1,11 +1,11 @@
 package com.jypec.ebc;
 
+import com.jypec.ebc.data.CodingBlock;
+import com.jypec.ebc.data.CodingPlane;
 import com.jypec.ebc.mq.ContextLabel;
 import com.jypec.ebc.mq.MQArithmeticDecoder;
 import com.jypec.util.Bit;
 import com.jypec.util.BitStream;
-import com.jypec.util.CodingBlock;
-import com.jypec.util.CodingPlane;
 import com.jypec.util.Pair;
 
 /**
