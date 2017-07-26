@@ -14,9 +14,7 @@ import com.jypec.util.BitStream.BitStreamConstants;
  *
  */
 public class MQArithmeticDecoder {
-	private static final int DEFAULT_INTERVAL = 0x8000;
-	private static final int C_ACTIVE_MASK = 0xffff00;
-	private static final int C_ACTIVE_SHIFT = 8;
+
 
 	//books = JPEG2000 image compression fundamentals. David S. Michael W.
 	private int normalizedIntervalLength;	//A in the books
@@ -56,7 +54,7 @@ public class MQArithmeticDecoder {
 		this.fillLSBs(input);
 		this.normalizedLowerBound <<= 7;
 		this.countdownTimer -= 7;
-		this.normalizedIntervalLength = MQArithmeticDecoder.DEFAULT_INTERVAL;
+		this.normalizedIntervalLength = MQConstants.DEFAULT_INTERVAL;
 	}
 	
 	/**
@@ -67,8 +65,8 @@ public class MQArithmeticDecoder {
 
 		//Logger.logger().log("Removing: " + Integer.toHexString(this.lastByteRead));
 		this.countdownTimer = 8;
-		if (this.codeBytesRead == this.maxCodeBytesToRead || (this.tempByteBuffer == 0xff && this.lastByteRead > 0x8f)) {
-			//this.normalizedLowerBound += 0xff;
+		if (this.codeBytesRead == this.maxCodeBytesToRead || (this.tempByteBuffer == 0xff && this.lastByteRead >= MQConstants.SPECIAL_CODE_START_INTERVAL)) {
+			this.normalizedLowerBound += 0xff;
 		} else {
 			if (this.tempByteBuffer == 0xff) {
 				this.countdownTimer = 7;
@@ -117,19 +115,19 @@ public class MQArithmeticDecoder {
 		
 		//adjust interval and get output
 		Bit recoveredSymbol;
-		int lowerBoundActive = BitTwiddling.maskAndShift(this.normalizedLowerBound, MQArithmeticDecoder.C_ACTIVE_MASK, MQArithmeticDecoder.C_ACTIVE_SHIFT);
+		int lowerBoundActive = BitTwiddling.maskAndShift(this.normalizedLowerBound, MQConstants.C_ACTIVE_MASK, MQConstants.C_ACTIVE_SHIFT);
 		if (lowerBoundActive < normalizedProbability) {
 			recoveredSymbol = prediction.getInverse();
 			this.normalizedIntervalLength = normalizedProbability;
 		} else {
 			recoveredSymbol = prediction;
 			lowerBoundActive -= normalizedProbability;
-			this.normalizedLowerBound &= ~MQArithmeticDecoder.C_ACTIVE_MASK;
-			this.normalizedLowerBound |= lowerBoundActive << MQArithmeticDecoder.C_ACTIVE_SHIFT;
+			this.normalizedLowerBound &= ~MQConstants.C_ACTIVE_MASK;
+			this.normalizedLowerBound |= lowerBoundActive << MQConstants.C_ACTIVE_SHIFT;
 		}
 		
 		//change state
-		if (this.normalizedIntervalLength < MQArithmeticDecoder.DEFAULT_INTERVAL) {
+		if (this.normalizedIntervalLength < MQConstants.DEFAULT_INTERVAL) {
 			if (recoveredSymbol == table.getPrediction()) {
 				table.changeStateMPS();
 			} else {
@@ -141,7 +139,7 @@ public class MQArithmeticDecoder {
 		}
 		
 		//renormalize
-		while (this.normalizedIntervalLength < MQArithmeticDecoder.DEFAULT_INTERVAL) {
+		while (this.normalizedIntervalLength < MQConstants.DEFAULT_INTERVAL) {
 			this.renormalizeOnce(input);
 		}
 		

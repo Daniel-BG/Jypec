@@ -12,13 +12,7 @@ import com.jypec.util.BitTwiddling;
  *
  */
 public class MQArithmeticCoder {
-	private static final int DEFAULT_INTERVAL = 0x8000;
-	private static final int C_MSBS_MASK = 0xff00000;
-	private static final int C_PART_MASK = 0x7f80000;
-	private static final int C_CARRY_MASK = 0x8000000;
-	private static final int C_MSBS_SHIFT = 20;
-	private static final int C_PART_SHIFT = 19;
-	private static final int C_CARRY_SHIFT = 27;
+
 	
 	
 	//books = JPEG2000 image compression fundamentals. David S. Michael W.
@@ -38,10 +32,10 @@ public class MQArithmeticCoder {
 	
 	
 	public MQArithmeticCoder () {
-		this.normalizedIntervalLength = DEFAULT_INTERVAL;
+		this.normalizedIntervalLength = MQConstants.DEFAULT_INTERVAL;
 		this.normalizedLowerBound = 0;
 		this.tempByteBuffer = 0;
-		this.countdownTimer = 12;
+		this.countdownTimer = MQConstants.COUNTDOWN_INIT;
 		this.codeBytesGenerated = -1;
 		
 		this.contextStates = new EnumMap<ContextLabel, MQProbabilityTable>(ContextLabel.class);
@@ -60,7 +54,7 @@ public class MQArithmeticCoder {
 	 * @param output
 	 */
 	public void dumpRemainingBits(BitStream output) {
-		int nbits = 12 - this.countdownTimer;
+		int nbits = MQConstants.COUNTDOWN_INIT - this.countdownTimer;
 		this.normalizedLowerBound <<= this.countdownTimer;
 		while (nbits > 0) {
 			this.transferByte(output);
@@ -117,7 +111,7 @@ public class MQArithmeticCoder {
 		}
 		
 		//change state
-		if (this.normalizedIntervalLength < DEFAULT_INTERVAL) {
+		if (this.normalizedIntervalLength < MQConstants.DEFAULT_INTERVAL) {
 			//we got what we expected, change the state following the
 			//most probable symbol state change
 			if (symbol == table.getPrediction()) {
@@ -134,7 +128,7 @@ public class MQArithmeticCoder {
 		}
 		
 		//renormalization shift
-		while (this.normalizedIntervalLength < DEFAULT_INTERVAL) {
+		while (this.normalizedIntervalLength < MQConstants.DEFAULT_INTERVAL) {
 			this.normalizedIntervalLength <<= 1;
 			this.normalizedLowerBound <<= 1;
 			this.countdownTimer -= 1;
@@ -154,15 +148,15 @@ public class MQArithmeticCoder {
 		//probably not necessary since we will use custom compression most likely
 		if (this.tempByteBuffer == 0xff) {
 			this.putByte(output);
-			this.updateAfterByte(C_MSBS_MASK, C_MSBS_SHIFT, 7);
+			this.updateAfterByte(MQConstants.C_MSBS_MASK, MQConstants.C_MSBS_SHIFT, 7);
 		} else {
-			this.tempByteBuffer += BitTwiddling.maskAndShift(this.normalizedLowerBound, C_CARRY_MASK, C_CARRY_SHIFT);
-			this.normalizedLowerBound &= (~C_CARRY_MASK);
+			this.tempByteBuffer += BitTwiddling.maskAndShift(this.normalizedLowerBound, MQConstants.C_CARRY_MASK, MQConstants.C_CARRY_SHIFT);
+			this.normalizedLowerBound &= (~MQConstants.C_CARRY_MASK);
 			this.putByte(output);
 			if (this.tempByteBuffer == 0xff) {
-				this.updateAfterByte(C_MSBS_MASK, C_MSBS_SHIFT, 7);
+				this.updateAfterByte(MQConstants.C_MSBS_MASK, MQConstants.C_MSBS_SHIFT, 7);
 			} else {
-				this.updateAfterByte(C_PART_MASK, C_PART_SHIFT, 8);
+				this.updateAfterByte(MQConstants.C_PART_MASK, MQConstants.C_PART_SHIFT, 8);
 			}
 		}
 	}
