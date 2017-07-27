@@ -12,6 +12,8 @@ import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.util.BitStream;
 import com.jypec.util.FIFOBitStream;
+import com.jypec.util.data.BidimensionalArrayIntegerMatrix;
+import com.jypec.util.data.IntegerMatrix;
 import com.jypec.util.debug.Logger;
 
 public class TestEBCodec {
@@ -25,7 +27,7 @@ public class TestEBCodec {
 	 * @param band
 	 * @return true if the test was passed
 	 */
-	private boolean testEncoding(int[][] data, int width, int height, int depth, SubBand band) {
+	private boolean testEncoding(IntegerMatrix data, int width, int height, int depth, SubBand band) {
 		Logger.logger().log(this, "Testing: " + height + "x" + width + "x" + depth + " (" + band.toString() + ")");
 		
 		//Code it
@@ -42,8 +44,8 @@ public class TestEBCodec {
 		boolean right = true;
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				assertEquals("Failed @" + i + "," + j, data[i][j], blockOut.getDataAt(i, j));
-				if (data[i][j] != blockOut.getDataAt(i, j)) {
+				assertEquals("Failed @" + i + "," + j, data.getDataAt(i, j), blockOut.getDataAt(i, j));
+				if (data.getDataAt(i, j) != blockOut.getDataAt(i, j)) {
 					right = false;
 				}
 			}
@@ -60,10 +62,10 @@ public class TestEBCodec {
 	 * @param height
 	 * @param value
 	 */
-	public static void fillDataWithValue(int[][] data, int width, int height, int value) {
+	public static void fillDataWithValue(IntegerMatrix data, int width, int height, int value) {
 		for (int i = 0; i < height; i++) { 
 			for (int j = 0; j < width; j++) {
-				data[i][j] = value;
+				data.setDataAt(value, i, j);
 			}
 		}
 	}
@@ -80,7 +82,7 @@ public class TestEBCodec {
 	 * @param depth: does not include the sign bit!
 	 * @param r
 	 */
-	public static void randomizeData(Random r, int[][] data, int width, int height, int depth) {
+	public static void randomizeMatrix(Random r, IntegerMatrix data, int width, int height, int depth) {
 		int magnitudeLimit = (0x1 << (depth - 1)) - 1;
 		
 		for (int i = 0; i < height; i++) {
@@ -95,7 +97,7 @@ public class TestEBCodec {
 				int sign = res < 0 ? 1 : 0;
 				int magnitude = res < 0 ? -res : res;
 				
-				data[i][j] = (sign << (depth - 1)) + magnitude;
+				data.setDataAt((sign << (depth - 1)) + magnitude, i, j);
 			}
 		}
 	}
@@ -107,13 +109,13 @@ public class TestEBCodec {
 		
 		//test all depths
 		int width = 64, height = 64, depth = 1;
-		int[][] data = new int[height][width];
+		IntegerMatrix data = BidimensionalArrayIntegerMatrix.newMatrix(height, width);
 		for (depth = 2; depth <= 32; depth++) {
 			fillDataWithValue(data, width, height, 0);
 			assertTrue("Failed testing with zeroes at depth: " + depth, this.testEncoding(data, width, height, depth, SubBand.HH));
 			fillDataWithValue(data, width, height, (-1) & (0xffffffff >>> (32 - depth)));
 			assertTrue("Failed testing with ones at depth: " + depth, this.testEncoding(data, width, height, depth, SubBand.HH));
-			randomizeData(r, data, width, height, depth);
+			randomizeMatrix(r, data, width, height, depth);
 			assertTrue("Failed testing with random at depth: " + depth, this.testEncoding(data, width, height, depth, SubBand.HH));
 		}
 	}
@@ -125,13 +127,13 @@ public class TestEBCodec {
 		//test all regular resulutions
 		int depth = 16;
 		int MAX_SIZE = 64;
-		int [][] data = new int[MAX_SIZE][MAX_SIZE];
+		IntegerMatrix data = BidimensionalArrayIntegerMatrix.newMatrix(MAX_SIZE, MAX_SIZE);
 		for (int size = 1; size <= 64; size++) {
 			fillDataWithValue(data, size, size, 0);
 			assertTrue("Failed testing with zeroes at depth: " + depth, this.testEncoding(data, size, size, depth, SubBand.HH));
 			fillDataWithValue(data, size, size, (-1) & (0xffffffff >>> (32 - depth)));
 			assertTrue("Failed testing with ones at depth: " + depth, this.testEncoding(data, size, size, depth, SubBand.HH));
-			randomizeData(r, data, size, size, depth);
+			randomizeMatrix(r, data, size, size, depth);
 			assertTrue("Failed testing with random at depth: " + depth, this.testEncoding(data, size, size, depth, SubBand.HH));
 		}
 	}
@@ -143,13 +145,13 @@ public class TestEBCodec {
 		//test all subband predictions
 		SubBand[] subBands = SubBand.values();
 		int width = 64, height = 64, depth = 16;
-		int [][] data = new int[height][width];
+		IntegerMatrix data = BidimensionalArrayIntegerMatrix.newMatrix(height, width);
 		for (int i = 0; i < subBands.length; i++) {
 			fillDataWithValue(data, width, height, 0);
 			this.testEncoding(data, width, height, depth, subBands[i]);
 			fillDataWithValue(data, width, height, (-1) & (0xffffffff >>> (32 - depth)));
 			this.testEncoding(data, width, height, depth, subBands[i]);
-			randomizeData(r, data, width, height, depth);
+			randomizeMatrix(r, data, width, height, depth);
 			this.testEncoding(data, width, height, depth, subBands[i]);
 		}
 	}
@@ -162,13 +164,13 @@ public class TestEBCodec {
 		int[] widths = {64, 1, 64, 4, 50, 59, 52, 20, 46, 12, 36, 44, 51, 19};
 		int[] heights = {1, 64, 4, 64, 60, 2, 28, 4, 10, 59, 7, 33, 29, 16};
 		int[] depths = {4, 4, 4, 4, 2, 25, 21, 3, 12, 7, 16, 3, 3, 6};
-		int [][] data = new int[64][64];
+		IntegerMatrix data = BidimensionalArrayIntegerMatrix.newMatrix(64, 64);
 		for (int i = 0; i < widths.length; i++) {
 			fillDataWithValue(data, widths[i], heights[i], 0);
 			this.testEncoding(data, widths[i], heights[i], depths[i], SubBand.HH);
 			fillDataWithValue(data, widths[i], heights[i], (-1) & (0xffffffff >>> (32 - depths[i])));
 			this.testEncoding(data, widths[i], heights[i], depths[i], SubBand.HH);
-			randomizeData(r, data, widths[i], heights[i], depths[i]);
+			randomizeMatrix(r, data, widths[i], heights[i], depths[i]);
 			this.testEncoding(data, widths[i], heights[i], depths[i], SubBand.HH);
 		}
 

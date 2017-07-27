@@ -2,38 +2,33 @@ package com.jypec.img;
 
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
+import com.jypec.util.data.IntegerMatrix;
 
 /**
  * Class that stores one hyperspectral band and can be used for extracting blocks for coding and such
  * @author Daniel
  *
  */
-public class HyperspectralBand {
+public class HyperspectralBand implements IntegerMatrix {
 
-	private int[][] data;
+	private HyperspectralImage hyimg;
+	private int band;
 	private int depth;
 	private int lines;
 	private int samples;
 	
 	
-	public HyperspectralBand (int[][] data, int depth, int lines, int samples) {
-		if (data == null) {
-			this.data = new int[lines][samples];
-		} else {
-			this.data = data;
-		}
+	public HyperspectralBand (HyperspectralImage hi, int band, int depth, int lines, int samples) {
+		this.hyimg = hi;
+		this.band = band;
 		this.depth = depth;
 		this.lines = lines;
 		this.samples = samples;
 	}
 	
-	/**
-	 * @param line
-	 * @param sample
-	 * @return the data at the given position (in binary form inside an integer)
-	 */
+	@Override
 	public int getDataAt(int line, int sample) {
-		return this.data[line][sample];
+		return this.hyimg.getDataAt(this.band, line, sample);
 	}
 	
 	/**
@@ -42,23 +37,22 @@ public class HyperspectralBand {
 	 * @return the VALUE of the DATA at the given position. This could be different from {@link #getDataAt(int, int)}
 	 */
 	private double getValueAt(int line, int sample) {
-		return (double) this.getDataAt(line, sample);
+		return this.hyimg.getValueAt(this.band, line, sample);
 	}
 	
-	/**
-	 * Sets the given data at the given position
-	 * @param data
-	 * @param line
-	 * @param sample
-	 */
+	@Override
 	public void setDataAt(int data, int line, int sample) {
-		this.data[line][sample] = data;
+		this.hyimg.setDataAt(data, this.band, line, sample);
 	}
 	
 	/**
 	 * @return the number of lines this band has
 	 */
 	public int getNumberOfLines() {
+		return this.lines;
+	}
+	@Override
+	public int getRows() {
 		return this.lines;
 	}
 	
@@ -68,6 +62,12 @@ public class HyperspectralBand {
 	public int getNumberOfSamples() {
 		return this.samples;
 	}
+	@Override
+	public int getColumns() {
+		return this.samples;
+	}
+	
+
 	
 	/**
 	 * Extract a block that references the internal data (that is, can MODIFY it, be careful!)
@@ -78,24 +78,15 @@ public class HyperspectralBand {
 	 * @param band
 	 * @return
 	 */
-	public CodingBlock extractBlock(int rowOffset, int colOffset, int height, int width, SubBand band, boolean referenceOriginal) {
+	public CodingBlock extractBlock(int rowOffset, int colOffset, int height, int width, SubBand band) {
 		if (rowOffset < 0 || colOffset < 0 || height < 0 || width < 0) {
 			throw new IllegalArgumentException("Arguments cannot be negative");
 		}
 		if (rowOffset + height > this.lines || colOffset + width > this.samples) {
 			throw new IllegalArgumentException("The block you are trying to create would have samples out of bounds");
 		}
-		if (referenceOriginal) {
-			return new CodingBlock(this.data, height, width, rowOffset, colOffset, this.depth, band);
-		} else {
-			int[][] newData = new int[height][width];
-			for (int i = 0; i < height; i++) {
-				for (int j = 0; j < width; j++) {
-					newData[i][j] = this.getDataAt(i + rowOffset, j + colOffset);
-				}
-			}
-			return new CodingBlock(newData, height, width, 0, 0, this.depth, band);
-		}
+			
+		return new CodingBlock(this, height, width, rowOffset, colOffset, this.depth, band);
 	}
 	
 	/**
@@ -113,13 +104,12 @@ public class HyperspectralBand {
 		return wave;
 	}
 
-	/**
-	 * @return a pointer to the internal data. Useful for changing it
-	 * TODO maybe remove this to make it a lil bit cleaner
-	 */
-	public int[][] getDataReference() {
-		return this.data;
+	@Override
+	public int[][] extractInnerMatrix() {
+		return this.hyimg.getDataReferenceToBand(this.band);
 	}
+
+
 
 
 }

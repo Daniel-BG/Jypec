@@ -1,5 +1,7 @@
 package com.jypec.quantization;
 
+import com.jypec.util.data.IntegerMatrix;
+
 /**
  * Matrix quantizer
  * @see Quantizer
@@ -25,10 +27,10 @@ public class MatrixQuantizer {
 	 * @param height first dimension length of the matrix
 	 * @param width second dimension length of the matrix
 	 */
-	public void quantize(double[][] input, int[][] output, int height, int width) {
+	public void quantize(double[][] input, IntegerMatrix output, int height, int width) {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				output[i][j] = this.quantizer.normalizeAndQuantize(input[i][j]);
+				output.setDataAt(this.quantizer.normalizeAndQuantize(input[i][j]), i, j);
 			}
 		}
 	}
@@ -41,10 +43,10 @@ public class MatrixQuantizer {
 	 * @param width second dimension length of the matrix
 	 * @return the dequantized input
 	 */
-	public void dequantize(int[][] input, double[][] output, int height, int width) {
+	public void dequantize(IntegerMatrix input, double[][] output, int height, int width) {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				output[i][j] = this.quantizer.deQuantizeAndDenormalize(input[i][j]);
+				output[i][j] = this.quantizer.deQuantizeAndDenormalize(input.getDataAt(i, j));
 			}
 		}
 	}

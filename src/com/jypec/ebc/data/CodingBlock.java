@@ -1,6 +1,8 @@
 package com.jypec.ebc.data;
 
 import com.jypec.ebc.SubBand;
+import com.jypec.util.data.BidimensionalArrayIntegerMatrix;
+import com.jypec.util.data.IntegerMatrix;
 
 /**
  * Class for the storage and manipulation of coding blocks that are coded
@@ -10,7 +12,7 @@ import com.jypec.ebc.SubBand;
  */
 public class CodingBlock {
 	
-	private int[][] data;
+	private IntegerMatrix data;
 	private int rows, columns;
 	private int rowOffset = 0, columnOffset = 0;
 	private int magnitudeBitPlanes;
@@ -27,7 +29,7 @@ public class CodingBlock {
 	 * @see SubBand
 	 * @note MSB: most significant bit LSB: least significant bit
 	 */
-	public CodingBlock(int[][] data, int height, int width, int rowOffset, int columnOffset, int depth, SubBand band) {
+	public CodingBlock(IntegerMatrix data, int height, int width, int rowOffset, int columnOffset, int depth, SubBand band) {
 		this.setUp(data, height, width, rowOffset, columnOffset, depth, band);
 	}
 
@@ -39,11 +41,11 @@ public class CodingBlock {
 	 * @param band
 	 */
 	public CodingBlock(int height, int width, int depth, SubBand band) {
-		this.setUp(new int[height][width], height, width, 0, 0, depth, band);
+		this.setUp(BidimensionalArrayIntegerMatrix.newMatrix(height, width), height, width, 0, 0, depth, band);
 	}
 	
 	
-	private void setUp(int[][] data, int height, int width, int rowOffset, int columnOffset, int depth, SubBand band) {
+	private void setUp(IntegerMatrix data, int height, int width, int rowOffset, int columnOffset, int depth, SubBand band) {
 		//check validity of arguments
 		if (depth < 2 || depth > 32) {
 			throw new IllegalArgumentException("Number of bitplanes must be between 1 and 31 (both inclusive)");
@@ -105,7 +107,7 @@ public class CodingBlock {
 	 * @return the data at the specified position
 	 */
 	public int getDataAt(int row, int column) {
-		return this.data[row + rowOffset][column + columnOffset];
+		return this.data.getDataAt(row + rowOffset, column + columnOffset);
 	}
 	
 	/**
@@ -115,7 +117,7 @@ public class CodingBlock {
 	 * @param column
 	 */
 	public void setDataAt(int value, int row, int column) {
-		this.data[row + rowOffset][column + columnOffset] = value;
+		this.data.setDataAt(value, row + rowOffset, column + columnOffset);
 	}
 
 	/**

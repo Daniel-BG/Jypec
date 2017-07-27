@@ -4,13 +4,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import com.jypec.img.HyperspectralImage;
+import com.jypec.img.ImageDataTypes;
 
 public class ImageReader {
 
 	
 	
 	public static final HyperspectralImage read(String file, int depth, int bands, int lines, int samples) throws FileNotFoundException {
-		HyperspectralImage hi = new HyperspectralImage(null, depth, bands, lines, samples);
+		HyperspectralImage hi = new HyperspectralImage(null, ImageDataTypes.UNSIGNED_TWO_BYTE, depth, bands, lines, samples);
 		BufferedDataReader bdr = new BufferedDataReader(file, depth);
 		
 		for (int i = 0; i < bands; i++) {

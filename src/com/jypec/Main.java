@@ -7,10 +7,13 @@ import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBand;
 import com.jypec.img.HyperspectralImage;
+import com.jypec.img.ImageDataTypes;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.BitStream;
 import com.jypec.util.FIFOBitStream;
+import com.jypec.util.data.BidimensionalArrayIntegerMatrix;
 import com.jypec.wavelet.BidimensionalWavelet;
+import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
 
 import test.TestEBCodec;
@@ -26,19 +29,22 @@ public class Main {
 		int size = 32;
 		int[][][] data = new int[size][size][size];
 		for (int i = 0; i < size; i++) {
-			TestEBCodec.randomizeData(new Random(i), data[i], size, size, 16);
+			TestEBCodec.randomizeMatrix(new Random(i), 
+					new BidimensionalArrayIntegerMatrix(data[i], size, size), 
+					size, size, 16);
 		}
-		HyperspectralImage hi = new HyperspectralImage(data, 16, size, size, size);
+		HyperspectralImage hi = new HyperspectralImage(data, ImageDataTypes.UNSIGNED_TWO_BYTE, 16, size, size, size);
 		
 		for (int i = 0; i < size; i++) {
 			//Code it
-			HyperspectralBand hb = hi.getBand(i, true);
+			HyperspectralBand hb = hi.getBand(i);
 			double[][] waveForm = hb.toWave();
-			BidimensionalWavelet bdw = new BidimensionalWavelet(new LiftingCdf97WaveletTransform());
+			BidimensionalWavelet bdw = new BidimensionalWavelet(new KernelCdf97WaveletTransform());
 			bdw.forwardTransform(waveForm, size, size);
 			MatrixQuantizer mq = new MatrixQuantizer(16, 0, 1, 0, 0x1 << 16, 0.5);
-			mq.quantize(waveForm, hb.getDataReference(), size, size);
-			CodingBlock block = hi.getBand(i, true).extractBlock(0, 0, size, size, SubBand.HH, true);
+			mq.quantize(waveForm, hb, size, size);
+			//TODO adjust the coding block depth since the quantizer increases that number with respecto to the original range!
+			CodingBlock block = hi.getBand(i).extractBlock(0, 0, size, size, SubBand.HH);
 			BitStream output = new FIFOBitStream();
 			EBCoder coder = new EBCoder();
 			coder.code(block, output);

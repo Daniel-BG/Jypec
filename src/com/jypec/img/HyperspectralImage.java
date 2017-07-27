@@ -8,6 +8,7 @@ package com.jypec.img;
 public class HyperspectralImage {
 
 	private int[][][] data;
+	private ImageDataTypes dataType;
 	private int depth;
 	private int bands;
 	private int lines;
@@ -22,12 +23,13 @@ public class HyperspectralImage {
 	 * @param lines: number of lines in a band (height of the spatial dimension (vertical number of samples))
 	 * @param samples: number of samples in a line (width of the spatial dimension (horizontal number of samples))
 	 */
-	public HyperspectralImage (int[][][] data, int depth, int bands, int lines, int samples) {
+	public HyperspectralImage (int[][][] data, ImageDataTypes dataType, int depth, int bands, int lines, int samples) {
 		if (data == null) {
 			data = new int[bands][lines][samples];
 		} else {
 			this.data = data;
 		}
+		this.dataType = dataType;
 		this.depth = depth;
 		this.bands = bands;
 		this.lines = lines;
@@ -42,6 +44,16 @@ public class HyperspectralImage {
 	 */
 	public int getDataAt(int band, int line, int sample) {
 		return this.data[band][line][sample];
+	}
+	
+	/**
+	 * @param band
+	 * @param line
+	 * @param sample
+	 * @return the value that the inner data represents at that position
+	 */
+	public double getValueAt(int band, int line, int sample) {
+		return this.dataType.dataToValue(this.getDataAt(band, line, sample));
 	}
 	
 	/**
@@ -62,12 +74,8 @@ public class HyperspectralImage {
 	 * will affet it
 	 * @return the requested band
 	 */
-	public HyperspectralBand getBand(int band, boolean referenceOriginal) {
-		if (referenceOriginal) {
-			return new HyperspectralBand(this.data[band], this.depth, this.lines, this.samples);
-		} else {
-			return new HyperspectralBand(this.data[band].clone(), this.depth, this.lines, this.samples);
-		}
+	public HyperspectralBand getBand(int band) {
+		return new HyperspectralBand(this, band, this.depth, this.lines, this.samples);
 	}
 	
 	/**
@@ -90,5 +98,15 @@ public class HyperspectralImage {
 	public int getNumberOfSamples() {
 		return this.samples;
 	}
+
+	/**
+	 * @param band
+	 * @return the pointer to the raw data of the given band
+	 */
+	protected int[][] getDataReferenceToBand(int band) {
+		return this.data[band];
+	}
+
+
 	
 }
