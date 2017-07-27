@@ -21,35 +21,32 @@ public class MatrixQuantizer {
 	/**
 	 * Quantizes the input 
 	 * @param input
+	 * @param output: where to put the result
 	 * @param height first dimension length of the matrix
 	 * @param width second dimension length of the matrix
-	 * @return the quantized input
 	 */
-	public int[][] quantize(double[][] input, int height, int width) {
-		int[][] result = new int[height][width];
+	public void quantize(double[][] input, int[][] output, int height, int width) {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				result[i][j] = this.quantizer.normalizeAndQuantize(input[i][j]);
+				output[i][j] = this.quantizer.normalizeAndQuantize(input[i][j]);
 			}
 		}
-		return result;
 	}
 	
 	/**
 	 * Dequantizes the input
 	 * @param input
+	 * @param output: where the dequantized result is output
 	 * @param height first dimension length of the matrix
 	 * @param width second dimension length of the matrix
 	 * @return the dequantized input
 	 */
-	public double[][] dequantize(int[][] input, int height, int width) {
-		double[][] result = new double[height][width];
+	public void dequantize(int[][] input, double[][] output, int height, int width) {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				result[i][j] = this.quantizer.deQuantizeAndDenormalize(input[i][j]);
+				output[i][j] = this.quantizer.deQuantizeAndDenormalize(input[i][j]);
 			}
 		}
-		return result;
 	}
 	
 	
