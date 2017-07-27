@@ -101,7 +101,7 @@ public class Quantizer {
 	 * @return the quantized value in sign-magnitude format according to this quantizer's setup. 
 	 * {@link #getNecessaryBitPlanes()} returns the number of magnitude bits that this value uses 
 	 */
-	public int quantize(double input) {
+	private int quantize(double input) {
 		//clamp to the guard bit interval
 		input = Math.max(Math.min(input, this.upperGuard), this.lowerGuard);
 		//get the sign before butchering the input
@@ -119,7 +119,7 @@ public class Quantizer {
 	 * @param input the quantized value
 	 * @return the unquantized value
 	 */
-	public double deQuantize(int input) {
+	private double deQuantize(int input) {
 		//base case
 		if (input == 0) {
 			return 0;
