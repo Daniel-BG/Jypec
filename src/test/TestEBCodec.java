@@ -29,7 +29,7 @@ public class TestEBCodec {
 		Logger.logger().log(this, "Testing: " + height + "x" + width + "x" + depth + " (" + band.toString() + ")");
 		
 		//Code it
-		CodingBlock block = new CodingBlock(data, height, width, depth, band);
+		CodingBlock block = new CodingBlock(data, height, width, 0, 0, depth, band);
 		BitStream output = new FIFOBitStream();
 		EBCoder coder = new EBCoder();
 		coder.code(block, output);
@@ -42,8 +42,8 @@ public class TestEBCodec {
 		boolean right = true;
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				assertEquals("Failed @" + i + "," + j, data[i][j], blockOut.getData()[i][j]);
-				if (data[i][j] != blockOut.getData()[i][j]) {
+				assertEquals("Failed @" + i + "," + j, data[i][j], blockOut.getDataAt(i, j));
+				if (data[i][j] != blockOut.getDataAt(i, j)) {
 					right = false;
 				}
 			}

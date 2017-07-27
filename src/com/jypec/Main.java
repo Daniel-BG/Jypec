@@ -3,7 +3,6 @@ package com.jypec;
 import java.util.Random;
 
 import com.jypec.ebc.EBCoder;
-import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.util.BitStream;
@@ -23,7 +22,7 @@ public class Main {
 		TestEBCodec.randomizeData(data, size, size, 16, new Random(2));
 		
 		//Code it
-		CodingBlock block = new CodingBlock(data, size, size, 16, SubBand.HH);
+		CodingBlock block = new CodingBlock(data, size, size, 0, 0, 16, SubBand.HH);
 		BitStream output = new FIFOBitStream();
 		EBCoder coder = new EBCoder();
 		coder.code(block, output);

@@ -23,7 +23,7 @@ public class BidimensionalWavelet {
 	/**
 	 * Applies a wavelet transform along both axes of the given matrix.
 	 * First along the rows, then along the columns.
-	 * A new copy is returned, and the memory originally pointed by s is modified
+	 * S is modified to include the results
 	 * @param s
 	 * @param width
 	 * @param height
@@ -34,12 +34,13 @@ public class BidimensionalWavelet {
 			this.baseWavelet.forwardTransform(s[i], width);
 		}
 		//transpose and transform along the other axis
-		double[][] tmp = MatrixTransforms.transpose(s, width, height);
+		double[][] tmp = new double[width][height];
+		MatrixTransforms.transpose(s, tmp, width, height);
 		for (int j = 0; j < width; j++) {
 			this.baseWavelet.forwardTransform(tmp[j], height);
 		}
 		//retranspose and return
-		s = MatrixTransforms.transpose(tmp, height, width);
+		MatrixTransforms.transpose(tmp, s, height, width);
 	}
 
 	/**
@@ -54,12 +55,13 @@ public class BidimensionalWavelet {
 			this.baseWavelet.reverseTransform(s[i], width);
 		}
 		//transpose and transform along the other axis
-		double[][] tmp = MatrixTransforms.transpose(s, width, height);
+		double[][] tmp = new double[width][height];
+		MatrixTransforms.transpose(s, tmp, width, height);
 		for (int j = 0; j < width; j++) {
 			this.baseWavelet.reverseTransform(tmp[j], height);
 		}
 		//retranspose and return
-		s = MatrixTransforms.transpose(tmp, height, width);
+		MatrixTransforms.transpose(tmp, s, height, width);
 	}
 	
 	

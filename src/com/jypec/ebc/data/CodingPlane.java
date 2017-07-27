@@ -10,31 +10,37 @@ import com.jypec.util.Bit;
  * @author Daniel
  */
 public class CodingPlane {
-	private int[][] data;
-	private int rows, columns;
-	private SubBand band;
+	private CodingBlock block;
+	
+	
+	private SubBand subBand;
 	private int bitMask;
 	private int signMask;
 	private boolean[][] codingStatus;
 	
+	private int fullStripNumber, lastStripHeight, columns;
+	
 	/**
 	 * Build a coding plane from the planeOffset-th bit of the given data
-	 * @param data: it is assumed that this is the data on the encompassing code block,
-	 * 		and thus the sign bit is stored in the MSB of the data
+	 * @param block: the encompassing block of this plane. Used to operate over the
+	 * data and to precalculate values to avoid excessive calling afterwards
 	 * @param planeOffset: offset (from the LSB) that this plane refers to
-	 * @param band: which band this plane belongs to (needed for coding)
 	 */
-	public CodingPlane(int[][] data, int width, int height, int planeOffset, SubBand band, int signMask) {
-		assert(planeOffset >= 0 && planeOffset <= 30);
+	public CodingPlane(CodingBlock block, int planeOffset) {
+		if (planeOffset < 0 && planeOffset > 30) {
+			throw new IllegalArgumentException("Planeoffset out of range");
+		}
 		
-		this.data = data;
-		this.rows = height;
-		this.columns = width;
-		this.band = band;
+		this.block = block;
+		int rows = this.block.getHeight();
+		this.fullStripNumber = rows >> 2;
+		this.lastStripHeight = rows % 4;
+		this.columns = this.block.getWidth();
+		this.subBand = this.block.getSubBand();
 		this.bitMask = 0x1 << planeOffset;
-		this.signMask = signMask;
+		this.signMask = this.block.getSignMask();
 		
-		this.codingStatus = new boolean[this.rows][this.columns]; //defaulted to false
+		this.codingStatus = new boolean[rows][columns]; //defaulted to false
 	}
 	
 	
@@ -43,7 +49,7 @@ public class CodingPlane {
 	 * @return
 	 */
 	public int getFullStripsNumber() {
-		return this.rows >> 2;
+		return this.fullStripNumber;
 	}
 
 	/**
@@ -59,7 +65,7 @@ public class CodingPlane {
 	 * @return
 	 */
 	public int getLastStripHeight() {
-		return this.rows % 4;
+		return this.lastStripHeight;
 	}
 
 	/**
@@ -67,7 +73,7 @@ public class CodingPlane {
 	 * @return
 	 */
 	public SubBand getSubBand() {
-		return this.band;
+		return this.subBand;
 	}
 
 	/**
@@ -76,7 +82,7 @@ public class CodingPlane {
 	 * @return 	The symbol at the given position
 	 */
 	public Bit getSymbolAt(int row, int column) {
-		return Bit.fromInteger(this.data[row][column] & this.bitMask);
+		return Bit.fromInteger(this.block.getDataAt(row, column) & this.bitMask);
 	}
 
 	/**
@@ -94,7 +100,7 @@ public class CodingPlane {
 	 * 		of the encompassing codeblock
 	 */
 	public boolean isNegativeAt(int row, int column) {
-		return (this.data[row][column] & this.signMask) != 0;
+		return (this.block.getDataAt(row, column) & this.signMask) != 0;
 	}
 
 	/**
@@ -146,11 +152,13 @@ public class CodingPlane {
 	 * @param mask
 	 */
 	private void setBitAt(int row, int column, Bit bit, int mask) {
+		int data = this.block.getDataAt(row, column);
 		if (bit == Bit.BIT_ONE) {
-			this.data[row][column] |= mask;
+			data |= mask;
 		} else {
-			this.data[row][column] &= ~mask;
+			data &= ~mask;
 		}
+		this.block.setDataAt(data, row, column);
 	}
 	
 	/**

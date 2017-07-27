@@ -12,6 +12,7 @@ public class CodingBlock {
 	
 	private int[][] data;
 	private int rows, columns;
+	private int rowOffset = 0, columnOffset = 0;
 	private int bitPlanes;
 	private SubBand band;
 	
@@ -28,7 +29,7 @@ public class CodingBlock {
 	 * @see SubBand
 	 * @note MSB: most significant bit LSB: least significant bit
 	 */
-	public CodingBlock(int[][] data, int height, int width, int bitPlanes, SubBand band) {
+	public CodingBlock(int[][] data, int height, int width, int rowOffset, int columnOffset, int bitPlanes, SubBand band) {
 		//check validity of arguments
 		if (bitPlanes < 1 || bitPlanes > 31) {
 			throw new IllegalArgumentException("Number of bitplanes must be between 1 and 31 (both inclusive)");
@@ -38,6 +39,8 @@ public class CodingBlock {
 		this.data = data;
 		this.rows = height;
 		this.columns = width;
+		this.rowOffset = rowOffset;
+		this.columnOffset = columnOffset;
 		this.bitPlanes = bitPlanes;
 		this.band = band;
 	}
@@ -87,21 +90,40 @@ public class CodingBlock {
 		if (i < 0 || i >= this.bitPlanes) {
 			throw new IllegalArgumentException("Requested plane does not exist. Available: [0," + (this.bitPlanes - 1) + "]");
 		}
-		return new CodingPlane(data, this.columns, this.rows, i, this.band, this.getSignMask());
+		return new CodingPlane(this, i);
 	}
 	
 	/**
 	 * @return the mask to be used with the internal data to extract the sign bit
 	 */
-	private int getSignMask() {
+	public int getSignMask() {
 		return 0x1 << this.bitPlanes;
 	}
 	
 	/**
-	 * @return the data matrix inside this coding block. Note that if this data is modified, 
-	 * the block is modified too
+	 * @param row
+	 * @param column
+	 * @return the data at the specified position
 	 */
-	public int[][] getData() {
-		return this.data;
+	public int getDataAt(int row, int column) {
+		return this.data[row + rowOffset][column + columnOffset];
 	}
+	
+	/**
+	 * Sets the value given at the given position, overwriting existing data!
+	 * @param value
+	 * @param row
+	 * @param column
+	 */
+	public void setDataAt(int value, int row, int column) {
+		this.data[row + rowOffset][column + columnOffset] = value;
+	}
+
+	/**
+	 * @return the subBand this block belongs to
+	 */
+	public SubBand getSubBand() {
+		return this.band;
+	}
+	
 }

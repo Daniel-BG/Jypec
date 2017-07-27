@@ -86,4 +86,6 @@ public class TestWaveletTransform {
 		}
 	}
 	
+	//TODO add tests for irregular matrices
+	
 }

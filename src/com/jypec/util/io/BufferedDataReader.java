@@ -57,12 +57,17 @@ public class BufferedDataReader extends FilterInputStream {
 	 */
 	private void fillBuffer() throws IOException {
 		int next = this.in.read();
+		if (next == -1) {
+			throw new IOException("No more bytes available");
+		}
 		this.buffer <<= 8;
 		this.buffer += next;
 		this.bufferLen += 8;
 	}
 	
-	
+	/**
+	 * Returns the next sample from the stream. It is NOT restricted to the range 0-255, but to the range 0-(2^depth-1)
+	 */
 	@Override
 	public int read() throws IOException {
 		while (bufferLen < depth) {
