@@ -71,29 +71,31 @@ public class TestEBCodec {
 	
 	/**
 	 * Fill the matrix with random data following a gaussian distribution with mean 0 and std of 2^depth.
-	 * Values over the limit of 2^depth are clamped to the inteval [-2^depth + 1, 2^depth - 1]
+	 * Values over the limit of 2^depth are clamped to the inteval [-2^depth + 1, 2^depth - 1]. 
+	 * Returned values are in sign-magnitude format, with one sign bit followed by (depth - 1) magnitude bits
+	 * Can also be interpreted as unsigned values
 	 * @param data
 	 * @param width
 	 * @param height
-	 * @param depth
+	 * @param depth: does not include the sign bit!
 	 * @param r
 	 */
-	public static void randomizeData(int[][] data, int width, int height, int depth, Random r) {
-		int limit = 0x1 << (depth - 1);
+	public static void randomizeData(Random r, int[][] data, int width, int height, int depth) {
+		int magnitudeLimit = (0x1 << (depth - 1)) - 1;
 		
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				double val = r.nextGaussian() * limit;
+				double val = r.nextGaussian() * magnitudeLimit;
 				int res = (int) val;
-				if (res < -limit)
-					res = -limit;
-				if (res > limit)
-					res = limit;
+				if (res < -magnitudeLimit)
+					res = -magnitudeLimit;
+				if (res > magnitudeLimit)
+					res = magnitudeLimit;
 				
 				int sign = res < 0 ? 1 : 0;
 				int magnitude = res < 0 ? -res : res;
 				
-				data[i][j] = (sign << depth) + magnitude;
+				data[i][j] = (sign << (depth - 1)) + magnitude;
 			}
 		}
 	}
@@ -106,12 +108,12 @@ public class TestEBCodec {
 		//test all depths
 		int width = 64, height = 64, depth = 1;
 		int[][] data = new int[height][width];
-		for (depth = 1; depth < 32; depth++) {
+		for (depth = 2; depth <= 32; depth++) {
 			fillDataWithValue(data, width, height, 0);
 			assertTrue("Failed testing with zeroes at depth: " + depth, this.testEncoding(data, width, height, depth, SubBand.HH));
-			fillDataWithValue(data, width, height, (-1) & (0xffffffff >>> (31 - depth)));
+			fillDataWithValue(data, width, height, (-1) & (0xffffffff >>> (32 - depth)));
 			assertTrue("Failed testing with ones at depth: " + depth, this.testEncoding(data, width, height, depth, SubBand.HH));
-			randomizeData(data, width, height, depth, r);
+			randomizeData(r, data, width, height, depth);
 			assertTrue("Failed testing with random at depth: " + depth, this.testEncoding(data, width, height, depth, SubBand.HH));
 		}
 	}
@@ -127,9 +129,9 @@ public class TestEBCodec {
 		for (int size = 1; size <= 64; size++) {
 			fillDataWithValue(data, size, size, 0);
 			assertTrue("Failed testing with zeroes at depth: " + depth, this.testEncoding(data, size, size, depth, SubBand.HH));
-			fillDataWithValue(data, size, size, (-1) & (0xffffffff >>> (31 - depth)));
+			fillDataWithValue(data, size, size, (-1) & (0xffffffff >>> (32 - depth)));
 			assertTrue("Failed testing with ones at depth: " + depth, this.testEncoding(data, size, size, depth, SubBand.HH));
-			randomizeData(data, size, size, depth, r);
+			randomizeData(r, data, size, size, depth);
 			assertTrue("Failed testing with random at depth: " + depth, this.testEncoding(data, size, size, depth, SubBand.HH));
 		}
 	}
@@ -145,9 +147,9 @@ public class TestEBCodec {
 		for (int i = 0; i < subBands.length; i++) {
 			fillDataWithValue(data, width, height, 0);
 			this.testEncoding(data, width, height, depth, subBands[i]);
-			fillDataWithValue(data, width, height, (-1) & (0xffffffff >>> (31 - depth)));
+			fillDataWithValue(data, width, height, (-1) & (0xffffffff >>> (32 - depth)));
 			this.testEncoding(data, width, height, depth, subBands[i]);
-			randomizeData(data, width, height, depth, r);
+			randomizeData(r, data, width, height, depth);
 			this.testEncoding(data, width, height, depth, subBands[i]);
 		}
 	}
@@ -159,14 +161,14 @@ public class TestEBCodec {
 		//test irregular sizes
 		int[] widths = {64, 1, 64, 4, 50, 59, 52, 20, 46, 12, 36, 44, 51, 19};
 		int[] heights = {1, 64, 4, 64, 60, 2, 28, 4, 10, 59, 7, 33, 29, 16};
-		int[] depths = {4, 4, 4, 4, 1, 25, 21, 3, 12, 7, 16, 3, 3, 6};
+		int[] depths = {4, 4, 4, 4, 2, 25, 21, 3, 12, 7, 16, 3, 3, 6};
 		int [][] data = new int[64][64];
 		for (int i = 0; i < widths.length; i++) {
 			fillDataWithValue(data, widths[i], heights[i], 0);
 			this.testEncoding(data, widths[i], heights[i], depths[i], SubBand.HH);
-			fillDataWithValue(data, widths[i], heights[i], (-1) & (0xffffffff >>> (31 - depths[i])));
+			fillDataWithValue(data, widths[i], heights[i], (-1) & (0xffffffff >>> (32 - depths[i])));
 			this.testEncoding(data, widths[i], heights[i], depths[i], SubBand.HH);
-			randomizeData(data, widths[i], heights[i], depths[i], r);
+			randomizeData(r, data, widths[i], heights[i], depths[i]);
 			this.testEncoding(data, widths[i], heights[i], depths[i], SubBand.HH);
 		}
 

@@ -41,7 +41,7 @@ public class EBDecoder {
 	 */
 	public void decode(BitStream input, CodingBlock output) {
 		this.initialize(input, output);
-		int numberOfBitPlanes = output.getBitPlaneNumber();
+		int numberOfBitPlanes = output.getMagnitudeBitPlaneNumber();
 		
 		//decode first cleanup pass
 		CodingPlane plane = output.getBitPlane(numberOfBitPlanes - 1);

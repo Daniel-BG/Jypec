@@ -26,7 +26,7 @@ public class Main {
 		int size = 32;
 		int[][][] data = new int[size][size][size];
 		for (int i = 0; i < size; i++) {
-			TestEBCodec.randomizeData(data[i], size, size, 16, new Random(i));
+			TestEBCodec.randomizeData(new Random(i), data[i], size, size, 16);
 		}
 		HyperspectralImage hi = new HyperspectralImage(data, 16, size, size, size);
 		

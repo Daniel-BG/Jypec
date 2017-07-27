@@ -32,7 +32,7 @@ public class EBCoder {
 	public void code(CodingBlock block, BitStream output) {
 		this.initialize(block.getWidth(), block.getHeight());
 		
-		int numberOfBitPlanes = block.getBitPlaneNumber();
+		int numberOfBitPlanes = block.getMagnitudeBitPlaneNumber();
 		
 		CodingPlane plane = block.getBitPlane(numberOfBitPlanes - 1);
 		
