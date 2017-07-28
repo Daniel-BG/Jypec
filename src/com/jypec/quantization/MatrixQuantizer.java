@@ -21,16 +21,18 @@ public class MatrixQuantizer {
 	}
 	
 	/**
-	 * Quantizes the input 
+	 * Quantizes the input
 	 * @param input
 	 * @param output: where to put the result
-	 * @param height first dimension length of the matrix
-	 * @param width second dimension length of the matrix
+	 * @param rowOffset
+	 * @param colOffset
+	 * @param rows first dimension length of the matrix
+	 * @param cols second dimension length of the matrix
 	 */
-	public void quantize(double[][] input, IntegerMatrix output, int height, int width) {
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				output.setDataAt(this.quantizer.normalizeAndQuantize(input[i][j]), i, j);
+	public void quantize(double[][] input, IntegerMatrix output, int rowOffset, int colOffset, int rows, int cols) {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				output.setDataAt(this.quantizer.normalizeAndQuantize(input[rowOffset + i][colOffset + j]), rowOffset + i, colOffset + j);
 			}
 		}
 	}
@@ -38,15 +40,16 @@ public class MatrixQuantizer {
 	/**
 	 * Dequantizes the input
 	 * @param input
-	 * @param output: where the dequantized result is output
-	 * @param height first dimension length of the matrix
-	 * @param width second dimension length of the matrix
-	 * @return the dequantized input
+	 * @param output where the dequantized result is output
+	 * @param rowOffset first dimension length of the matrix
+	 * @param colOffset second dimension length of the matrix
+	 * @param rows
+	 * @param cols
 	 */
-	public void dequantize(IntegerMatrix input, double[][] output, int height, int width) {
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				output[i][j] = this.quantizer.deQuantizeAndDenormalize(input.getDataAt(i, j));
+	public void dequantize(IntegerMatrix input, double[][] output, int rowOffset, int colOffset, int rows, int cols) {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				output[rowOffset + i][colOffset + j] = this.quantizer.deQuantizeAndDenormalize(input.getDataAt(rowOffset + i, colOffset + j));
 			}
 		}
 	}

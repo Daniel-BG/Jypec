@@ -1,18 +1,17 @@
 package com.jypec.util.io;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Wrapper for reading uniform data of arbitrary (1-32) bit lengths as integers
  * @author Daniel
  *
  */
-public class BufferedDataReader extends FilterInputStream {
+public class DataReader extends FilterInputStream {
 	private int depth;
 	private int dataMask;
 	private long buffer;
@@ -26,8 +25,8 @@ public class BufferedDataReader extends FilterInputStream {
 	 * @param depth
 	 * @throws FileNotFoundException
 	 */
-	public BufferedDataReader(String file, int depth) throws FileNotFoundException {
-		super(new BufferedInputStream(new FileInputStream(new File(file))));
+	public DataReader(InputStream in, int depth) throws FileNotFoundException {
+		super(in);
 		if (depth < 1 || depth > 32) {
 			throw new IllegalArgumentException("The depth is a number between 1 and 32 inclusive");
 		}

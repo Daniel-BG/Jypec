@@ -149,7 +149,7 @@ public class Quantizer {
 	}
 	
 	/**
-	 * @return the number of magnitude bits this quantizer uses when returning values
+	 * @return the number of MAGNITUDE bits this quantizer uses when returning values
 	 */
 	public int getNecessaryBitPlanes() {
 		return Math.max(0, this.exponent + this.guard - 1);

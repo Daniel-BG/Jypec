@@ -12,7 +12,7 @@ import com.jypec.wavelet.Wavelet;
  */
 public class LiftingCdf97WaveletTransform implements Wavelet {
 	
-	private static final double COEFF_PREDICT_1 = 1.586134342;
+	private static final double COEFF_PREDICT_1 = -1.586134342;
 	private static final double COEFF_PREDICT_2 = 0.8829110762; 
 	private static final double COEFF_UPDATE_1= -0.05298011854;
 	private static final double COEFF_UPDATE_2 = 0.4435068522;

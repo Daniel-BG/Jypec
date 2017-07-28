@@ -1,5 +1,6 @@
 package com.jypec;
 
+import java.io.FileNotFoundException;
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.SubBand;
@@ -10,10 +11,9 @@ import com.jypec.img.ImageDataTypes;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.BitStream;
 import com.jypec.util.FIFOBitStream;
-import com.jypec.util.data.BidimensionalArrayIntegerMatrix;
+import com.jypec.util.io.DataMatrixReader;
 import com.jypec.wavelet.BidimensionalWavelet;
-import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
-import test.TestEBCodec;
+import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
 
 /**
  * Tests go here
@@ -21,75 +21,70 @@ import test.TestEBCodec;
  *
  */
 public class Main {
+	
+	
+	
 
 	public static void main(String[] args) {
-		int size = 32;
-		int codingDepth = 18;
-		int[][][] data = new int[size][size][size];
-		for (int i = 0; i < size; i++) {
-			TestEBCodec.fillDataWithValue(new BidimensionalArrayIntegerMatrix(data[i], size, size), size, size, 4);
-			/*TestEBCodec.randomizeMatrix(new Random(i), 
-					new BidimensionalArrayIntegerMatrix(data[i], size, size), 
-					size, size, 16);*/
-		}
-		HyperspectralImage hi = new HyperspectralImage(data, ImageDataTypes.UNSIGNED_TWO_BYTE, 16, size, size, size);
+		testFullProcess();
 		
-		for (int i = 0; i < size; i++) {
+		
+	}
 
+	
+	private static void testFullProcess() {
+		int bands = 188, lines = 350, samples = 350;
+		ImageDataTypes type = ImageDataTypes.UNSIGNED_TWO_BYTE;
+		
+		HyperspectralImage hi;
+		try {
+			hi = DataMatrixReader.read("C:/Users/Daniel/Hiperspectral images/cupriteBSQ/Cuprite", bands, lines, samples, type, true);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		for (int i = 0; i < bands; i++) {
+			//things we'll need
+			BidimensionalWavelet bdw = new BidimensionalWavelet(new LiftingCdf97WaveletTransform());
+			MatrixQuantizer mq = new MatrixQuantizer(type.getBitDepth() - 1, 0, 1, - (0x1 << 16), 0x1 << 17, 0.5);
 			
-			//CODE IT
+			int stl = lines / 2, sts = samples / 2;
+			int ll = lines - lines / 2, sl = samples - samples / 2;
+			
+			CodingBlock block = hi.getBand(i).extractBlock(stl, sts, ll, sl, SubBand.HH);
+			
+			///////CODING
 			HyperspectralBand hb = hi.getBand(i);
-			
-			
-			System.out.println("");
-			for (int ii = 0; ii < size; ii++) {
-				System.out.print(hi.getDataAt(i, 0, ii) + ",");
-			}
-			System.out.println("");
 			//transform to double and wave it
-			double[][] waveForm = hb.toWave();
-
-			
-			BidimensionalWavelet bdw = new BidimensionalWavelet(new KernelCdf97WaveletTransform());
-			bdw.forwardTransform(waveForm, size, size);
-			
-
+			double[][] waveForm = hb.toWave(0, 0, lines, samples);
+			bdw.forwardTransform(waveForm, lines, samples);
 			//quantize
-			MatrixQuantizer mq = new MatrixQuantizer(codingDepth - 1, 0, 1, - (0x1 << 16), 0x1 << 16, 0.5);
-			mq.quantize(waveForm, hb, size, size);
+			mq.quantize(waveForm, hb, stl, sts, ll, sl);
 			//code it
-			CodingBlock block = hi.getBand(i).extractBlock(0, 0, size, size, SubBand.HH);
-			block.setDepth(codingDepth); //depth adjusted since there is one bit more now!
+			block.setDepth(type.getBitDepth()); //depth adjusted since there might be more bits
 			BitStream output = new FIFOBitStream();
 			EBCoder coder = new EBCoder();
 			coder.code(block, output);
-			//clear the block and output results
-			block.clear(); 
+			//////END CODING
 			
-			double compressionRate = (double) output.getNumberOfBits() / ((double) 16 * size * size);
+			//output results
+			double compressionRate = (double) output.getNumberOfBits() / ((double) 16 * ll * sl);
 			System.out.println("Compression rate is: " + compressionRate);
 			
 			
-			//DECODE IT into the original block
+			///////DECODE IT into the original block
+			//clear the block since we need it at zero
+			block.clear(); 
+			//decode the block from the stream
 			EBDecoder decoder = new EBDecoder();
 			decoder.decode(output, block);
 			//dequantize
-			mq.dequantize(hb, waveForm, size, size);
-			
+			mq.dequantize(hb, waveForm, stl, sts, ll, sl);
 			//reverse transform and back into integer form
-			bdw.reverseTransform(waveForm, size, size);
-			
-
-			
-			hb.fromWave(waveForm);
-			
-			for (int ii = 0; ii < size; ii++) {
-				System.out.print(hi.getDataAt(i, 0, ii) + ",");
-			}
-			System.out.println("");
-			
-
+			bdw.reverseTransform(waveForm, ll, sl);
+			hb.fromWave(waveForm, stl, sts, ll, sl);
+			///////END DECODING
 		}
 	}
-
 }

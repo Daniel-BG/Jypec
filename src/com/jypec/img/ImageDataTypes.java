@@ -115,6 +115,17 @@ public enum ImageDataTypes {
 		
 		return val;
 	}
+
+	/**
+	 * @return the byte depth of this type, or -1 if its depth is not multiple of 8
+	 */
+	public int getByteDepth() {
+		if (this.getBitDepth() % 8 != 0) {
+			return -1;
+		}
+		
+		return this.getBitDepth() / 8;
+	}
 	
 	
 }

@@ -18,6 +18,14 @@ public class HyperspectralBand implements IntegerMatrix {
 	private int samples;
 	
 	
+	/**
+	 * Builds a hyperspectral band from the given hyperspectral image
+	 * @param hi
+	 * @param band
+	 * @param depth
+	 * @param lines 
+	 * @param samples
+	 */
 	public HyperspectralBand (HyperspectralImage hi, int band, int depth, int lines, int samples) {
 		this.hyimg = hi;
 		this.band = band;
@@ -87,7 +95,7 @@ public class HyperspectralBand implements IntegerMatrix {
 	 * @param height
 	 * @param width
 	 * @param band
-	 * @return
+	 * @return a Coding block Wrapper for the data in the requested position
 	 */
 	public CodingBlock extractBlock(int rowOffset, int colOffset, int height, int width, SubBand band) {
 		if (rowOffset < 0 || colOffset < 0 || height < 0 || width < 0) {
@@ -100,15 +108,20 @@ public class HyperspectralBand implements IntegerMatrix {
 		return new CodingBlock(this, height, width, rowOffset, colOffset, this.depth, band);
 	}
 	
+
 	/**
+	 * @param lineOffset skip this number of lines before filling the returned value
+	 * @param sampleOffset same as lineOffset but for samples
+	 * @param lines number of lines to be returned
+	 * @param samples number of samples to be returned
 	 * @return the internal information in double precision format for wave analysis
 	 */
-	public double[][] toWave() {
-		double[][] wave = new double[this.lines][this.samples];
+	public double[][] toWave(int lineOffset, int sampleOffset, int lines, int samples) {
+		double[][] wave = new double[lines][samples];
 		
-		for (int i = 0; i < this.lines; i++) {
-			for (int j = 0; j  < this.lines; j++) {
-				wave[i][j] = this.getValueAt(i, j);
+		for (int i = 0; i < lines; i++) {
+			for (int j = 0; j  < samples; j++) {
+				wave[i][j] = this.getValueAt(i + lineOffset, j + sampleOffset);
 			}
 		}
 		
@@ -124,11 +137,15 @@ public class HyperspectralBand implements IntegerMatrix {
 	 * Fill this image with the values from the double matrix. They are converted
 	 * to the data type of the encompassing image and then set into the inner array
 	 * @see HyperspectralImage
-	 * @param waveForm
+	 * @param waveForm from where to take the data
+	 * @param lineOffset starting line for filling the data in
+	 * @param sampleOffset starting sample for filling the data in
+	 * @param lines number of lines in waveForm
+	 * @param samples number of samples in waveForm
 	 */
-	public void fromWave(double[][] waveForm) {
-		for (int i = 0; i < this.lines; i++) {
-			for (int j = 0; j  < this.lines; j++) {
+	public void fromWave(double[][] waveForm, int lineOffset, int sampleOffset, int lines, int samples) {
+		for (int i = 0; i < lines; i++) {
+			for (int j = 0; j  < samples; j++) {
 				this.setValueAt(waveForm[i][j], i, j);
 			}
 		}

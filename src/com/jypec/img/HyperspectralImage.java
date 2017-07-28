@@ -23,14 +23,14 @@ public class HyperspectralImage {
 	 * @param lines: number of lines in a band (height of the spatial dimension (vertical number of samples))
 	 * @param samples: number of samples in a line (width of the spatial dimension (horizontal number of samples))
 	 */
-	public HyperspectralImage (int[][][] data, ImageDataTypes dataType, int depth, int bands, int lines, int samples) {
+	public HyperspectralImage (int[][][] data, ImageDataTypes dataType, int bands, int lines, int samples) {
 		if (data == null) {
-			data = new int[bands][lines][samples];
+			this.data = new int[bands][lines][samples];
 		} else {
 			this.data = data;
 		}
 		this.dataType = dataType;
-		this.depth = depth;
+		this.depth = dataType.getBitDepth();
 		this.bands = bands;
 		this.lines = lines;
 		this.samples = samples;

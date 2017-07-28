@@ -22,10 +22,10 @@ public class CodingBlock {
 	 * Construct a coding block from the given data. It is assumed that 
 	 * data is a non-null rectangular matrix. Otherwise behaviour
 	 * is undefined.
-	 * @param data: the data for this block
-	 * @param depth: number of bitplanes in the data. (SIGN PLANE INCLUDED) 
+	 * @param data the data for this block
+	 * @param depth number of bitplanes in the data. (SIGN PLANE INCLUDED) 
 	 * assuming the least significant bit plane is stored int the LSB
-	 * @param band: the subBand this block belongs to
+	 * @param band the subBand this block belongs to
 	 * @see SubBand
 	 * @note MSB: most significant bit LSB: least significant bit
 	 */
