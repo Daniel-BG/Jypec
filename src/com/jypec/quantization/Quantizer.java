@@ -34,7 +34,7 @@ public class Quantizer {
 	
 	/**
 	 * Create a quantizer
-	 * @param exponent: basically the number of bits that the quantized output will use
+	 * @param exponent: basically the number of bits that the quantized output will use, minus one
 	 * @param mantissa: adjust the interval of quantization with decimal values
 	 * @param guard: number of guard bits in case samples exceed the limits
 	 * @param sampleAbsoluteValueLimit: maximum absolute value of the quantized samples
@@ -89,7 +89,7 @@ public class Quantizer {
 	 */
 	public int normalizeAndQuantize(double input) {
 		//normalize
-		input += this.sampleLowerLimit;
+		input -= this.sampleLowerLimit;
 		input /= this.sampleIntervalLength;
 		input -= 0.5;
 		//quantize
@@ -144,7 +144,7 @@ public class Quantizer {
 		double dequantized = this.deQuantize(input);
 		dequantized += 0.5;
 		dequantized *= this.sampleIntervalLength;
-		dequantized -= this.sampleLowerLimit;
+		dequantized += this.sampleLowerLimit;
 		return dequantized;
 	}
 	

@@ -57,7 +57,7 @@ public class CodingBlock {
 		this.columns = width;
 		this.rowOffset = rowOffset;
 		this.columnOffset = columnOffset;
-		this.magnitudeBitPlanes = depth - 1;
+		this.setDepth(depth);
 		this.band = band;
 	}
 
@@ -125,6 +125,24 @@ public class CodingBlock {
 	 */
 	public SubBand getSubBand() {
 		return this.band;
+	}
+
+	/**
+	 * @param depth the new depth of this bit plane
+	 */
+	public void setDepth(int depth) {
+		this.magnitudeBitPlanes = depth - 1;
+	}
+
+	/**
+	 * Clear the contents of this block. Setting to ZERO
+	 */
+	public void clear() {
+		for (int i = 0; i < this.getHeight(); i++) {
+			for (int j = 0; j < this.getWidth(); j++) {
+				this.setDataAt(0, i, j);
+			}
+		}
 	}
 	
 }

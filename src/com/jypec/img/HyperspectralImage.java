@@ -68,6 +68,17 @@ public class HyperspectralImage {
 	}
 	
 	/**
+	 * Sets the value given in the given position, restricting it to this image's range
+	 * and coding it in this image's data type
+	 * @param value the new value to set
+	 * @param line
+	 * @param sample
+	 */
+	public void setValueAt(double value, int band, int line, int sample) {
+		this.data[band][line][sample] = this.dataType.valueToData(value);
+	}
+	
+	/**
 	 * return a band of this image
 	 * @param band: the returned band's index
 	 * @param referenceOriginal: if true, the returned band references the original and thus any changes to it
@@ -106,6 +117,8 @@ public class HyperspectralImage {
 	protected int[][] getDataReferenceToBand(int band) {
 		return this.data[band];
 	}
+
+
 
 
 	

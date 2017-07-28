@@ -30,20 +30,21 @@ public class TestQuantizer {
 		Random r = new Random(1);
 		for (int j = 0; j < 400; j++) {
 			double upperLimit = r.nextDouble() * 65536;
+			double lowerLimit = - r.nextDouble() * 65536;
 			double offset = r.nextDouble();
 			int e = r.nextInt(29) + 1;
 			int m = r.nextInt(0x1 << 11);
-			Quantizer q = new Quantizer(e, m, 1, 0, upperLimit, offset);
+			Quantizer q = new Quantizer(e, m, 1, lowerLimit, upperLimit, offset);
 			
 			int bits = q.getNecessaryBitPlanes();
 			int max = 0x1 << bits;
 			
 			//maximum expected error
-			double expectedError = 2 * upperLimit / (double) max;
+			double expectedError = 2 * (upperLimit - lowerLimit) / (double) max;
 
 			for (int i = 0; i < 1000; i++) {
-				double test = r.nextDouble() * upperLimit;
-				assertEquals("Failed with (limit, e, m, test) -> (" + upperLimit+ "," + e + "," + m + "," + test + ") (expected error = " + expectedError + ")", 
+				double test = r.nextDouble() * (upperLimit - lowerLimit) + lowerLimit;
+				assertEquals("Failed with ([ll,lh], e, m, test) -> ([" + lowerLimit + "," +  upperLimit+ "]," + e + "," + m + "," + test + ") (expected error = " + expectedError + ")", 
 						test, q.deQuantizeAndDenormalize(q.normalizeAndQuantize(test)), expectedError);
 			}
 		}
