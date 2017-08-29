@@ -1,6 +1,8 @@
 package com.jypec;
 
 import java.io.FileNotFoundException;
+import java.util.Locale;
+
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.SubBand;
@@ -8,9 +10,11 @@ import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBand;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataTypes;
+import com.jypec.pca.PrincipalComponentAnalysis;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.BitStream;
 import com.jypec.util.FIFOBitStream;
+import com.jypec.util.debug.ArrayPrinter;
 import com.jypec.util.io.DataMatrixReader;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
@@ -29,11 +33,39 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		testFullProcess();
-		
+		Locale.setDefault(Locale.US);
+		//testFullProcess();
+		testPCA();
 		
 	}
 
+	private static void testPCA() {
+		
+		int bands = 188, lines = 350, samples = 350;
+		ImageDataTypes type = ImageDataTypes.UNSIGNED_TWO_BYTE;
+		
+		HyperspectralImage hi;
+		try {
+			hi = DataMatrixReader.read("C:/Users/Daniel/Hiperspectral images/cupriteBSQ/Cuprite", bands, lines, samples, type, true);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
+		pca.setup(350*350, 188);
+		for (int i = 0; i < 350; i++) {
+			for (int j = 0; j < 350; j++) {
+				pca.addSample(hi.getSample(i, j));
+			}
+		}
+		pca.computeBasis(30);
+		
+		System.out.println(ArrayPrinter.printDoubleArray(hi.getSample(0, 0)));
+		//System.out.println(ArrayPrinter.printDoubleArray(pca.sampleToEigenSpace(hi.getSample(0, 0))));
+		System.out.println(ArrayPrinter.printDoubleArray(pca.eigenToSampleSpace(pca.sampleToEigenSpace(hi.getSample(0, 0)))));
+		
+	}
 	
 	private static void testFullProcess() {
 		int bands = 188, lines = 350, samples = 350;

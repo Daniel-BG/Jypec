@@ -117,6 +117,19 @@ public class HyperspectralImage {
 		return this.data[band];
 	}
 
+	/**
+	 * @param line
+	 * @param sample
+	 * @return a pixel of the image at the given spatial position, with all spectral components
+	 */
+	public double[] getSample(int line, int sample) {
+		double[] res = new double[this.getNumberOfBands()];
+		for (int i = 0; i < this.getNumberOfBands(); i++) {
+			res[i] = this.getValueAt(i, line, sample);
+		}
+		return res;
+	}
+
 
 
 
