@@ -16,24 +16,35 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
+/**
+ * @author Daniel
+ * Test various wavelet transforms (can be specified inside in the @Parameters array)
+ */
 @RunWith(Parameterized.class)
 public class TestWaveletTransform {
 	
+	/**
+	 * @return a list of wavelets to be tested
+	 */
 	@Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {{new LiftingCdf97WaveletTransform()}, {new KernelCdf97WaveletTransform()}});
     }
 
+	/** Wavelet under test */
 	public Wavelet testWavelet;
 	
 	/**
-	 * @param wavelet: wavelet to test
+	 * @param wavelet wavelet to test
 	 */
 	public TestWaveletTransform(Wavelet wavelet) {
 		this.testWavelet = wavelet;
 	}
 
 	
+	/**
+	 * Test that the wavelet does not go out of bounds in small signals (ranging from one element onwards)
+	 */
 	@Test
 	public void testIndexOutOfBounds() {
 		for (int i = 1; i < 100; i++) {
@@ -44,6 +55,9 @@ public class TestWaveletTransform {
 	}
 	
 	
+	/**
+	 * Test that after a forward and reverse transform, the original signal is recovered within a margin of 1 ten thousanth
+	 */
 	@Test
 	public void testSignalRecovered() {
 		Random r = new Random();
@@ -63,6 +77,9 @@ public class TestWaveletTransform {
 	}
 	
 	
+	/**
+	 * Test that the filter works for recovering a signal  when made two dimensional by applying along both dimensions
+	 */
 	@Test
 	public void testSymetricBidimensionalRecovery() {
 		BidimensionalWavelet biTestWavelet = new BidimensionalWavelet(testWavelet);

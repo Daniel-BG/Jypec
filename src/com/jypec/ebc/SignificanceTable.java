@@ -17,16 +17,30 @@ public class SignificanceTable {
 	 *
 	 */
 	public enum SignificanceValue {
-		INSIGNIFICANT, SIGNIFICANT_POSITIVE, SIGNIFICANT_NEGATIVE;
+		/** not signigicant yet, usually this value is not coded in any of the passes */
+		INSIGNIFICANT, 
+		/** the value is significant and its sign positive */ 
+		SIGNIFICANT_POSITIVE, 
+		/** the value is significant and its sign negative */
+		SIGNIFICANT_NEGATIVE;
 		
+		/**
+		 * @return 1 if the value is significant (regardless of sign)
+		 */
 		public int getValue() {
 			return this == INSIGNIFICANT ? 0 : 1;
 		}
 		
+		/**
+		 * @return true if the value is significant (regardless of sign)
+		 */
 		public boolean isSignificant() {
 			return this != SignificanceValue.INSIGNIFICANT;
 		}
 		
+		/**
+		 * @return 0 for insignificant, +/- 1 for significant positive and negative respectively
+		 */
 		public int getContribution() {
 			switch (this) {
 			case INSIGNIFICANT: return 0;
@@ -66,6 +80,7 @@ public class SignificanceTable {
 	 * Set the value at the given position as significant
 	 * @param column
 	 * @param row
+	 * @param isNegative set significant negative if this flag is true, positive if false
 	 */
 	public void setSignificant(int row, int column, boolean isNegative) {
 		if (!isNegative) {
@@ -133,13 +148,12 @@ public class SignificanceTable {
 	}
 	
 	/**
-	 * Get the context at the given position, assuming it refers to the given
-	 * subband, according to Table D.1 of ISO/IEC 15444-1:2002 (E)
-	 * (D.3.1 JPEG2000 standard)
 	 * @param column
 	 * @param row
 	 * @param subBand
-	 * @return
+	 * @return the context at the given position, assuming it refers to the given
+	 * subband, according to Table D.1 of ISO/IEC 15444-1:2002 (E)
+	 * (D.3.1 JPEG2000 standard)
 	 */
 	public ContextLabel getSignificancePropagationContextAt(int row, int column, SubBand subBand) {
 		//d0 v0 d1
@@ -220,11 +234,10 @@ public class SignificanceTable {
 	
 	
 	/**
-	 * Gets the sign bit context associated with the given position
-	 * (D.3.2 JPEG2000 standard), and the xor bit needed for compression
 	 * @param column
 	 * @param row
-	 * @return
+	 * @return the sign bit context associated with the given position
+	 * (D.3.2 JPEG2000 standard), and the xor bit needed for compression
 	 */
 	public Pair<ContextLabel, Bit> getSignBitDecodingContextAt(int row, int column) {
 		SignificanceValue v0, v1, h0, h1;
@@ -286,12 +299,11 @@ public class SignificanceTable {
 	
 	
 	/**
-	 * Gets the magnitude refinement context at the given position
-	 * (D.3.3 JPEG2000 standard). Modifies internal variables so that
-	 * the first refinement context is separated from subsequent ones
 	 * @param column
 	 * @param row
-	 * @return
+	 * @return the magnitude refinement context at the given position
+	 * (D.3.3 JPEG2000 standard). Modifies internal variables so that
+	 * the first refinement context is separated from subsequent ones
 	 */
 	public ContextLabel getMagnitudeRefinementContextAt(int row, int column) {
 		int[] sums = getLocalSums(row, column);

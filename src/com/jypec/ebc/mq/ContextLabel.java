@@ -8,18 +8,19 @@ import com.jypec.util.Bit;
  *
  */
 public enum ContextLabel {
-	//special context label zero. Used only in cleanup mode
+	/** special context label zero. Used only in cleanup mode*/
 	ZERO,	 
-	//labels for significance propagation
+	/**labels for significance propagation*/
 	ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT,
-	//labels for sign encoding
+	/**labels for sign encoding*/
 	NINE, TEN, ELEVEN, TWELVE, THIRTEEN,
-	//labels for refinement
+	/**labels for refinement*/
 	FOURTEEN, FIFTEEN, SIXTEEN,
-	//special label for run_length coding
+	/**special label for run_length coding*/
 	RUN_LENGTH, 
-	//special label for encoding pointers in run_length mode when failing to make a chain
-	UNIFORM; //note: should always be in state 46.
+	/**special label for encoding pointers in run_length mode when failing to make a chain 
+	 * note: should always be in state 46.*/
+	UNIFORM;
 	
 	
 	/**

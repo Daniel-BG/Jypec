@@ -17,11 +17,11 @@ public class HyperspectralImage {
 	
 	/**
 	 * Create a hyperspectral image with the given data, or an empty image if data is null
-	 * @param data: the data that comprises the image, or null if it shall be initialized to zero
-	 * @param depth: the bitdepth of the samples that comprise the image
-	 * @param bands: number of bands in the image (spectral dimension)
-	 * @param lines: number of lines in a band (height of the spatial dimension (vertical number of samples))
-	 * @param samples: number of samples in a line (width of the spatial dimension (horizontal number of samples))
+	 * @param data the data that comprises the image, or null if it shall be initialized to zero
+	 * @param dataType the type of data that forms the image
+	 * @param bands number of bands in the image (spectral dimension)
+	 * @param lines number of lines in a band (height of the spatial dimension (vertical number of samples))
+	 * @param samples number of samples in a line (width of the spatial dimension (horizontal number of samples))
 	 */
 	public HyperspectralImage (int[][][] data, ImageDataTypes dataType, int bands, int lines, int samples) {
 		if (data == null) {
@@ -58,7 +58,7 @@ public class HyperspectralImage {
 	
 	/**
 	 * Set the given value at the given position
-	 * @param value: value to be set
+	 * @param value value to be set
 	 * @param band
 	 * @param line
 	 * @param sample
@@ -71,6 +71,7 @@ public class HyperspectralImage {
 	 * Sets the value given in the given position, restricting it to this image's range
 	 * and coding it in this image's data type
 	 * @param value the new value to set
+	 * @param band 
 	 * @param line
 	 * @param sample
 	 */
@@ -79,10 +80,8 @@ public class HyperspectralImage {
 	}
 	
 	/**
-	 * return a band of this image
-	 * @param band: the returned band's index
-	 * @param referenceOriginal: if true, the returned band references the original and thus any changes to it
-	 * will affet it
+	 * return a band of this image. Modifications to this band will affect the original data, since it is referenced, not copied
+	 * @param band the returned band's index
 	 * @return the requested band
 	 */
 	public HyperspectralBand getBand(int band) {

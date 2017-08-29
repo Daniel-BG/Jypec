@@ -22,9 +22,9 @@ public class CodingPlane {
 	
 	/**
 	 * Build a coding plane from the planeOffset-th bit of the given data
-	 * @param block: the encompassing block of this plane. Used to operate over the
+	 * @param block the encompassing block of this plane. Used to operate over the
 	 * data and to precalculate values to avoid excessive calling afterwards
-	 * @param planeOffset: offset (from the LSB) that this plane refers to
+	 * @param planeOffset offset (from the LSB) that this plane refers to
 	 */
 	public CodingPlane(CodingBlock block, int planeOffset) {
 		if (planeOffset < 0 && planeOffset > 30) {
@@ -45,32 +45,28 @@ public class CodingPlane {
 	
 	
 	/**
-	 * Get the number of 4-high strips within this plane
-	 * @return
+	 * @return the number of 4-high strips within this plane
 	 */
 	public int getFullStripsNumber() {
 		return this.fullStripNumber;
 	}
 
 	/**
-	 * Get the width of this plane
-	 * @return
+	 * @return the width of this plane
 	 */
 	public int getWidth() {
 		return this.columns;
 	}
 
 	/**
-	 * Get the number of dangling rows at the end that don't make a full strip (0-3)
-	 * @return
+	 * @return the number of dangling rows at the end that don't make a full strip (0-3)
 	 */
 	public int getLastStripHeight() {
 		return this.lastStripHeight;
 	}
 
 	/**
-	 * Get the SubBand this plane belongs to
-	 * @return
+	 * @return the SubBand this plane belongs to
 	 */
 	public SubBand getSubBand() {
 		return this.subBand;
@@ -79,7 +75,7 @@ public class CodingPlane {
 	/**
 	 * @param column
 	 * @param row
-	 * @return 	The symbol at the given position
+	 * @return The symbol at the given position
 	 */
 	public Bit getSymbolAt(int row, int column) {
 		return Bit.fromInteger(this.block.getDataAt(row, column) & this.bitMask);
@@ -113,9 +109,9 @@ public class CodingPlane {
 	}
 
 	/**
-	 * @param i
-	 * @param j
-	 * @return true if the bit at the given position has already been set as coded
+	 * @param row 
+	 * @param column 
+	 * @return true if the given position is already coded
 	 * @see CodingPlane.setCoded
 	 */
 	public boolean isCoded(int row, int column) {

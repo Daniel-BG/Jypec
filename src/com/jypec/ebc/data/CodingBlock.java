@@ -23,11 +23,14 @@ public class CodingBlock {
 	 * data is a non-null rectangular matrix. Otherwise behaviour
 	 * is undefined.
 	 * @param data the data for this block
+	 * @param height of the block within the data
+	 * @param width of the block within the data
+	 * @param rowOffset how much to offset the index when accesing the block within the data
+	 * @param columnOffset same as rowOffset but for columns
 	 * @param depth number of bitplanes in the data. (SIGN PLANE INCLUDED) 
 	 * assuming the least significant bit plane is stored int the LSB
 	 * @param band the subBand this block belongs to
 	 * @see SubBand
-	 * @note MSB: most significant bit LSB: least significant bit
 	 */
 	public CodingBlock(IntegerMatrix data, int height, int width, int rowOffset, int columnOffset, int depth, SubBand band) {
 		this.setUp(data, height, width, rowOffset, columnOffset, depth, band);
@@ -35,10 +38,10 @@ public class CodingBlock {
 
 	/**
 	 * Creates an empty codeblock to be filled when decoding
-	 * @param height
-	 * @param width
-	 * @param magnitudeBitPlanes
-	 * @param band
+	 * @param height height of this block
+	 * @param width width of this block
+	 * @param depth depth of this block (sign bit included)
+	 * @param band which band this block corresponds to
 	 */
 	public CodingBlock(int height, int width, int depth, SubBand band) {
 		this.setUp(BidimensionalArrayIntegerMatrix.newMatrix(height, width), height, width, 0, 0, depth, band);
@@ -84,8 +87,8 @@ public class CodingBlock {
 
 	/**
 	 * Gets the ith bitPlane from within this codeBlock
-	 * @param i
-	 * @return
+	 * @param i the index of the bitplane to get
+	 * @return the ith bit plane within this block
 	 */
 	public CodingPlane getBitPlane(int i) {
 		if (i < 0 || i >= this.magnitudeBitPlanes) {

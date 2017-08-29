@@ -7,21 +7,22 @@ package com.jypec.util;
  *
  */
 public interface BitStream {
-	//CONSTANTS
+	/** Useful constants for this class */
 	public enum BitStreamConstants {
-		ORDERING_LEFTMOST_FIRST, ORDERING_RIGHTMOST_FIRST
+		/** If the leftmost bit is the first to be processed */
+		ORDERING_LEFTMOST_FIRST, 
+		/** If the rightmost bit is the first to be processed */
+		ORDERING_RIGHTMOST_FIRST
 	}
 
+
 	/**
-	 * Gets a bit from the stream
-	 * @return
-	 * @throws EmptyStreamException
+	 * @return the next bit
 	 */
 	public Bit getBit();
 	
 	/**
-	 * Same as getBit but returning an integer in the interval [0, 1]
-	 * @return
+	 * @return the next bit as an integer [0, 1]
 	 */
 	public int getBitAsInt();
 	
@@ -31,14 +32,18 @@ public interface BitStream {
 	 * and shifting left
 	 * @param quantity
 	 * @param ordering
-	 * @return
+	 * @return the specified number of bits as an integer
 	 */
 	public int getBits(int quantity, BitStreamConstants ordering);
 	
 	/**
 	 * Puts a bit in the stream
+	 * @param bit the bit to be put
 	 */
 	public void putBit(Bit bit);
+	/**
+	 * @param bit same as {@link #putBit(Bit)} but using an integer as input and converting to {@link Bit}
+	 */
 	public void putBit(int bit);
 	
 	/**
@@ -50,8 +55,7 @@ public interface BitStream {
 	public void putBits(int bits, int quantity, BitStreamConstants ordering);
 	
 	/**
-	 * Gets the number of bits currently stored on this stream
-	 * @return
+	 * @return the number of bits currently stored on this stream 
 	 */
 	public int getNumberOfBits();
 	

@@ -1,5 +1,9 @@
 package com.jypec.wavelet;
 
+/**
+ * @author Daniel
+ * Wavelet interface to apply wavelet transforms to one dimensional arrays
+ */
 public interface Wavelet {
 	
 	/**
@@ -12,6 +16,7 @@ public interface Wavelet {
 	 * Transformation is made with the "lifting" scheme instead of kerning 
 	 * the signal. This saves around half of the operations needed.
 	 * @param s the signal that is to be transformed
+	 * @param n the length of the wavelet transform
 	 */
 	public void forwardTransform(double[] s, int n);
 	
@@ -19,6 +24,7 @@ public interface Wavelet {
 	 * Reverses the transform applied by {@link #forwardTransform(double[])} and recovers
 	 * the original signal.
 	 * @param s
+	 * @param n the length of the wavelet transform
 	 */
 	public void reverseTransform(double[] s, int n);
 	

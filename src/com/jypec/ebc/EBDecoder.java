@@ -149,7 +149,7 @@ public class EBDecoder {
 	 * @param plane
 	 * @param row
 	 * @param column
-	 * @param onlySign: if true, assume the magnitude was already decoded, and decode only the sign
+	 * @param onlySign if true, assume the magnitude was already decoded, and decode only the sign
 	 */
 	private void decodeSignificanceBit(BitStream input, CodingPlane plane, int row, int column, boolean onlySign) {
 		//decode the magnitude

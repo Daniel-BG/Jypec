@@ -12,11 +12,29 @@ import java.util.Set;
  */
 public class Logger {
 	//inner classes
+	/** Severity scale for the different types of message of the logger */
 	public enum SeverityScale {
-		INFO, WARNING, ERROR
+		/** Informative message, can be safely ignored */
+		INFO, 
+		/** Warning message. Not fatal but should not be ignored either */
+		WARNING, 
+		/** An error ocurred. Maybe the program recovers from it, but must be looked into */
+		ERROR
 	}
+	/** The different parameters this logger has. All can be set up later via calls to the Logger object */
 	public enum LoggerParameter {
-		SHOW_INFO, SHOW_WARNING, SHOW_ERROR, TERMINATE_ON_ERROR, LOG_MESSAGES, DEFAULT_SEVERITY
+		/** Flag indicating if the INFO messages are to be shown */
+		SHOW_INFO, 
+		/** Flag indicating if the WARNING messages are to be shown */
+		SHOW_WARNING,
+		/** Flag indicating if the ERROR messages are to be shown */
+		SHOW_ERROR, 
+		/** Flag indicating if the Logger should exit when encountering an error*/
+		TERMINATE_ON_ERROR, 
+		/** Flag indicating if the messages are to be logged for further processing */
+		LOG_MESSAGES, 
+		/** Value of the default severity of the messages given to the Logger. Can be anything of SeverityScale */
+		DEFAULT_SEVERITY
 	}
 	
 	//singleton setup
@@ -61,11 +79,17 @@ public class Logger {
 	
 	/**
 	 * Log with the default SeverityScale
+	 * @param sender the Class of the object that logs this message
 	 * @param message
 	 */
 	public void log (Class<? extends Object> sender, String message) {
 		this.log(sender, message, this.default_severity);
 	}
+	/**
+	 * Log with the default SeverityScale
+	 * @param sender the object that logs this message
+	 * @param message
+	 */
 	public void log (Object sender, String message) {
 		this.log(sender.getClass(), message, this.default_severity);
 	}
@@ -73,6 +97,7 @@ public class Logger {
 	/**
 	 * Add a message to the logger with the given severity.
 	 * Act according to the loggers configuration
+	 * @param sender Class of the object sending the message
 	 * @param message
 	 * @param sev
 	 */
@@ -105,6 +130,13 @@ public class Logger {
 			break;
 		}
 	}
+	/**
+	 * Add a message to the logger with the given severity.
+	 * Act according to the loggers configuration
+	 * @param sender the Object logging the message
+	 * @param message
+	 * @param sev
+	 */
 	public void log(Object sender, String message, SeverityScale sev) {
 		this.log(sender.getClass(), message, sev);
 	}
@@ -148,6 +180,10 @@ public class Logger {
 	public void allowLogging(Class<? extends Object> cls) {
 		this.allowedClasses.add(cls);
 	}
+	/**
+	 * Allow all objects of the class of 'o' to produce logs
+	 * @param o
+	 */
 	public void allowLogging(Object o) {
 		this.allowLogging(o.getClass());
 	}

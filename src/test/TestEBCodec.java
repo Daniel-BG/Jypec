@@ -16,6 +16,10 @@ import com.jypec.util.data.BidimensionalArrayIntegerMatrix;
 import com.jypec.util.data.IntegerMatrix;
 import com.jypec.util.debug.Logger;
 
+/**
+ * @author Daniel
+ * Test for the embedded block coder
+ */
 public class TestEBCodec {
 
 	/**
@@ -79,7 +83,7 @@ public class TestEBCodec {
 	 * @param data
 	 * @param width
 	 * @param height
-	 * @param depth: does not include the sign bit!
+	 * @param depth does not include the sign bit!
 	 * @param r
 	 */
 	public static void randomizeMatrix(Random r, IntegerMatrix data, int width, int height, int depth) {
@@ -103,6 +107,9 @@ public class TestEBCodec {
 	}
 
 
+	/**
+	 * Test if the EBCoder works for different depths (2 to 32)
+	 */
 	@Test
 	public void testDifferentDepths() {
 		Random r = new Random();
@@ -120,6 +127,9 @@ public class TestEBCodec {
 		}
 	}
 	
+	/**
+	 * Test if the EBCoder works for different matrix sizes
+	 */
 	@Test
 	public void testDifferentSizes() {
 		Random r = new Random();
@@ -138,6 +148,9 @@ public class TestEBCodec {
 		}
 	}
 	
+	/**
+	 * Test if the EBCoder works for different subband types
+	 */
 	@Test
 	public void testDifferentBands() {
 		Random r = new Random();
@@ -156,6 +169,9 @@ public class TestEBCodec {
 		}
 	}
 	
+	/**
+	 * Test the EBCoder in a few different random scenarios to see if it works for non regular cases too
+	 */
 	@Test
 	public void testRandomConfigurations() {
 		Random r = new Random();

@@ -31,6 +31,9 @@ public class MQArithmeticCoder {
 	private EnumMap<ContextLabel, MQProbabilityTable> contextStates;
 	
 	
+	/**
+	 * Create and initialize the MQArithmeticCoder with the default values used for encoding
+	 */
 	public MQArithmeticCoder () {
 		this.normalizedIntervalLength = MQConstants.DEFAULT_INTERVAL;
 		this.normalizedLowerBound = 0;
@@ -64,6 +67,10 @@ public class MQArithmeticCoder {
 		this.transferByte(output);
 	}
 	
+	/**
+	 * adds bits marking the end of stream to the given bitstream
+	 * @param output 
+	 */
 	public void markEndOfStream(BitStream output) {
 		output.putBits(MQConstants.BYTE_MARKER, 8, BitStream.BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 		output.putBits(MQConstants.BYTE_END_OF_MQ_CODER, 8, BitStream.BitStreamConstants.ORDERING_LEFTMOST_FIRST);
@@ -72,7 +79,7 @@ public class MQArithmeticCoder {
 	/**
 	 * Code an integer with the given context
 	 * @param number
-	 * @param bitsToCode: number of bits to be coded (taken from the LSBs and coded from MSB to LSB)
+	 * @param bitsToCode number of bits to be coded (taken from the LSBs and coded from MSB to LSB)
 	 * @param context
 	 * @param output
 	 */
@@ -84,9 +91,10 @@ public class MQArithmeticCoder {
 	
 	
 	/**
-	 * Codes the given symbol with the given context
+	 * Codes the given symbol with the given context outputting in the given output
 	 * @param symbol
 	 * @param context
+	 * @param output 
 	 */
 	public void codeSymbol(Bit symbol, ContextLabel context, BitStream output) {
 		//get the table associated to this context

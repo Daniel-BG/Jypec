@@ -47,11 +47,19 @@ public class MQProbabilityTable {
 	private Bit prediction;
 	private int state;
 	
+	/**
+	 * Create the table with the initial value
+	 */
 	public MQProbabilityTable() {
 		this.prediction = INITIAL_BIT;
 		this.state = INITIAL_STATE;
 	}
 	
+	/**
+	 * Create a table with the given initial values
+	 * @param state
+	 * @param MPS
+	 */
 	public MQProbabilityTable(int state, Bit MPS) {
 		this.prediction = MPS;
 		if (state < 0 || state > 46) {
@@ -92,8 +100,7 @@ public class MQProbabilityTable {
 	}
 
 	/**
-	 * Gets the probability estimate in the current state
-	 * @return
+	 * @return the probability estimate in the current state
 	 */
 	public int getPEstimate() {
 		return P_ESTIMATE[this.state];

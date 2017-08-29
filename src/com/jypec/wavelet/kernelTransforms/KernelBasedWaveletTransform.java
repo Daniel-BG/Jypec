@@ -3,12 +3,23 @@ package com.jypec.wavelet.kernelTransforms;
 import com.jypec.util.arrays.ArrayTransforms;
 import com.jypec.wavelet.Wavelet;
 
+/**
+ * @author Daniel
+ * A wavelet transform based on kernels applied to elements of the matrix that is filtered
+ */
 public class KernelBasedWaveletTransform implements Wavelet {
 
 	private KernelApplier forward;
 	private Kernel reverseLowpass;
 	private Kernel reverseHighpass;
 	
+	/**
+	 * Create the wavelet transform based on a quartet of filters. Both highpass and lowpass for analysis and synthesis
+	 * @param analysisLowpass
+	 * @param analysisHighpass
+	 * @param synthesisLowpass
+	 * @param synthesisHighpass
+	 */
 	public KernelBasedWaveletTransform(Kernel analysisLowpass, Kernel analysisHighpass, Kernel synthesisLowpass, Kernel synthesisHighpass) {
 		this.forward = new KernelApplier(analysisLowpass, analysisHighpass);
 		this.reverseHighpass = synthesisHighpass;

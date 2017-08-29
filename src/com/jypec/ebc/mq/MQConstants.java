@@ -1,5 +1,9 @@
 package com.jypec.ebc.mq;
 
+/**
+ * @author Daniel
+ * class to store constants used by the MQ-CODER
+ */
 public class MQConstants {
 	/** Marker that signals the start of a two-byte code */
 	public static final int BYTE_MARKER = 0xff;

@@ -31,8 +31,7 @@ public class MQArithmeticDecoder {
 	
 	/**
 	 * Initialize the decoder, make it ready to rumble
-	 * @param width
-	 * @param height
+	 * @param input where to read from
 	 */
 	public MQArithmeticDecoder(BitStream input) {
 		this.contextStates = new EnumMap<ContextLabel, MQProbabilityTable>(ContextLabel.class);
@@ -78,11 +77,10 @@ public class MQArithmeticDecoder {
 	}
 	
 	/**
-	 * Decodes an unsigned integer int the input stream using the given context
 	 * @param input
 	 * @param bitsToDecode
 	 * @param context
-	 * @return
+	 * @return the next unsigned integer in the input stream decoded using the given context 
 	 */
 	public int decodeNumberWithContext(BitStream input, int bitsToDecode, ContextLabel context) {
 		int res = 0;
@@ -99,7 +97,7 @@ public class MQArithmeticDecoder {
 	 * @see EBCoder#code(com.jypec.util.CodingBlock, BitStream)
 	 * @param input
 	 * @param context
-	 * @return
+	 * @return the next bit decoded from input using context
 	 */
 	public Bit decodeSymbol(BitStream input, ContextLabel context) {
 		//get the table associated to this context

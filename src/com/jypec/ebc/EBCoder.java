@@ -28,6 +28,8 @@ public class EBCoder {
 	/**
 	 * Codes the given block into the given output, resetting
 	 * statistics every time this function is called
+	 * @param block block to be coded
+	 * @param output bitstream where to put the coded block
 	 */ 
 	public void code(CodingBlock block, BitStream output) {
 		this.initialize(block.getWidth(), block.getHeight());

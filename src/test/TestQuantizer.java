@@ -8,6 +8,10 @@ import org.junit.Test;
 
 import com.jypec.quantization.Quantizer;
 
+/**
+ * @author Daniel
+ * Test the quantizer
+ */
 public class TestQuantizer {
 
 	/**
@@ -25,6 +29,9 @@ public class TestQuantizer {
 		}
 	}
 	
+	/**
+	 * Test various random values for the quantizer, ensuring the recovered unquantized values fall within the expected error range
+	 */
 	@Test
 	public void testQuantizerBruteForce() {
 		Random r = new Random(1);

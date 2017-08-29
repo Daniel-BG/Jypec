@@ -1,6 +1,5 @@
 package com.jypec.util.io;
 
-import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -21,8 +20,8 @@ public class DataReader extends FilterInputStream {
 	 * Create a buffered image reader that will read the input file assuming it has even
 	 * sized data of depth bits. Each call to {@link #next()} will return the next value
 	 * as an integer. 
-	 * @param file
-	 * @param depth
+	 * @param in the input stream from where data is read
+	 * @param depth depth of the input data (in bits)
 	 * @throws FileNotFoundException
 	 */
 	public DataReader(InputStream in, int depth) throws FileNotFoundException {

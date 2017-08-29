@@ -34,11 +34,13 @@ public class Quantizer {
 	
 	/**
 	 * Create a quantizer
-	 * @param exponent: basically the number of bits that the quantized output will use, minus one
-	 * @param mantissa: adjust the interval of quantization with decimal values
-	 * @param guard: number of guard bits in case samples exceed the limits
-	 * @param sampleAbsoluteValueLimit: maximum absolute value of the quantized samples
-	 * @param canSamplesBeNegative: boolean indicating if the given samples can be negative
+	 * @param exponent basically the number of bits that the quantized output will use, minus one
+	 * @param mantissa adjust the interval of quantization with decimal values
+	 * @param guard number of guard bits in case samples exceed the limits
+	 * @param sampleLowerLimit lower limit of the quantized samples
+	 * @param sampleUpperLimit upper limit of the quantized samples
+	 * @param reconstructionOffset offset used when reconstructing the values. Usually 0.5 is used to round to the nearest integer, but other values to take
+	 * into account the distribution of the differences to the nearest integer might be used such as 0.375
 	 */
 	public Quantizer(int exponent, int mantissa, int guard, double sampleLowerLimit, double sampleUpperLimit, double reconstructionOffset) {
 		//validity checks
@@ -136,9 +138,9 @@ public class Quantizer {
 	}
 	
 	/**
-	 * Dequantizes using {@link #deQuantize(int)} and then denormalizes to this quantizer's interval
+	 *  
 	 * @param input
-	 * @return
+	 * @return the dequantized value using {@link #deQuantize(int)} then denormalized to this quantizer's interval
 	 */
 	public double deQuantizeAndDenormalize(int input) {
 		double dequantized = this.deQuantize(input);

@@ -14,6 +14,12 @@ public class MatrixQuantizer {
 	
 	/**
 	 * Create a matrix quantizer with an underlying Quantizer for the quantizing process.
+	 * @param exponent 
+	 * @param mantissa 
+	 * @param guard 
+	 * @param sampleLowerLimit 
+	 * @param sampleUpperLimit 
+	 * @param reconstructionOffset 
 	 * @see Quantizer
 	 */
 	public MatrixQuantizer(int exponent, int mantissa, int guard, double sampleLowerLimit, double sampleUpperLimit, double reconstructionOffset) {
@@ -23,7 +29,7 @@ public class MatrixQuantizer {
 	/**
 	 * Quantizes the input
 	 * @param input
-	 * @param output: where to put the result
+	 * @param output where to put the result
 	 * @param rowOffset
 	 * @param colOffset
 	 * @param rows first dimension length of the matrix

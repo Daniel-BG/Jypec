@@ -6,7 +6,14 @@ package com.jypec.img;
  *
  */
 public enum ImageDataTypes {
-	UNSIGNED_BYTE, SIGNED_BYTE, UNSIGNED_TWO_BYTE, SIGNED_TWO_BYTE;
+	/** represents a unsigned byte data type (from 0 to 255) */
+	UNSIGNED_BYTE, 
+	/** represents a signed byte data type in sign-magnitude form (from -127 to 127) */
+	SIGNED_BYTE, 
+	/** represents a unsigned two-byte data type (from 0-65535) */
+	UNSIGNED_TWO_BYTE, 
+	/** represents a signed two-byte data type in sign-magnitude form (from -32767 to 32767) */
+	SIGNED_TWO_BYTE;
 	
 	private static final int SIGNED_BYTE_MASK = 0xffffff80;
 	private static final int SIGNED_BYTE_SIGN_BIT = 0x80;

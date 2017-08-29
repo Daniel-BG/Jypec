@@ -13,7 +13,7 @@ public class BidimensionalWavelet {
 	
 	/**
 	 * Create a Bidimensional wavelet
-	 * @param baseWavelet: 1-D wavelet that is to be applied in both dimensions
+	 * @param baseWavelet 1-D wavelet that is to be applied in both dimensions
 	 */
 	public BidimensionalWavelet(Wavelet baseWavelet) {
 		this.baseWavelet = baseWavelet;

@@ -1,5 +1,9 @@
 package com.jypec.util.arrays;
 
+/**
+ * @author Daniel
+ * Useful matrix transforms are written here
+ */
 public class MatrixTransforms {
 
 	/**
@@ -8,7 +12,6 @@ public class MatrixTransforms {
 	 * @param dest
 	 * @param width
 	 * @param height
-	 * @return
 	 */
 	public static void transpose(double[][]source, double[][]dest, int width, int height) {
 		for (int i = 0; i < height; i++) {

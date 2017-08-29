@@ -25,6 +25,9 @@ public class FIFOBitStream implements BitStream {
 	//current size (number of bits stored)
 	int size;
 	
+	/**
+	 * Create a FIFO bit stream ready for use
+	 */
 	public FIFOBitStream() {
 		this.storage = new LinkedList<Integer>();
 		this.size = 0;

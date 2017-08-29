@@ -23,12 +23,12 @@ public class DataMatrixReader {
 	 * A flag indicating if the data is in Little endian format ensures that a wrapper is placed around the reader in order
 	 * to invert the bit-order of the values
 	 * @param file
-	 * @param bands
-	 * @param lines
-	 * @param samples
-	 * @param format
-	 * @param isLittleEndian
-	 * @return
+	 * @param bands number of bands in the image
+	 * @param lines number of lines in the image
+	 * @param samples number of samples in the image
+	 * @param format format of the image
+	 * @param isLittleEndian if the input data is in LittleEndian format (BigEndian otherwise)
+	 * @return the read image
 	 * @throws FileNotFoundException
 	 */
 	public static final HyperspectralImage read(String file, int bands, int lines, int samples, ImageDataTypes format, boolean isLittleEndian) throws FileNotFoundException {

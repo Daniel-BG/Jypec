@@ -15,5 +15,12 @@ package com.jypec.ebc;
  *
  */
 public enum SubBand {
-	LL, LH, HL, HH
+	/** SubBand resulting from lowpassing the input in both the vertical and horizontal direction */
+	LL, 
+	/** Horizontal lowpass and vertical highpass subBand */
+	LH, 
+	/** Horizontal highpass and vertical lowpass subBand */
+	HL, 
+	/** Subband where both directions have been highpassed */
+	HH
 }
