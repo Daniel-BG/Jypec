@@ -20,7 +20,7 @@ public class MatrixQuantizer {
 	 * @param sampleLowerLimit 
 	 * @param sampleUpperLimit 
 	 * @param reconstructionOffset 
-	 * @see Quantizer
+	 * @see {@link Quantizer #Quantizer(int, int, int, double, double, double)}
 	 */
 	public MatrixQuantizer(int exponent, int mantissa, int guard, double sampleLowerLimit, double sampleUpperLimit, double reconstructionOffset) {
 		this.quantizer = new Quantizer(exponent, mantissa, guard, sampleLowerLimit, sampleUpperLimit, reconstructionOffset); 
