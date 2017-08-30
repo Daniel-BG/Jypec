@@ -62,8 +62,8 @@ public class Main {
 		pca.computeBasis(30);
 		
 		System.out.println(ArrayPrinter.printDoubleArray(hi.getSample(0, 0)));
-		//System.out.println(ArrayPrinter.printDoubleArray(pca.sampleToEigenSpace(hi.getSample(0, 0))));
 		System.out.println(ArrayPrinter.printDoubleArray(pca.eigenToSampleSpace(pca.sampleToEigenSpace(hi.getSample(0, 0)))));
+		System.out.println(ArrayPrinter.printDoubleArray(pca.sampleToEigenSpace(hi.getSample(0, 0))));
 		
 	}
 	

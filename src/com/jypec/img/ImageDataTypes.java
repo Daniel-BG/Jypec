@@ -5,36 +5,48 @@ package com.jypec.img;
  * @author Daniel
  *
  */
-public enum ImageDataTypes {
+public class ImageDataTypes {
 	/** represents a unsigned byte data type (from 0 to 255) */
-	UNSIGNED_BYTE, 
+	public static final ImageDataTypes UNSIGNED_BYTE = new ImageDataTypes(8, false); 
 	/** represents a signed byte data type in sign-magnitude form (from -127 to 127) */
-	SIGNED_BYTE, 
+	public static final ImageDataTypes SIGNED_BYTE = new ImageDataTypes(8, true);
 	/** represents a unsigned two-byte data type (from 0-65535) */
-	UNSIGNED_TWO_BYTE, 
+	public static final ImageDataTypes UNSIGNED_TWO_BYTE = new ImageDataTypes(16, false); 
 	/** represents a signed two-byte data type in sign-magnitude form (from -32767 to 32767) */
-	SIGNED_TWO_BYTE;
+	public static final ImageDataTypes SIGNED_TWO_BYTE = new ImageDataTypes(16, true); 
 	
-	private static final int SIGNED_BYTE_MASK = 0xffffff80;
-	private static final int SIGNED_BYTE_SIGN_BIT = 0x80;
-	private static final int SIGNED_TWO_BYTE_MASK = 0xffff8000;
-	private static final int SIGNED_TWO_BYTE_SIGN_BIT = 0x8000;
-	private static final int UNSIGNED_BYTE_LIMIT = 0xff;
-	private static final int UNSIGNED_TWO_BYTE_LIMIT = 0xffff;
+	
+	private int bitDepth;
+	private int magnitudeDepth;
+	private int magnitudeLimit;
+	private int signMask;
+	private int signBit;
+	private boolean signed;
+	
+	
+	/**
+	 * Build a data type of the specified bit depth, indicating if it is signed or not.
+	 * These data types are on sign-magnitude form, and the sign bit is COUNTED in the
+	 * bitDepth parameter. <br>
+	 * E.g: bitDepth=8, signed=true means 1 sign bit + 7 magnitude bits
+	 * @param bitDepth
+	 * @param signed
+	 */
+	public ImageDataTypes(int bitDepth, boolean signed) {
+		this.bitDepth = bitDepth;
+		this.signed = signed;
+		this.magnitudeDepth = this.bitDepth - (this.signed ? 1 : 0);
+		this.magnitudeLimit = (0x1 << this.magnitudeDepth) - 1;
+		this.signBit = this.signed ? (0x1 << this.magnitudeDepth) : 0;
+		this.signMask = 0xffffffff << this.magnitudeDepth;
+	}
+	
 	
 	/**
 	 * @return this type's bit depth
 	 */
 	public int getBitDepth() {
-		switch(this) {
-		case UNSIGNED_BYTE:
-		case SIGNED_BYTE:
-			return 8;
-		case UNSIGNED_TWO_BYTE:
-		case SIGNED_TWO_BYTE:
-			return 16;
-		}
-		return 0;
+		return this.bitDepth;
 	}
 	
 	/**
@@ -53,16 +65,11 @@ public enum ImageDataTypes {
 	 * @return the value of the given data if it is of this object's type
 	 */
 	public int dataToValue(int data) {
-		switch(this) {
-		case UNSIGNED_BYTE:
-		case UNSIGNED_TWO_BYTE:
+		if (this.signed) {
+			return signMaskToValue(data, this.signMask);
+		} else {
 			return data;
-		case SIGNED_BYTE:
-			return signMaskToValue(data, SIGNED_BYTE_MASK);
-		case SIGNED_TWO_BYTE:
-			return signMaskToValue(data, SIGNED_TWO_BYTE_MASK);
 		}
-		return 0;
 	}
 	
 	/**
@@ -109,18 +116,12 @@ public enum ImageDataTypes {
 	public int valueToData(double value) {
 		int val = (int) value;
 		
-		switch(this) {
-		case UNSIGNED_BYTE:
-			return this.clampToInterval(val, 0, UNSIGNED_BYTE_LIMIT);
-		case UNSIGNED_TWO_BYTE:
-			return this.clampToInterval(val, 0, UNSIGNED_TWO_BYTE_LIMIT);
-		case SIGNED_BYTE:
-			return this.signedClampToRange(val, SIGNED_BYTE_SIGN_BIT - 1, SIGNED_BYTE_SIGN_BIT);
-		case SIGNED_TWO_BYTE:
-			return this.signedClampToRange(val, SIGNED_BYTE_SIGN_BIT - 1, SIGNED_TWO_BYTE_SIGN_BIT);
+		if (this.signed) {
+			return this.signedClampToRange(val, this.magnitudeLimit, this.signBit); 	
+		} else {
+			return this.clampToInterval(val, 0, this.magnitudeLimit);
 		}
-		
-		return val;
+
 	}
 
 	/**
