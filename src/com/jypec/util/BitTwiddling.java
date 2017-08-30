@@ -17,4 +17,13 @@ public class BitTwiddling {
 		return (input & mask) >> shift;
 	}
 	
+	
+	/**
+	 * @param number
+	 * @return true if number is a positive power of two
+	 */
+	public static boolean powerOfTwo(int number) {
+		return (number > 0) && ((number & (number - 1)) == 0);
+	}
+	
 }

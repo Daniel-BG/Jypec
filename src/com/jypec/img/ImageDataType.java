@@ -5,15 +5,15 @@ package com.jypec.img;
  * @author Daniel
  *
  */
-public class ImageDataTypes {
+public class ImageDataType {
 	/** represents a unsigned byte data type (from 0 to 255) */
-	public static final ImageDataTypes UNSIGNED_BYTE = new ImageDataTypes(8, false); 
+	public static final ImageDataType UNSIGNED_BYTE = new ImageDataType(8, false); 
 	/** represents a signed byte data type in sign-magnitude form (from -127 to 127) */
-	public static final ImageDataTypes SIGNED_BYTE = new ImageDataTypes(8, true);
+	public static final ImageDataType SIGNED_BYTE = new ImageDataType(8, true);
 	/** represents a unsigned two-byte data type (from 0-65535) */
-	public static final ImageDataTypes UNSIGNED_TWO_BYTE = new ImageDataTypes(16, false); 
+	public static final ImageDataType UNSIGNED_TWO_BYTE = new ImageDataType(16, false); 
 	/** represents a signed two-byte data type in sign-magnitude form (from -32767 to 32767) */
-	public static final ImageDataTypes SIGNED_TWO_BYTE = new ImageDataTypes(16, true); 
+	public static final ImageDataType SIGNED_TWO_BYTE = new ImageDataType(16, true); 
 	
 	
 	private int bitDepth;
@@ -32,7 +32,7 @@ public class ImageDataTypes {
 	 * @param bitDepth
 	 * @param signed
 	 */
-	public ImageDataTypes(int bitDepth, boolean signed) {
+	public ImageDataType(int bitDepth, boolean signed) {
 		this.bitDepth = bitDepth;
 		this.signed = signed;
 		this.magnitudeDepth = this.bitDepth - (this.signed ? 1 : 0);
@@ -133,6 +133,17 @@ public class ImageDataTypes {
 		}
 		
 		return this.getBitDepth() / 8;
+	}
+	
+	/**
+	 * @return the number of different values this image data type can have
+	 */
+	public int getMagnitudeAbsoluteRange() {
+		if (this.signed) {
+			return this.magnitudeLimit * 2 + 1;
+		} else {
+			return this.magnitudeLimit;
+		}
 	}
 	
 	

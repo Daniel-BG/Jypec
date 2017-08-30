@@ -5,8 +5,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.Wavelet;
+import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
 
@@ -82,7 +82,7 @@ public class TestWaveletTransform {
 	 */
 	@Test
 	public void testSymetricBidimensionalRecovery() {
-		BidimensionalWavelet biTestWavelet = new BidimensionalWavelet(testWavelet);
+		OneDimensionalWaveletExtender biTestWavelet = new OneDimensionalWaveletExtender(testWavelet);
 		Random r = new Random();
 		for (int i = 1; i < 50; i++) {
 			double[][] s = new double[i][i*2];

@@ -150,6 +150,13 @@ public class HyperspectralBand implements IntegerMatrix {
 			}
 		}
 	}
+	
+	/**
+	 * @return the type of this band's data
+	 */
+	public ImageDataType getDataType() {
+		return this.hyimg.getDataType();
+	}
 
 
 

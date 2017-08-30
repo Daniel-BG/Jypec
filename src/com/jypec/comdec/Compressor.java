@@ -1,10 +1,8 @@
 package com.jypec.comdec;
 
-import javax.swing.text.Highlighter.HighlightPainter;
-
 import com.jypec.img.HyperspectralImage;
+import com.jypec.img.ImageDataType;
 import com.jypec.pca.PrincipalComponentAnalysis;
-import com.jypec.util.debug.ArrayPrinter;
 
 /**
  * @author Daniel
@@ -32,21 +30,33 @@ public class Compressor {
 		pca.setup(lines * samples, bands);
 		for (int i = 0; i < lines; i++) {
 			for (int j = 0; j < samples; j++) {
-				pca.addSample(srcImg.getSample(i, j));
+				pca.addSample(srcImg.getPixel(i, j));
 			}
 		}
 		
-		pca.computeBasis(pcaDim);
+		pca.computeBasis(this.pcaDim);
 		
-		HyperspectralImage reduced;
+		/** Now compute the max value that this newly created basis might have, and allocate an image with enough space for it */
+		double maxVal = (double) srcImg.getDataType().getMagnitudeAbsoluteRange();
+		double valueIncrement = Math.sqrt((double) bands);
+		double newMaxVal = maxVal * valueIncrement;
+		double newBitDepth = Math.log10(newMaxVal) * Math.log10(2);
+		
+		ImageDataType newDataType = new ImageDataType((int) Math.ceil(newBitDepth), true);
+		
+		HyperspectralImage reduced = new HyperspectralImage(null, newDataType, this.pcaDim, lines, samples);
+		
+		/** Project all image values onto the reduced space */
+		
+		for (int i = 0; i < lines; i++) {
+			for (int j = 0; j < samples; j++) {
+				reduced.setPixel(pca.sampleToEigenSpace(srcImg.getPixel(i, j)), i, j);
+			}
+		}
+		
+		/** Proceed to compress the reduced image */
 		
 		
-		
-		
-		
-		System.out.println(ArrayPrinter.printDoubleArray(srcImg.getSample(0, 0)));
-		System.out.println(ArrayPrinter.printDoubleArray(pca.eigenToSampleSpace(pca.sampleToEigenSpace(srcImg.getSample(0, 0)))));
-		System.out.println(ArrayPrinter.printDoubleArray(pca.sampleToEigenSpace(srcImg.getSample(0, 0))));
 	}
 	
 }

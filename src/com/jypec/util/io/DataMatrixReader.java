@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.jypec.img.HyperspectralImage;
-import com.jypec.img.ImageDataTypes;
+import com.jypec.img.ImageDataType;
 
 /**
  * Generic reader for hyperspectral image data
@@ -31,7 +31,7 @@ public class DataMatrixReader {
 	 * @return the read image
 	 * @throws FileNotFoundException
 	 */
-	public static final HyperspectralImage read(String file, int bands, int lines, int samples, ImageDataTypes format, boolean isLittleEndian) throws FileNotFoundException {
+	public static final HyperspectralImage read(String file, int bands, int lines, int samples, ImageDataType format, boolean isLittleEndian) throws FileNotFoundException {
 		HyperspectralImage hi = new HyperspectralImage(null, format, bands, lines, samples);
 		InputStream is = new FileInputStream(new File(file));	//read a file
 		is = new BufferedInputStream(is);						//buffer it

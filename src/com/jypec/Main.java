@@ -9,7 +9,7 @@ import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBand;
 import com.jypec.img.HyperspectralImage;
-import com.jypec.img.ImageDataTypes;
+import com.jypec.img.ImageDataType;
 import com.jypec.pca.PrincipalComponentAnalysis;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.BitStream;
@@ -17,6 +17,8 @@ import com.jypec.util.FIFOBitStream;
 import com.jypec.util.debug.ArrayPrinter;
 import com.jypec.util.io.DataMatrixReader;
 import com.jypec.wavelet.BidimensionalWavelet;
+import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
+import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
 
 /**
@@ -34,15 +36,15 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		Locale.setDefault(Locale.US);
-		//testFullProcess();
-		testPCA();
+		testFullProcess();
+		//testPCA();
 		
 	}
 
 	private static void testPCA() {
 		
 		int bands = 188, lines = 350, samples = 350;
-		ImageDataTypes type = ImageDataTypes.UNSIGNED_TWO_BYTE;
+		ImageDataType type = ImageDataType.UNSIGNED_TWO_BYTE;
 		
 		HyperspectralImage hi;
 		try {
@@ -56,20 +58,20 @@ public class Main {
 		pca.setup(350*350, 188);
 		for (int i = 0; i < 350; i++) {
 			for (int j = 0; j < 350; j++) {
-				pca.addSample(hi.getSample(i, j));
+				pca.addSample(hi.getPixel(i, j));
 			}
 		}
 		pca.computeBasis(30);
 		
-		System.out.println(ArrayPrinter.printDoubleArray(hi.getSample(0, 0)));
-		System.out.println(ArrayPrinter.printDoubleArray(pca.eigenToSampleSpace(pca.sampleToEigenSpace(hi.getSample(0, 0)))));
-		System.out.println(ArrayPrinter.printDoubleArray(pca.sampleToEigenSpace(hi.getSample(0, 0))));
+		System.out.println(ArrayPrinter.printDoubleArray(hi.getPixel(0, 0)));
+		System.out.println(ArrayPrinter.printDoubleArray(pca.eigenToSampleSpace(pca.sampleToEigenSpace(hi.getPixel(0, 0)))));
+		System.out.println(ArrayPrinter.printDoubleArray(pca.sampleToEigenSpace(hi.getPixel(0, 0))));
 		
 	}
 	
 	private static void testFullProcess() {
 		int bands = 188, lines = 350, samples = 350;
-		ImageDataTypes type = ImageDataTypes.UNSIGNED_TWO_BYTE;
+		ImageDataType type = ImageDataType.UNSIGNED_TWO_BYTE;
 		
 		HyperspectralImage hi;
 		try {
@@ -81,7 +83,7 @@ public class Main {
 		
 		for (int i = 0; i < bands; i++) {
 			//things we'll need
-			BidimensionalWavelet bdw = new BidimensionalWavelet(new LiftingCdf97WaveletTransform());
+			BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), 3);
 			MatrixQuantizer mq = new MatrixQuantizer(type.getBitDepth() - 1, 0, 1, - (0x1 << 16), 0x1 << 17, 0.5);
 			
 			int stl = lines / 2, sts = samples / 2;

@@ -8,7 +8,7 @@ package com.jypec.img;
 public class HyperspectralImage {
 
 	private int[][][] data;
-	private ImageDataTypes dataType;
+	private ImageDataType dataType;
 	private int depth;
 	private int bands;
 	private int lines;
@@ -23,7 +23,7 @@ public class HyperspectralImage {
 	 * @param lines number of lines in a band (height of the spatial dimension (vertical number of samples))
 	 * @param samples number of samples in a line (width of the spatial dimension (horizontal number of samples))
 	 */
-	public HyperspectralImage (int[][][] data, ImageDataTypes dataType, int bands, int lines, int samples) {
+	public HyperspectralImage (int[][][] data, ImageDataType dataType, int bands, int lines, int samples) {
 		if (data == null) {
 			this.data = new int[bands][lines][samples];
 		} else {
@@ -122,7 +122,7 @@ public class HyperspectralImage {
 	 * @param sample
 	 * @return a pixel of the image at the given spatial position, with all spectral components
 	 */
-	public double[] getSample(int line, int sample) {
+	public double[] getPixel(int line, int sample) {
 		double[] res = new double[this.getNumberOfBands()];
 		for (int i = 0; i < this.getNumberOfBands(); i++) {
 			res[i] = this.getValueAt(i, line, sample);
@@ -130,6 +130,24 @@ public class HyperspectralImage {
 		return res;
 	}
 
+	/**
+	 * @return the data type of this image
+	 */
+	public ImageDataType getDataType() {
+		return this.dataType;
+	}
+
+	/**
+	 * Set a whole sample (pixel) for this image
+	 * @param values
+	 * @param line
+	 * @param sample
+	 */
+	public void setPixel(double[] values, int line, int sample) {
+		for (int i = 0; i < this.getNumberOfBands(); i++) {
+			this.setValueAt(values[i], i, line, sample);
+		}
+	}
 
 
 
