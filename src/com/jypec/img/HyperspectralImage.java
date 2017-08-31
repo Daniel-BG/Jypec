@@ -52,7 +52,7 @@ public class HyperspectralImage {
 	 * @param sample
 	 * @return the value that the inner data represents at that position
 	 */
-	public double getValueAt(int band, int line, int sample) {
+	public int getValueAt(int band, int line, int sample) {
 		return this.dataType.dataToValue(this.getDataAt(band, line, sample));
 	}
 	
@@ -148,8 +148,15 @@ public class HyperspectralImage {
 			this.setValueAt(values[i], i, line, sample);
 		}
 	}
-
-
-
 	
+	/**
+	 * @param other
+	 * @return true if this image's size and type is equal to other's size and type
+	 */
+	public boolean sizeAndTypeEquals(HyperspectralImage other) {
+		return this.getNumberOfBands() == other.getNumberOfBands() 
+				&& this.getNumberOfLines() == other.getNumberOfLines() 
+				&& this.getNumberOfSamples() == other.getNumberOfSamples()
+				&& this.getDataType().equals(other.getDataType());
+	}
 }

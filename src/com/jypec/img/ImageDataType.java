@@ -147,4 +147,13 @@ public class ImageDataType {
 	}
 	
 	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof ImageDataType) {
+			ImageDataType other = (ImageDataType) obj;
+			return this.bitDepth == other.bitDepth && this.signed == other.signed;
+		}
+		return false;
+	}
+
 }

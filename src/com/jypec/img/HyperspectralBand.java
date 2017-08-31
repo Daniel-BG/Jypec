@@ -44,7 +44,7 @@ public class HyperspectralBand implements IntegerMatrix {
 	 * @param sample
 	 * @return the VALUE of the DATA at the given position. This could be different from {@link #getDataAt(int, int)}
 	 */
-	private double getValueAt(int line, int sample) {
+	public int getValueAt(int line, int sample) {
 		return this.hyimg.getValueAt(this.band, line, sample);
 	}
 	
@@ -158,7 +158,15 @@ public class HyperspectralBand implements IntegerMatrix {
 		return this.hyimg.getDataType();
 	}
 
-
+	/**
+	 * @param other
+	 * @return true if this image's size and type is equal to other's size and type
+	 */
+	public boolean sizeAndTypeEquals(HyperspectralBand other) {
+		return this.getNumberOfLines() == other.getNumberOfLines() 
+				&& this.getNumberOfSamples() == other.getNumberOfSamples()
+				&& this.getDataType().equals(other.getDataType());
+	}
 
 
 }
