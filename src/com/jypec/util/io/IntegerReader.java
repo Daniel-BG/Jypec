@@ -10,7 +10,7 @@ import java.io.InputStream;
  * @author Daniel
  *
  */
-public class DataReader extends FilterInputStream {
+public class IntegerReader extends FilterInputStream {
 	private int depth;
 	private int dataMask;
 	private long buffer;
@@ -24,7 +24,7 @@ public class DataReader extends FilterInputStream {
 	 * @param depth depth of the input data (in bits)
 	 * @throws FileNotFoundException
 	 */
-	public DataReader(InputStream in, int depth) throws FileNotFoundException {
+	public IntegerReader(InputStream in, int depth) throws FileNotFoundException {
 		super(in);
 		if (depth < 1 || depth > 32) {
 			throw new IllegalArgumentException("The depth is a number between 1 and 32 inclusive");

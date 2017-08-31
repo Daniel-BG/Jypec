@@ -39,7 +39,7 @@ public class DataMatrixReader {
 			is = new EndiannessChangerReader(is, format.getByteDepth());
 		}
 		
-		DataReader bdr = new DataReader(is, format.getBitDepth());
+		IntegerReader bdr = new IntegerReader(is, format.getBitDepth());
 		
 		for (int i = 0; i < bands; i++) {
 			for (int j = 0; j < lines; j++) {

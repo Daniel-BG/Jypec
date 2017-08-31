@@ -13,7 +13,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	TestEBCodec.class,
 	TestWaveletTransform.class,
-	TestQuantizer.class
+	TestQuantizer.class,
+	TestBitStreamReaderWriter.class
 })
 
 

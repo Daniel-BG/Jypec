@@ -7,6 +7,8 @@ import org.ejml.dense.row.SingularOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 
+import com.jypec.util.BitStream;
+
 /**
  * <p>
  * The following is a simple example of how to perform basic principal component analysis in EJML.
@@ -242,4 +244,25 @@ public class PrincipalComponentAnalysis {
 
         return NormOps_DDRM.normF(dots);
     }
+    
+    
+    /**
+     * Stores the necessary information in the output stream so that afterwards, a call
+     * can be made to {@link #restoreFromBitStream(BitStream)} to set the PCA up so that
+     * eigen-space samples can be restored onto the original space
+     * @param output
+     */
+    public void saveToBitStream(BitStream output) {
+    	
+    }
+    
+    /**
+     * Restore the PCA object from the given bitstream so that it can perform projections
+     * (direct and inverse) without training again
+     * @param input
+     */
+    public void restoreFromBitStream(BitStream input) {
+    	
+    }
+    
 }

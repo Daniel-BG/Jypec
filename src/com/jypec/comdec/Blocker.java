@@ -15,6 +15,12 @@ import com.jypec.util.Stepper;
 public class Blocker extends ArrayList<CodingBlock> {
 
 	private static final long serialVersionUID = -9028934315574770801L;
+	/** We want the blocks to be 64x64 */
+	public static final int DEFAULT_EXPECTED_DIM = 64;
+	/** Being restricted to a max size of 64x64=4096, we want our blocks
+	 * to have a max side of 1024 so that the other dimension is ensured 4 samples to allow
+	 * run-length encoding */
+	public static final int DEFAULT_MAX_BLOCK_DIM = 1024;
 	
 	private int waveletSteps;
 	private int expectedBlockDim;

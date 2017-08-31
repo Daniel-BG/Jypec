@@ -9,9 +9,13 @@ package com.jypec.util;
 public interface BitStream {
 	/** Useful constants for this class */
 	public enum BitStreamConstants {
-		/** If the leftmost bit is the first to be processed */
+		/** If the leftmost bit is the first to be processed, 
+		 * either for reading the integer (reads from left to right) 
+		 * or writing (writes left then shifts right) */
 		ORDERING_LEFTMOST_FIRST, 
-		/** If the rightmost bit is the first to be processed */
+		/** If the rightmost bit is the first to be processed, 
+		 * either for reading the integer (reads from right to left) 
+		 * or writing (writes the rightmost bit then shifts left) */
 		ORDERING_RIGHTMOST_FIRST
 	}
 
