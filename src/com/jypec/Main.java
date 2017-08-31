@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.util.Locale;
 
 import com.jypec.comdec.Blocker;
+import com.jypec.comdec.Compressor;
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.SubBand;
@@ -41,9 +42,28 @@ public class Main {
 		Locale.setDefault(Locale.US);
 		Logger.logger().allowLogging(Main.class);
 		Logger.logger().set(LoggerParameter.SHOW_INFO, 1);
-		testFullProcess();
+		//testFullProcess();
 		//testPCA();
+		testCompressor();
+	}
+	
+	private static void testCompressor() {
+		Compressor c = new Compressor(30, 3);
+		int bands = 188, lines = 350, samples = 350;
+		ImageDataType type = ImageDataType.UNSIGNED_TWO_BYTE;
 		
+		HyperspectralImage hi;
+		try {
+			hi = DataMatrixReader.read("C:/Users/Daniel/Hiperspectral images/cupriteBSQ/Cuprite", bands, lines, samples, type, true);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return;
+		}
+		BitStream output = new FIFOBitStream();
+		
+		c.compress(hi, output);
+		
+		System.out.println("Compressed size is: " + output.getNumberOfBits());
 	}
 
 	private static void testPCA() {

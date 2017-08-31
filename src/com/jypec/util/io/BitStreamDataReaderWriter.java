@@ -67,5 +67,52 @@ public class BitStreamDataReaderWriter {
 	public int readInt() {
 		return this.stream.getBits(32, BitStreamConstants.ORDERING_RIGHTMOST_FIRST);
 	}
+	
+	/**
+	 * Write the given number of elements from the given array
+	 * @param array
+	 * @param length
+	 */
+	public void writeDoubleArray(double[] array, int length) {
+		for (int i = 0; i < length; i++) {
+			this.writeDouble(array[i]);
+		}
+	}
+	
+	/**
+	 * @param length
+	 * @return an array contaning the specified number of elements, read from the inner stream
+	 */
+	public double[] readDoubleArray(int length) {
+		double[] res = new double[length];
+		for (int i = 0; i < length; i++) {
+			res[i] = this.readDouble();
+		}
+		return res;
+	}
+	
+	/**
+	 * Write the given number of elements from the given array
+	 * @param array
+	 * @param length
+	 */
+	public void writeFloatArray(float[] array, int length) {
+		for (int i = 0; i < length; i++) {
+			this.writeFloat(array[i]);
+		}
+	}
+	
+	/**
+	 * @param length
+	 * @return an array contaning the specified number of elements, read from the inner stream
+	 */
+	public float[] readFloatArray(int length) {
+		float[] res = new float[length];
+		for (int i = 0; i < length; i++) {
+			res[i] = this.readFloat();
+		}
+		return res;
+	}
+
 
 }

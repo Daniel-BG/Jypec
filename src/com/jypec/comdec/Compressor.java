@@ -1,7 +1,6 @@
 package com.jypec.comdec;
 
 import com.jypec.ebc.EBCoder;
-import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBand;
 import com.jypec.img.HyperspectralImage;
@@ -9,7 +8,6 @@ import com.jypec.img.ImageDataType;
 import com.jypec.pca.PrincipalComponentAnalysis;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.BitStream;
-import com.jypec.util.FIFOBitStream;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
@@ -24,6 +22,10 @@ public class Compressor {
 	private int pcaDim;
 	private int wavePasses;
 
+	/**
+	 * @param pcaDim value of the reduced PCA dimension
+	 * @param wavePasses passes that the wavelet transform does over each band before compressing
+	 */
 	public Compressor(int pcaDim, int wavePasses) {
 		this.pcaDim = pcaDim;
 		this.wavePasses = wavePasses;
@@ -49,13 +51,13 @@ public class Compressor {
 		}
 		
 		pca.computeBasis(this.pcaDim);
-		//TODO will need to save PCA values here to be later recovered!
+		pca.saveToBitStream(output);
 		
 		/** Now compute the max value that this newly created basis might have, and allocate an image with enough space for it */
 		double maxVal = (double) srcImg.getDataType().getMagnitudeAbsoluteRange();
 		double valueIncrement = Math.sqrt((double) bands);
 		double newMaxVal = maxVal * valueIncrement;
-		double newBitDepth = Math.log10(newMaxVal) * Math.log10(2);
+		double newBitDepth = Math.log10(newMaxVal) / Math.log10(2);
 		
 		ImageDataType newDataType = new ImageDataType((int) Math.ceil(newBitDepth), true);
 		

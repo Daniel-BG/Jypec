@@ -8,6 +8,7 @@ import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 
 import com.jypec.util.BitStream;
+import com.jypec.util.io.BitStreamDataReaderWriter;
 
 /**
  * <p>
@@ -47,6 +48,9 @@ public class PrincipalComponentAnalysis {
     // how many principal components are used
     private int numComponents;
 
+    // dimension of the original space
+    private int sampleSize;
+    
     // where the data is stored
     private DMatrixRMaj A = new DMatrixRMaj(1,1);
     private int sampleIndex;
@@ -69,6 +73,7 @@ public class PrincipalComponentAnalysis {
     public void setup( int numSamples , int sampleSize ) {
         mean = new double[ sampleSize ];
         A.reshape(numSamples,sampleSize,false);
+        this.sampleSize = sampleSize;
         sampleIndex = 0;
         numComponents = -1;
     }
@@ -80,7 +85,7 @@ public class PrincipalComponentAnalysis {
      * @param sampleData Sample from original raw data.
      */
     public void addSample( double[] sampleData ) {
-        if( A.getNumCols() != sampleData.length )
+        if( this.sampleSize != sampleData.length )
             throw new IllegalArgumentException("Unexpected sample size");
         if( sampleIndex >= A.getNumRows() )
             throw new IllegalArgumentException("Too many samples");
@@ -98,7 +103,7 @@ public class PrincipalComponentAnalysis {
      * smaller than the number of elements in the input vector.
      */
     public void computeBasis( int numComponents ) {
-        if( numComponents > A.getNumCols() )
+        if( numComponents > this.sampleSize )
             throw new IllegalArgumentException("More components requested that the data's length.");
         if( sampleIndex != A.getNumRows() )
             throw new IllegalArgumentException("Not all the data has been added");
@@ -163,11 +168,11 @@ public class PrincipalComponentAnalysis {
      * @return Eigen space projection.
      */
     public double[] sampleToEigenSpace( double[] sampleData ) {
-        if( sampleData.length != A.getNumCols() )
+        if( sampleData.length != this.sampleSize )
             throw new IllegalArgumentException("Unexpected sample length");
-        DMatrixRMaj mean = DMatrixRMaj.wrap(A.getNumCols(),1,this.mean);
+        DMatrixRMaj mean = DMatrixRMaj.wrap(this.sampleSize,1,this.mean);
 
-        DMatrixRMaj s = new DMatrixRMaj(A.getNumCols(),1,true,sampleData);
+        DMatrixRMaj s = new DMatrixRMaj(this.sampleSize,1,true,sampleData);
         DMatrixRMaj r = new DMatrixRMaj(numComponents,1);
 
         CommonOps_DDRM.subtract(s, mean, s);
@@ -187,12 +192,12 @@ public class PrincipalComponentAnalysis {
         if( eigenData.length != numComponents )
             throw new IllegalArgumentException("Unexpected sample length");
 
-        DMatrixRMaj s = new DMatrixRMaj(A.getNumCols(),1);
+        DMatrixRMaj s = new DMatrixRMaj(this.sampleSize,1);
         DMatrixRMaj r = DMatrixRMaj.wrap(numComponents,1,eigenData);
         
         CommonOps_DDRM.multTransA(V_t,r,s);
 
-        DMatrixRMaj mean = DMatrixRMaj.wrap(A.getNumCols(),1,this.mean);
+        DMatrixRMaj mean = DMatrixRMaj.wrap(this.sampleSize,1,this.mean);
         CommonOps_DDRM.add(s,mean,s);
 
         return s.data;
@@ -253,7 +258,16 @@ public class PrincipalComponentAnalysis {
      * @param output
      */
     public void saveToBitStream(BitStream output) {
-    	
+    	BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
+    	bw.setStream(output);
+    	//write the number of dimensions in the original space
+    	bw.writeInt(this.sampleSize);
+    	//write the number of dimensions in the reduced space
+    	bw.writeInt(numComponents);
+    	//write the mean
+    	bw.writeDoubleArray(mean, this.sampleSize);
+    	//write the matrix
+    	bw.writeDoubleArray(V_t.getData(), this.sampleSize * numComponents);
     }
     
     /**
@@ -262,7 +276,18 @@ public class PrincipalComponentAnalysis {
      * @param input
      */
     public void restoreFromBitStream(BitStream input) {
-    	
+    	BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
+    	bw.setStream(input);
+    	//read the number of dimensions in the original space
+    	this.sampleSize = bw.readInt();
+    	//read the number of dimensions in the reduced space
+    	this.numComponents = bw.readInt();
+    	//read the mean
+    	this.mean = bw.readDoubleArray(sampleSize);
+    	//read the projection matrix
+    	V_t = new DMatrixRMaj();
+    	V_t.setData(bw.readDoubleArray(this.sampleSize * this.numComponents));
+    	V_t.reshape(numComponents,mean.length,true);
     }
     
 }
