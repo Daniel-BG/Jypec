@@ -24,6 +24,8 @@ public class FIFOBitStream implements BitStream {
 	int outputLeft, inputLeft;
 	//current size (number of bits stored)
 	int size;
+	//stores the last read bits
+	private int lastReadBits;
 	
 	/**
 	 * Create a FIFO bit stream ready for use
@@ -33,6 +35,7 @@ public class FIFOBitStream implements BitStream {
 		this.size = 0;
 		this.outputLeft = 0;
 		this.inputLeft = 32;
+		this.lastReadBits = 0;
 	}
 	
 	
@@ -66,22 +69,30 @@ public class FIFOBitStream implements BitStream {
 	
 	@Override
 	public int getBitAsInt() {
+		int res;
 		//check if there are bits in the output
 		if (outputLeft > 0) {
-			return removeBitFromOutput();
+			res = removeBitFromOutput();
 		}
 		//check if there are bits in the intermediate storage
-		if (!storage.isEmpty()) {
+		else if (!storage.isEmpty()) {
 			output = storage.removeFirst();
 			outputLeft = 32;
-			return removeBitFromOutput();
+			res = removeBitFromOutput();
 		}
 		//check if there are bits in the input
-		if (inputLeft < 32) {
-			return removeBitFromInput();
+		else if (inputLeft < 32) {
+			res = removeBitFromInput();
 		}
 		//nothing to return, throw exception
-		throw new IndexOutOfBoundsException();
+		else {
+			throw new IndexOutOfBoundsException();
+		}
+		//update the latest read bits
+		this.lastReadBits <<= 1;
+		this.lastReadBits |= res;
+		//return the bit
+		return res;
 	}
 
 	
@@ -188,6 +199,12 @@ public class FIFOBitStream implements BitStream {
 		}
 		
 		return output;
+	}
+
+
+	@Override
+	public int getLastReadBits() {
+		return this.lastReadBits;
 	}
 
 

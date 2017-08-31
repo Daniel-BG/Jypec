@@ -3,6 +3,7 @@ package com.jypec;
 import java.io.FileNotFoundException;
 import java.util.Locale;
 
+import com.jypec.comdec.Blocker;
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.SubBand;
@@ -15,6 +16,8 @@ import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.BitStream;
 import com.jypec.util.FIFOBitStream;
 import com.jypec.util.debug.ArrayPrinter;
+import com.jypec.util.debug.Logger;
+import com.jypec.util.debug.Logger.LoggerParameter;
 import com.jypec.util.io.DataMatrixReader;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
@@ -36,6 +39,8 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		Locale.setDefault(Locale.US);
+		Logger.logger().allowLogging(Main.class);
+		Logger.logger().set(LoggerParameter.SHOW_INFO, 1);
 		testFullProcess();
 		//testPCA();
 		
@@ -86,10 +91,10 @@ public class Main {
 			BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), 3);
 			MatrixQuantizer mq = new MatrixQuantizer(type.getBitDepth() - 1, 0, 1, - (0x1 << 16), 0x1 << 17, 0.5);
 			
-			int stl = lines / 2, sts = samples / 2;
-			int ll = lines - lines / 2, sl = samples - samples / 2;
 			
-			CodingBlock block = hi.getBand(i).extractBlock(stl, sts, ll, sl, SubBand.HH);
+
+			Blocker blocker = new Blocker(hi.getBand(i), 3, 64, 1024);
+			//CodingBlock block = hi.getBand(i).extractBlock(stl, sts, ll, sl, SubBand.HH);
 			
 			///////CODING
 			HyperspectralBand hb = hi.getBand(i);
@@ -97,30 +102,39 @@ public class Main {
 			double[][] waveForm = hb.toWave(0, 0, lines, samples);
 			bdw.forwardTransform(waveForm, lines, samples);
 			//quantize
-			mq.quantize(waveForm, hb, stl, sts, ll, sl);
+			mq.quantize(waveForm, hb, 0, 0, lines, samples);
 			//code it
-			block.setDepth(type.getBitDepth()); //depth adjusted since there might be more bits
 			BitStream output = new FIFOBitStream();
-			EBCoder coder = new EBCoder();
-			coder.code(block, output);
+			for (CodingBlock block: blocker) {
+				
+				block.setDepth(type.getBitDepth()); //depth adjusted since there might be more bits
+				EBCoder coder = new EBCoder();
+				coder.code(block, output);
+				//Logger.logger().log(Main.class, "Coded block: " + block);
+			}
 			//////END CODING
 			
 			//output results
-			double compressionRate = (double) output.getNumberOfBits() / ((double) 16 * ll * sl);
+			double compressionRate = (double) output.getNumberOfBits() / ((double) 16 * lines * samples);
 			System.out.println("Compression rate is: " + compressionRate);
 			
 			
 			///////DECODE IT into the original block
 			//clear the block since we need it at zero
-			block.clear(); 
-			//decode the block from the stream
-			EBDecoder decoder = new EBDecoder();
-			decoder.decode(output, block);
+			for (CodingBlock block: blocker) {
+				block.clear(); 
+				//decode the block from the stream
+				EBDecoder decoder = new EBDecoder();
+				decoder.decode(output, block);
+				//Logger.logger().log(Main.class, "Decoded block: " + block);
+				//Logger.logger().log(Main.class, "Bits remaining: " + output.getNumberOfBits());
+			}
+
 			//dequantize
-			mq.dequantize(hb, waveForm, stl, sts, ll, sl);
+			mq.dequantize(hb, waveForm, 0, 0, lines, samples);
 			//reverse transform and back into integer form
-			bdw.reverseTransform(waveForm, ll, sl);
-			hb.fromWave(waveForm, stl, sts, ll, sl);
+			bdw.reverseTransform(waveForm, lines, samples);
+			hb.fromWave(waveForm, 0, 0, lines, samples);
 			///////END DECODING
 		}
 	}

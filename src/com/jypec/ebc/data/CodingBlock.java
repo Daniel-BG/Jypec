@@ -12,6 +12,11 @@ import com.jypec.util.data.IntegerMatrix;
  */
 public class CodingBlock {
 	
+	@Override
+	public String toString() {
+		return "(" + rows + "x" + columns + ") @ (" + rowOffset + "," + columnOffset + ") [" + band.name() + "]";
+	}
+
 	private IntegerMatrix data;
 	private int rows, columns;
 	private int rowOffset = 0, columnOffset = 0;

@@ -51,8 +51,8 @@ public class Blocker extends ArrayList<CodingBlock> {
 		int col = 0, row = 0;
 		int[] cols = Stepper.getStepSizes(hb.getColumns(), this.waveletSteps);
 		int[] rows = Stepper.getStepSizes(hb.getRows(), this.waveletSteps);
-		for (int i = this.waveletSteps - 1; i >= 0; i--) {
-			if (i == this.waveletSteps - 1) {
+		for (int i = this.waveletSteps; i >= 0; i--) {
+			if (i == this.waveletSteps) {
 				this.blockSameSubBandRegion(hb, SubBand.LL, row, col, rows[i], cols[i]);
 			} else {
 				this.blockSameSubBandRegion(hb, SubBand.HL, 0, col, row, cols[i] - col);

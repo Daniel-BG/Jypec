@@ -37,6 +37,13 @@ public interface BitStream {
 	public int getBits(int quantity, BitStreamConstants ordering);
 	
 	/**
+	 * @return the last 32 bits read by calls to {@link #getBit()}, {@link #getBitAsInt()} and 
+	 * {@link #getBits(int, BitStreamConstants)}. If less than 32 bits have been read in total, only 
+	 * the bits read so far are returned, with zeroes filling the leftmost positions of the returned integer
+	 */
+	public int getLastReadBits();
+	
+	/**
 	 * Puts a bit in the stream
 	 * @param bit the bit to be put
 	 */

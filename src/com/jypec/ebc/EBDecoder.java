@@ -4,9 +4,11 @@ import com.jypec.ebc.data.CodingBlock;
 import com.jypec.ebc.data.CodingPlane;
 import com.jypec.ebc.mq.ContextLabel;
 import com.jypec.ebc.mq.MQArithmeticDecoder;
+import com.jypec.ebc.mq.MQConstants;
 import com.jypec.util.Bit;
 import com.jypec.util.BitStream;
 import com.jypec.util.Pair;
+import com.jypec.util.BitStream.BitStreamConstants;
 
 /**
  * MQDecoder dual to the MQcoder
@@ -54,9 +56,11 @@ public class EBDecoder {
 			this.decodeRefinement(input, plane);
 			this.decodeCleanup(input, plane);
 		}
+		
+		this.removeMarkEndOfStream(input);
 	}
 	
-	
+
 	private void decodeCleanup(BitStream input, CodingPlane plane) {
 		//code full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
@@ -198,6 +202,16 @@ public class EBDecoder {
 					this.decodeSignificanceBit(input, plane, j + 4*plane.getFullStripsNumber(), i, false);
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Remove the last bits of the stream which mark the end of the block, if present
+	 */
+	private void removeMarkEndOfStream(BitStream input) {
+		//the stream might end with extra bytes. Remove those if present
+		while ((input.getLastReadBits() & MQConstants.CODE_MASK) != MQConstants.CODE_END_OF_BLOCK) {
+			input.getBits(8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 		}
 	}
 

@@ -9,6 +9,11 @@ public class MQConstants {
 	public static final int BYTE_MARKER = 0xff;
 	/** Mark the end of a MQ_CODER segment */
 	public static final int BYTE_END_OF_MQ_CODER = 0xff;
+	/** 16-bit Code mask */
+	public static final int CODE_MASK = 0xffff;
+	/** 16-bit Code for end of CODEBLOCK segment */
+	public static final int CODE_END_OF_BLOCK = (BYTE_MARKER << 8) | BYTE_END_OF_MQ_CODER;
+	
 	/** Default interval with which A starts */
 	public static final int DEFAULT_INTERVAL = 0x8000;
 	/** Number of spacer bits used when coding. Default is 3. Less leaves less codes for markers available */
@@ -37,4 +42,5 @@ public class MQConstants {
 	public static final int C_ACTIVE_SHIFT = 8;
 	/** Start of the interval of markers left unused by the spacing bits selected */
 	public static final int SPECIAL_CODE_START_INTERVAL = 0x80 + (0x1 << (7 - SPACER_BITS));
+	
 }
