@@ -68,7 +68,7 @@ public class MQArithmeticDecoder {
 	 * Procedure that loads the next byte into C for decoding
 	 */
 	private void fillLSBs(BitStream input) {
-		this.lastByteRead = input.getBits(8, BitStreamConstants.ORDERING_RIGHTMOST_FIRST);
+		this.lastByteRead = input.getBits(8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 
 		//Logger.logger().log("Removing: " + Integer.toHexString(this.lastByteRead));
 		this.countdownTimer = 8;

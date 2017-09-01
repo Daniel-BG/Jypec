@@ -78,6 +78,6 @@ public class Decompressor {
 		
 		
 		//image is decompressed now
-		throw new UnsupportedOperationException();
+		return srcImg;
 	}
 }

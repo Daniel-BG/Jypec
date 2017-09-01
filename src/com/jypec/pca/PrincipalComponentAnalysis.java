@@ -132,7 +132,7 @@ public class PrincipalComponentAnalysis {
 
         // Compute SVD and save time by not computing U
         SingularValueDecomposition<DMatrixRMaj> svd =
-                DecompositionFactory_DDRM.svd(A.numRows, A.numCols, false, true, false);
+                DecompositionFactory_DDRM.svd(A.numRows, this.sampleSize, false, true, false);
         if( !svd.decompose(A) )
             throw new RuntimeException("SVD failed");
 
@@ -156,8 +156,8 @@ public class PrincipalComponentAnalysis {
         if( which < 0 || which >= numComponents )
             throw new IllegalArgumentException("Invalid component");
 
-        DMatrixRMaj v = new DMatrixRMaj(1,A.numCols);
-        CommonOps_DDRM.extract(V_t,which,which+1,0,A.numCols,v,0,0);
+        DMatrixRMaj v = new DMatrixRMaj(1,this.sampleSize);
+        CommonOps_DDRM.extract(V_t,which,which+1,0,this.sampleSize,v,0,0);
 
         return v.data;
     }
@@ -282,11 +282,11 @@ public class PrincipalComponentAnalysis {
      * @return Higher value indicates it is more likely to be a member of input dataset.
      */
     public double response( double[] sample ) {
-        if( sample.length != A.numCols )
+        if( sample.length != this.sampleSize )
             throw new IllegalArgumentException("Expected input vector to be in sample space");
 
         DMatrixRMaj dots = new DMatrixRMaj(numComponents,1);
-        DMatrixRMaj s = DMatrixRMaj.wrap(A.numCols,1,sample);
+        DMatrixRMaj s = DMatrixRMaj.wrap(this.sampleSize,1,sample);
 
         CommonOps_DDRM.mult(V_t,s,dots);
 

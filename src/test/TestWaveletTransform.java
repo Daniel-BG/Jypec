@@ -5,10 +5,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.jypec.util.arrays.ArrayTransforms;
+import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.wavelet.Wavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
+
+import test.generic.TestHelpers;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -64,10 +68,8 @@ public class TestWaveletTransform {
 		for (int i = 1; i < 200; i++) {
 			double[] s = new double[i];
 			double[] res = new double[i];
-			for (int j = 0; j < s.length; j++) {
-				s[j] = r.nextGaussian() * 1000;
-				res[j] = s[j];
-			}
+			TestHelpers.randomGaussianFillArray(s, s.length, r, 1000, 0);
+			ArrayTransforms.copy(s, res, s.length);
 			
 			testWavelet.forwardTransform(s, i);
 			testWavelet.reverseTransform(s, i);
@@ -87,12 +89,8 @@ public class TestWaveletTransform {
 		for (int i = 1; i < 50; i++) {
 			double[][] s = new double[i][i*2];
 			double[][] res = new double[i][i*2];
-			for (int k = 0; k < i; k++) {
-				for (int j = 0; j < i*2; j++) {
-					s[k][j] = r.nextGaussian() * 1000;
-					res[k][j] = s[k][j];
-				}
-			}
+			TestHelpers.randomGaussianFillMatrix(s, i, i*2, r, 1000, 0);
+			MatrixTransforms.copy(s, res, i, i*2);
 			
 			biTestWavelet.forwardTransform(res, i, i);
 			biTestWavelet.reverseTransform(res, i, i);

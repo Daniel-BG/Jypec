@@ -21,4 +21,20 @@ public class MatrixTransforms {
 		}
 	}
 	
+	
+	
+	/**
+	 * @param src source of the data
+	 * @param dst where the data is to be copied
+	 * @param rows number of rows to be copied
+	 * @param cols number of columns to be copied
+	 */
+	public static void copy(double[][] src, double[][] dst, int rows, int cols) {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				dst[i][j] = src[i][j];
+			}
+		}
+	}
+	
 }

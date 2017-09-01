@@ -33,7 +33,8 @@ public interface BitStream {
 	/**
 	 * Get the given quantity of bits as an integer that packs them
 	 * inserting from the MSB and shifting right or from the LSB
-	 * and shifting left
+	 * and shifting left. See {@link #putBits(int, int, BitStreamConstants)} for more information,
+	 * since this is the reverse operation
 	 * @param quantity
 	 * @param ordering
 	 * @return the specified number of bits as an integer
@@ -58,7 +59,10 @@ public interface BitStream {
 	public void putBit(int bit);
 	
 	/**
-	 * Puts more than one bit if needed
+	 * Puts more than one bit if needed. The bits put are the LESS SIGNIFICANT. <br>
+	 * E.g: if bits = 0xf000000a and quantity = 4, then 0b1010 is written. <br>
+	 * If ordering = LEFTMOST_FIRST then the bits are put from left to right: 1, 0, 1, 0. <br>
+	 * If ordering = RIGHTMOST_FIRST then the bits are put from right to left: 0, 1, 0, 1. <br>
 	 * @param bits
 	 * @param quantity
 	 * @param ordering

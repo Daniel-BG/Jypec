@@ -102,7 +102,7 @@ public class BitStreamDataReaderWriter {
 	 * @return the specified number of bits inside of an integer
 	 */
 	public int readNBitNumber(int bits) {
-		return this.stream.getBits(bits, BitStreamConstants.ORDERING_RIGHTMOST_FIRST);
+		return this.stream.getBits(bits, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 	}
 	
 	/**
@@ -111,7 +111,7 @@ public class BitStreamDataReaderWriter {
 	 * @param bits
 	 */
 	public void writeNBitNumber(int i, int bits) {
-		this.stream.putBits(i << (Integer.SIZE - bits), bits, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+		this.stream.putBits(i, bits, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 	}
 	
 	

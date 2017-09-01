@@ -101,5 +101,37 @@ public class TestBitStreamReaderWriter {
 		}
 	}
 	
+	/**
+	 * Test that multiple integer bit depths are correctly saved
+	 */
+	@Test
+	public void testDifferentIntBitDepths() {
+		BitStream b = new FIFOBitStream();
+		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter();
+		rw.setStream(b);
+		Random r = new Random();
+		
+		for (int depth = 1; depth <= 32; depth++) {
+			int[] data = new int[this.testSampleSize];
+			int[] defData = {0, 1, 0xffffffff >>> (32 - depth), depth > 1 ? 0xffffffff >>> (33 - depth) : 0, 0x1 << (depth - 1)};
+
+			for (int i = 0; i < this.testSampleSize; i++) {
+				if (i < defData.length)
+					data[i] = defData[i];
+				else
+					data[i] = r.nextInt() & (0xffffffff >>> (32 - depth));
+			}
+			
+			for (int i = 0; i < this.testSampleSize; i++) {
+				rw.writeNBitNumber(data[i], depth);
+			}
+			
+			for (int i = 0; i < this.testSampleSize; i++) {
+				assertTrue("Failed when recovering: " + data[i] + " at bit depth: " + depth, rw.readNBitNumber(depth) == data[i]);
+			}
+		}
+		
+
+	}
 	
 }
