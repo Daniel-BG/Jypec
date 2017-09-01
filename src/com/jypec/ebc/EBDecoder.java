@@ -29,7 +29,11 @@ public class EBDecoder {
 	 * @param height
 	 */
 	private void initialize(BitStream input, CodingBlock output) {
-		decoder = new MQArithmeticDecoder(input);
+		if (decoder == null) {
+			decoder = new MQArithmeticDecoder(input);
+		} else {
+			decoder.initialize(input);
+		}
 		sigTable = new SignificanceTable(output.getWidth(), output.getHeight());
 	}
 	

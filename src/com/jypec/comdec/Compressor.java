@@ -43,8 +43,11 @@ public class Compressor {
 		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
 		bw.setStream(output);
 		
-		/** First off, extract necessary information from the image*/
+		/** First off, extract necessary information from the image and save to stream */
 		int bands = srcImg.getNumberOfBands(), lines = srcImg.getNumberOfLines(), samples = srcImg.getNumberOfSamples();
+		bw.writeNBitNumber(bands, ComDecConstants.BAND_BITS);
+		bw.writeNBitNumber(lines, ComDecConstants.LINE_BITS);
+		bw.writeNBitNumber(samples, ComDecConstants.SAMPLE_BITS);
 		
 		/** Do the PCA */
 		PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();

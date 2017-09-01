@@ -34,6 +34,14 @@ public class MQArithmeticDecoder {
 	 * @param input where to read from
 	 */
 	public MQArithmeticDecoder(BitStream input) {
+		this.initialize(input);
+	}
+	
+	/**
+	 * Initializes this decoder starting inmmediately with the bits in the input BitStream
+	 * @param input
+	 */
+	public void initialize(BitStream input) {
 		this.contextStates = new EnumMap<ContextLabel, MQProbabilityTable>(ContextLabel.class);
 		
 		for (ContextLabel contextLabel: ContextLabel.values()) {

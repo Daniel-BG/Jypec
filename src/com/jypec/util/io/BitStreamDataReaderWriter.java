@@ -114,7 +114,21 @@ public class BitStreamDataReaderWriter {
 		this.stream.putBits(i << (Integer.SIZE - bits), bits, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 	}
 	
-
+	
+	/**
+	 * Writes a boolean to the inner stream, using 1 bit
+	 * @param b
+	 */
+	public void writeBoolean(boolean b) {
+		this.writeNBitNumber(b ? 1 : 0, 1);
+	}
+	
+	/**
+	 * @return the next bit in the inner stream, parsed as a boolean
+	 */
+	public boolean readBoolean() {
+		return this.readNBitNumber(1) != 0;
+	}
 	
 	/**
 	 * Write the given number of elements from the given array

@@ -186,8 +186,8 @@ public class PrincipalComponentAnalysis {
     
     /**
      * Projects a whole hyperspectral image "src" onto the destination "dst" image
-     * @param src
-     * @param dst
+     * @param src source of information in the sample space
+     * @param dst where the result is saved in the eigen space
      */
     public void imageToEigenSpace(HyperspectralImage src, HyperspectralImage dst) {
     	if (src.getNumberOfLines() != dst.getNumberOfLines() ||
@@ -225,6 +225,27 @@ public class PrincipalComponentAnalysis {
         return s.data;
     }
 
+    
+    /**
+     * Undoes the projection of a whole hyperspectral image 
+     * "src" onto the destination "dst" image.
+     * @param src the source of information, in the eigen space
+     * @param dst where the result is saved, in the sample space
+     */
+    public void imageToSampleSpace(HyperspectralImage src, HyperspectralImage dst) {
+    	if (src.getNumberOfLines() != dst.getNumberOfLines() ||
+    			src.getNumberOfSamples() != dst.getNumberOfSamples() ||
+    			src.getNumberOfBands() != this.numComponents ||
+    			dst.getNumberOfBands() != this.sampleSize) {
+    		throw new IllegalArgumentException("Image dimensions do not match with the expected PCA matrix transform size");
+    	}
+    	
+		for (int i = 0; i < src.getNumberOfLines(); i++) {
+			for (int j = 0; j < src.getNumberOfSamples(); j++) {
+				dst.setPixel(this.eigenToSampleSpace(src.getPixel(i, j)), i, j);
+			}
+		}
+    }
 
     /**
      * <p>
@@ -324,6 +345,13 @@ public class PrincipalComponentAnalysis {
 		}
 		
 		this.computeBasis(pcaDim);
+	}
+	
+	/**
+	 * @return the number of components that this PCA reduces to
+	 */
+	public int getNumComponents() {
+		return this.numComponents;
 	}
     
 }
