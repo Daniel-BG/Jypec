@@ -22,14 +22,14 @@ public class BitStreamDataReaderWriter {
 	 * @param f float to be written into the inner BitStream
 	 */
 	public void writeFloat(float f) {
-		this.stream.putBits(Float.floatToIntBits(f), 32, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+		this.writeNBitNumber(Float.floatToIntBits(f), 32);
 	}
 	
 	/**
 	 * @return the next 32 bits of the inner BitStream interpreted as a floating-point number
 	 */
 	public float readFloat() {
-		int floatBits = this.stream.getBits(32, BitStreamConstants.ORDERING_RIGHTMOST_FIRST);
+		int floatBits = this.readNBitNumber(32);
 		return Float.intBitsToFloat(floatBits);
 	}
 	
@@ -40,16 +40,16 @@ public class BitStreamDataReaderWriter {
 		long bits = Double.doubleToLongBits(d);
 		int leftBits = (int) (bits >>> 32);
 		int rightBits = (int) (bits & 0xffffffffl);
-		this.stream.putBits(leftBits, 32, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
-		this.stream.putBits(rightBits, 32, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+		this.writeNBitNumber(leftBits, 32);
+		this.writeNBitNumber(rightBits, 32);
 	}
 	
 	/**
 	 * @return the next 64 bits of the inner BitStream as a Double precision number
 	 */
 	public double readDouble() {
-		int leftBits = this.stream.getBits(32, BitStreamConstants.ORDERING_RIGHTMOST_FIRST);
-		int rightBits = this.stream.getBits(32, BitStreamConstants.ORDERING_RIGHTMOST_FIRST);
+		int leftBits = this.readNBitNumber(32);
+		int rightBits = this.readNBitNumber(32);
 		return Double.longBitsToDouble((((long) leftBits) << 32) | (((long) rightBits) & 0xffffffffl));
 	}
 	
@@ -58,15 +58,63 @@ public class BitStreamDataReaderWriter {
 	 * @param i
 	 */
 	public void writeInt(int i) {
-		this.stream.putBits(i, 32, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+		this.writeNBitNumber(i, Integer.SIZE);
 	}
 	
 	/**
 	 * @return the next 4-byte integer in the stream 
 	 */
 	public int readInt() {
-		return this.stream.getBits(32, BitStreamConstants.ORDERING_RIGHTMOST_FIRST);
+		return this.readNBitNumber(Integer.SIZE);
 	}
+	
+	/**
+	 * @return a 16-bit short number
+	 */
+	public short readShort() {
+		return (short) this.readNBitNumber(Short.SIZE);
+	}
+	
+	/**
+	 * @param i an integer containing an unsigned short in the 16 less significant
+	 * bits
+	 */
+	public void writeShort(short i) {
+		this.writeNBitNumber(i, Short.SIZE);
+	}
+	
+	/**
+	 * @return an 8-bit byte number
+	 */
+	public byte readByte() {
+		return (byte) this.readNBitNumber(Byte.SIZE); 
+	}
+	
+	/**
+	 * @param i the byte to be written
+	 */
+	public void writeByte(byte i) {
+		this.writeNBitNumber(i, Byte.SIZE);
+	}
+	
+	/**
+	 * @param bits
+	 * @return the specified number of bits inside of an integer
+	 */
+	public int readNBitNumber(int bits) {
+		return this.stream.getBits(bits, BitStreamConstants.ORDERING_RIGHTMOST_FIRST);
+	}
+	
+	/**
+	 * writes the specified number of bits from the given binary int
+	 * @param i
+	 * @param bits
+	 */
+	public void writeNBitNumber(int i, int bits) {
+		this.stream.putBits(i << (Integer.SIZE - bits), bits, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+	}
+	
+
 	
 	/**
 	 * Write the given number of elements from the given array

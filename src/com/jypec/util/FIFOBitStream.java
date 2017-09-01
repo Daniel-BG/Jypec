@@ -5,12 +5,12 @@ import java.util.LinkedList;
 /**
  * Implements a BitStream in a FIFO way.
  * Bits are shifted from the right to a bit queue, and taken from the left.
- * This is encapsulated in an integer queue
+ * This is encapsulated in an integer queue.
  * @author Daniel
  *
  */
 public class FIFOBitStream implements BitStream {
-	private static final int LEFTMOST_BIT_MASK = 0x80000000;
+	private static final int LEFTMOST_BIT_MASK = 0x1 << (Integer.SIZE - 1);
 	private static final int RIGHTMOST_BIT_MASK = 0x1;
 	
 	
@@ -34,7 +34,7 @@ public class FIFOBitStream implements BitStream {
 		this.storage = new LinkedList<Integer>();
 		this.size = 0;
 		this.outputLeft = 0;
-		this.inputLeft = 32;
+		this.inputLeft = Integer.SIZE;
 		this.lastReadBits = 0;
 	}
 	
@@ -61,7 +61,7 @@ public class FIFOBitStream implements BitStream {
 	 * @return
 	 */
 	private int removeBitFromInput() {
-		int temp = input & (0x1 << (31 - inputLeft));
+		int temp = input & (0x1 << (Integer.SIZE - 1 - inputLeft));
 		inputLeft++;
 		this.size--;
 		return Bit.normalize(temp);
@@ -77,11 +77,11 @@ public class FIFOBitStream implements BitStream {
 		//check if there are bits in the intermediate storage
 		else if (!storage.isEmpty()) {
 			output = storage.removeFirst();
-			outputLeft = 32;
+			outputLeft = Integer.SIZE;
 			res = removeBitFromOutput();
 		}
 		//check if there are bits in the input
-		else if (inputLeft < 32) {
+		else if (inputLeft < Integer.SIZE) {
 			res = removeBitFromInput();
 		}
 		//nothing to return, throw exception
@@ -112,7 +112,7 @@ public class FIFOBitStream implements BitStream {
 		} else {
 			storage.addLast(input);
 			input = bit;
-			inputLeft = 31;
+			inputLeft = Integer.SIZE - 1;
 		}
 		this.size++;
 	}
@@ -127,7 +127,7 @@ public class FIFOBitStream implements BitStream {
 		switch (ordering) {
 		case ORDERING_LEFTMOST_FIRST:
 			//adjust the bits so that the first one is in the leftmost position
-			bits <<= 32 - quantity;
+			bits <<= Integer.SIZE - quantity;
 			for (int i = 0; i < quantity; i++) {
 				putBit(Bit.fromInteger(bits & LEFTMOST_BIT_MASK));
 				bits <<= 1;
@@ -150,7 +150,7 @@ public class FIFOBitStream implements BitStream {
 			for (int i = 0; i < quantity; i++) {
 				result >>= 1;
 				result &= LEFTMOST_BIT_MASK;
-				result |= getBitAsInt() << 31;
+				result |= getBitAsInt() << (Integer.SIZE - 1);
 			}
 			break;
 		case ORDERING_RIGHTMOST_FIRST:
