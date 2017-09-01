@@ -7,6 +7,7 @@ import org.ejml.dense.row.SingularOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 
+import com.jypec.img.HyperspectralImage;
 import com.jypec.util.BitStream;
 import com.jypec.util.io.BitStreamDataReaderWriter;
 
@@ -181,6 +182,27 @@ public class PrincipalComponentAnalysis {
 
         return r.data;
     }
+    
+    
+    /**
+     * Projects a whole hyperspectral image "src" onto the destination "dst" image
+     * @param src
+     * @param dst
+     */
+    public void imageToEigenSpace(HyperspectralImage src, HyperspectralImage dst) {
+    	if (src.getNumberOfLines() != dst.getNumberOfLines() ||
+    			src.getNumberOfSamples() != dst.getNumberOfSamples() ||
+    			src.getNumberOfBands() != this.sampleSize ||
+    			dst.getNumberOfBands() != this.numComponents) {
+    		throw new IllegalArgumentException("Image dimensions do not match with the expected PCA matrix transform size");
+    	}
+    	
+		for (int i = 0; i < src.getNumberOfLines(); i++) {
+			for (int j = 0; j < src.getNumberOfSamples(); j++) {
+				dst.setPixel(this.sampleToEigenSpace(src.getPixel(i, j)), i, j);
+			}
+		}
+    }
 
     /**
      * Converts a vector from eigen space into sample space.
@@ -255,11 +277,9 @@ public class PrincipalComponentAnalysis {
      * Stores the necessary information in the output stream so that afterwards, a call
      * can be made to {@link #restoreFromBitStream(BitStream)} to set the PCA up so that
      * eigen-space samples can be restored onto the original space
-     * @param output
+     * @param bw writer to the output stream
      */
-    public void saveToBitStream(BitStream output) {
-    	BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
-    	bw.setStream(output);
+    public void saveToBitStream(BitStreamDataReaderWriter bw) {
     	//write the number of dimensions in the original space
     	bw.writeInt(this.sampleSize);
     	//write the number of dimensions in the reduced space
@@ -273,11 +293,9 @@ public class PrincipalComponentAnalysis {
     /**
      * Restore the PCA object from the given bitstream so that it can perform projections
      * (direct and inverse) without training again
-     * @param input
+     * @param bw reader to the output stream
      */
-    public void restoreFromBitStream(BitStream input) {
-    	BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
-    	bw.setStream(input);
+    public void restoreFromBitStream(BitStreamDataReaderWriter bw) {
     	//read the number of dimensions in the original space
     	this.sampleSize = bw.readInt();
     	//read the number of dimensions in the reduced space
@@ -289,5 +307,23 @@ public class PrincipalComponentAnalysis {
     	V_t.setData(bw.readDoubleArray(this.sampleSize * this.numComponents));
     	V_t.reshape(numComponents,mean.length,true);
     }
+
+	/**
+	 * Computes the PCA algorithm for the given source image, with the target space
+	 * being of dimension pcaDim
+	 * @param srcImg
+	 * @param pcaDim
+	 */
+	public void computeBasisFrom(HyperspectralImage srcImg, int pcaDim) {
+		this.setup(srcImg.getNumberOfLines() * srcImg.getNumberOfSamples(), srcImg.getNumberOfBands());
+		
+		for (int i = 0; i < srcImg.getNumberOfLines(); i++) {
+			for (int j = 0; j < srcImg.getNumberOfSamples(); j++) {
+				this.addSample(srcImg.getPixel(i, j));
+			}
+		}
+		
+		this.computeBasis(pcaDim);
+	}
     
 }

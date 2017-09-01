@@ -35,6 +35,13 @@ public class MQArithmeticCoder {
 	 * Create and initialize the MQArithmeticCoder with the default values used for encoding
 	 */
 	public MQArithmeticCoder () {
+		this.intialize();
+	}
+	
+	/**
+	 * Initializes default values for this coder
+	 */
+	public void intialize() {
 		this.normalizedIntervalLength = MQConstants.DEFAULT_INTERVAL;
 		this.normalizedLowerBound = 0;
 		this.tempByteBuffer = 0;

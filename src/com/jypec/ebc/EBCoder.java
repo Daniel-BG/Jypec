@@ -10,7 +10,9 @@ import com.jypec.util.Pair;
 
 /**
  * MQCoder that given an input block codes it into the
- * desired output bitstream
+ * desired output bitstream. Every time {@link #code(CodingBlock, BitStream)} is called,
+ * statistics are reset, so you can reuse the object for multiple codings without
+ * one interfering with the others 
  * @author Daniel
  *
  */
@@ -20,7 +22,11 @@ public class EBCoder {
 
 	
 	private void initialize(int width, int height) {
-		coder = new MQArithmeticCoder();
+		if (coder == null) {
+			coder = new MQArithmeticCoder();
+		} else {
+			coder.intialize();
+		}
 		sigTable = new SignificanceTable(width, height);
 	}
 	
