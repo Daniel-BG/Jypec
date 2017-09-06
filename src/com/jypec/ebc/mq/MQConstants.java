@@ -5,10 +5,12 @@ package com.jypec.ebc.mq;
  * class to store constants used by the MQ-CODER
  */
 public class MQConstants {
-	/** Marker that signals the start of a two-byte code */
+	/** Marker that signals the start of a two-byte code 
+	 * DO NOT use this for anything else. Avoid 0xffff codes since
+	 * they can be detected twice (as 0xffff and as 0xffxx for the second ff */
 	public static final int BYTE_MARKER = 0xff;
 	/** Mark the end of a MQ_CODER segment */
-	public static final int BYTE_END_OF_MQ_CODER = 0xff;
+	public static final int BYTE_END_OF_MQ_CODER = 0xfe;
 	/** 16-bit Code mask */
 	public static final int CODE_MASK = 0xffff;
 	/** 16-bit Code for end of CODEBLOCK segment */

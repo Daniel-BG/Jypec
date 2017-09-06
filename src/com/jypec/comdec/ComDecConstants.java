@@ -15,4 +15,6 @@ public class ComDecConstants {
 	public static final int IMAGE_BIT_DEPTH_BITS = 8;
 	/** Bit depth of the number of passes of the wavelet transform */
 	public static final int WAVE_PASSES_BITS = 8;
+	/** Bit depth of the number of guard bits */
+	public static final int GUARD_BITS_BITS = 8;
 }

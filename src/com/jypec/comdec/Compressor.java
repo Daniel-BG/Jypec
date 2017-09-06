@@ -23,14 +23,17 @@ public class Compressor {
 
 	private int pcaDim;
 	private int wavePasses;
+	private int guardBits;
 
 	/**
 	 * @param pcaDim value of the reduced PCA dimension
 	 * @param wavePasses passes that the wavelet transform does over each band before compressing
+	 * @param guardBits guard bits used when quantizing
 	 */
-	public Compressor(int pcaDim, int wavePasses) {
+	public Compressor(int pcaDim, int wavePasses, int guardBits) {
 		this.pcaDim = pcaDim;
 		this.wavePasses = wavePasses;
+		this.guardBits = guardBits;
 	}
 	
 	/**
@@ -52,6 +55,7 @@ public class Compressor {
 		cp.srcSigned = srcImg.getDataType().isSigned();
 		cp.srcBitDepth = srcImg.getDataType().getBitDepth();
 		cp.wavePasses = this.wavePasses;
+		cp.guardBits = this.guardBits;
 		
 		/** Now compute the max value that this newly created basis might have, and allocate an image with enough space for it */
 		double newMaxVal = MathOperations.getMaximumDistance(srcImg.getDataType().getMagnitudeAbsoluteRange(), bands);
@@ -67,7 +71,7 @@ public class Compressor {
 		
 		/** create the wavelet transform, quantizer, and coder we'll be using */
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), this.wavePasses);
-		MatrixQuantizer mq = new MatrixQuantizer(newDataType.getBitDepth() - 1, 0, 1, -newMaxVal, newMaxVal, 0.5);
+		MatrixQuantizer mq = new MatrixQuantizer(newDataType.getBitDepth() - 1, 0, cp.guardBits, -newMaxVal, newMaxVal, 0.5);
 		EBCoder coder = new EBCoder();
 		
 		/** Save metadata before compressing the image */

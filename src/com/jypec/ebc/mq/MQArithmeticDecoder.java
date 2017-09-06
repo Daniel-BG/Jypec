@@ -64,23 +64,31 @@ public class MQArithmeticDecoder {
 		this.normalizedIntervalLength = MQConstants.DEFAULT_INTERVAL;
 	}
 	
+	
 	/**
 	 * Procedure that loads the next byte into C for decoding
 	 */
 	private void fillLSBs(BitStream input) {
-		this.lastByteRead = input.getBits(8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+
+		
 
 		//Logger.logger().log("Removing: " + Integer.toHexString(this.lastByteRead));
 		this.countdownTimer = 8;
-		if (this.codeBytesRead == this.maxCodeBytesToRead || (this.tempByteBuffer == 0xff && this.lastByteRead >= MQConstants.SPECIAL_CODE_START_INTERVAL)) {
+		if (this.codeBytesRead == this.maxCodeBytesToRead) {
 			this.normalizedLowerBound += 0xff;
-		} else {
-			if (this.tempByteBuffer == 0xff) {
-				this.countdownTimer = 7;
+		} else {			
+			this.lastByteRead = input.getBits(8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+			if (this.tempByteBuffer == 0xff && this.lastByteRead >= MQConstants.SPECIAL_CODE_START_INTERVAL) {
+				this.maxCodeBytesToRead = this.codeBytesRead; //max has been reached, automatically stop reading further
+				this.normalizedLowerBound += 0xff;
+			} else {
+				if (this.tempByteBuffer == 0xff) {
+					this.countdownTimer = 7;
+				}
+				this.tempByteBuffer = this.lastByteRead;
+				this.codeBytesRead++;
+				this.normalizedLowerBound += this.tempByteBuffer << (8 - this.countdownTimer);
 			}
-			this.tempByteBuffer = this.lastByteRead;
-			this.codeBytesRead++;
-			this.normalizedLowerBound += this.tempByteBuffer << (8 - this.countdownTimer);
 		}
 	}
 	

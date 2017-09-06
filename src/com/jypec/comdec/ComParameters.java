@@ -26,6 +26,8 @@ public class ComParameters {
 	public boolean srcSigned;
 	/** Max values of reduced image */
 	public double newMaxVal;
+	/** Number of guard bits */
+	public int guardBits;
 	
 	
 	
@@ -42,6 +44,7 @@ public class ComParameters {
 		bw.writeNBitNumber(this.srcBitDepth, ComDecConstants.IMAGE_BIT_DEPTH_BITS);
 		bw.writeBoolean(this.srcSigned);
 		bw.writeDouble(this.newMaxVal);
+		bw.writeNBitNumber(this.guardBits, ComDecConstants.GUARD_BITS_BITS);
 	}
 	
 	
@@ -58,6 +61,7 @@ public class ComParameters {
 		this.srcBitDepth = bw.readNBitNumber(ComDecConstants.IMAGE_BIT_DEPTH_BITS);
 		this.srcSigned = bw.readBoolean();
 		this.newMaxVal = bw.readDouble();
+		this.guardBits = bw.readNBitNumber(ComDecConstants.GUARD_BITS_BITS);
 	}
 	
 	
@@ -75,7 +79,8 @@ public class ComParameters {
 				this.redBitDepth == other.redBitDepth &&
 				this.srcBitDepth == other.srcBitDepth &&
 				this.srcSigned == other.srcSigned &&
-				this.newMaxVal == other.newMaxVal;
+				this.newMaxVal == other.newMaxVal &&
+				this.guardBits == other.guardBits;
 	}
 
 

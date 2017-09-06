@@ -29,6 +29,8 @@ public class Quantizer {
 	private double sampleLowerLimit, sampleIntervalLength;
 	/** Offset used when dequantizing samples */
 	private double reconstructionOffset;
+	/** Maximum magnitude in the sign-magnitude representation*/
+	private int maxMagnitude;
 	
 	
 	
@@ -56,18 +58,19 @@ public class Quantizer {
 		if (sampleLowerLimit >= sampleUpperLimit) {
 			throw new IllegalArgumentException("Limits must define a non-empty interval");
 		}
-		if (reconstructionOffset < 0.0 || reconstructionOffset > 1.0) {
+		if (reconstructionOffset < -1.0 || reconstructionOffset > 1.0) {
 			throw new IllegalArgumentException("Reconstruction offset not in the allowed range");
 		}
 		//assignments
 		this.exponent = exponent;
 		this.guard = guard;
 		this.signMask = 0x1 << this.getNecessaryBitPlanes();
+		this.maxMagnitude = this.signMask - 1;
 		if (this.guard == 0) {
 			this.lowerGuard = -0.5;
 			this.upperGuard = 0.5;
 		} else {
-			this.upperGuard = (double) (0x1 << this.guard);
+			this.upperGuard = (double) (0x1 << (this.guard - 1));
 			this.lowerGuard = -this.upperGuard;
 		}
 		this.sampleLowerLimit = sampleLowerLimit;
@@ -111,7 +114,7 @@ public class Quantizer {
 		//round the input up
 		input = Math.abs(input);
 		input /= this.delta;
-		int transformedInput = (int) Math.floor(input);
+		int transformedInput = Math.min(this.maxMagnitude, (int) Math.floor(input)); //use min just in case the guards rounded up the doubles
 		//join sign and magnitude together
 		return transformedInput | (sign << this.getNecessaryBitPlanes());
 	}

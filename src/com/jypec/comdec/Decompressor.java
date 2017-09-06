@@ -42,7 +42,7 @@ public class Decompressor {
 		ImageDataType redDT = new ImageDataType(cp.redBitDepth, true);
 		HyperspectralImage reduced = new HyperspectralImage(null, redDT, pca.getNumComponents(), cp.lines, cp.samples);
 		EBDecoder decoder = new EBDecoder();
-		MatrixQuantizer mq = new MatrixQuantizer(redDT.getBitDepth() - 1, 0, 1, -cp.newMaxVal, cp.newMaxVal, 0.5);
+		MatrixQuantizer mq = new MatrixQuantizer(redDT.getBitDepth() - 1, 0, cp.guardBits, -cp.newMaxVal, cp.newMaxVal, 0.5);
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
 		
 		/** Proceed to uncompress the reduced image band by band */
