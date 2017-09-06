@@ -14,7 +14,9 @@ import org.junit.runners.Suite.SuiteClasses;
 	TestEBCodec.class,
 	TestWaveletTransform.class,
 	TestQuantizer.class,
-	TestBitStreamReaderWriter.class
+	TestBitStreamReaderWriter.class,
+	ComParametersRecoveryTest.class,
+	PCARecoveryTest.class
 })
 
 

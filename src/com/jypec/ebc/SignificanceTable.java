@@ -1,8 +1,8 @@
 package com.jypec.ebc;
 
 import com.jypec.ebc.mq.ContextLabel;
-import com.jypec.util.Bit;
 import com.jypec.util.Pair;
+import com.jypec.util.bits.Bit;
 
 /**
  * Stores the significance values of a grid of pixels

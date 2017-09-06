@@ -2,9 +2,9 @@ package com.jypec.ebc.mq;
 
 import java.util.EnumMap;
 
-import com.jypec.util.Bit;
-import com.jypec.util.BitStream;
-import com.jypec.util.BitTwiddling;
+import com.jypec.util.bits.Bit;
+import com.jypec.util.bits.BitStream;
+import com.jypec.util.bits.BitTwiddling;
 
 /**
  * Implementation of the MQ arithmetic coder

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBand;
-import com.jypec.util.BitTwiddling;
 import com.jypec.util.Stepper;
+import com.jypec.util.bits.BitTwiddling;
 
 /**
  * @author Daniel

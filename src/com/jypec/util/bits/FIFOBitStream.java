@@ -1,4 +1,4 @@
-package com.jypec.util;
+package com.jypec.util.bits;
 
 import java.util.LinkedList;
 

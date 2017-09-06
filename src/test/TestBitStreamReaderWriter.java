@@ -6,9 +6,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import com.jypec.util.BitStream;
-import com.jypec.util.FIFOBitStream;
-import com.jypec.util.io.BitStreamDataReaderWriter;
+import com.jypec.util.bits.BitStream;
+import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.bits.FIFOBitStream;
 
 /**
  * @author Daniel

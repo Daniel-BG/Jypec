@@ -12,8 +12,9 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.jypec.pca.PrincipalComponentAnalysis;
-import com.jypec.util.FIFOBitStream;
-import com.jypec.util.io.BitStreamDataReaderWriter;
+import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.bits.FIFOBitStream;
+
 import test.generic.TestHelpers;
 
 /**

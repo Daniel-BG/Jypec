@@ -1,6 +1,6 @@
 package com.jypec.ebc.mq;
 
-import com.jypec.util.Bit;
+import com.jypec.util.bits.Bit;
 
 /**
  * Enum storing all the Context labels used by the MQ-Coder

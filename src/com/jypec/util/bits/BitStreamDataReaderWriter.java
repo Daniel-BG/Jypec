@@ -1,7 +1,6 @@
-package com.jypec.util.io;
+package com.jypec.util.bits;
 
-import com.jypec.util.BitStream;
-import com.jypec.util.BitStream.BitStreamConstants;
+import com.jypec.util.bits.BitStream.BitStreamConstants;
 
 /**
  * @author Daniel

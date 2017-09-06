@@ -146,6 +146,13 @@ public class ImageDataType {
 		}
 	}
 	
+	/**
+	 * @return true if this data type is signed, i.e. it accepts negative numbers
+	 */
+	public boolean isSigned() {
+		return this.signed;
+	}
+	
 	
 	@Override
 	public boolean equals(Object obj) {

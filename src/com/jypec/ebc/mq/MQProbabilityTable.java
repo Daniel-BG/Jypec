@@ -1,6 +1,6 @@
 package com.jypec.ebc.mq;
 
-import com.jypec.util.Bit;
+import com.jypec.util.bits.Bit;
 
 /**
  * Probability Table used for encoding. 

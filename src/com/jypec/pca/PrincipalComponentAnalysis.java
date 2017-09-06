@@ -8,8 +8,8 @@ import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 
 import com.jypec.img.HyperspectralImage;
-import com.jypec.util.BitStream;
-import com.jypec.util.io.BitStreamDataReaderWriter;
+import com.jypec.util.bits.BitStream;
+import com.jypec.util.bits.BitStreamDataReaderWriter;
 
 /**
  * <p>

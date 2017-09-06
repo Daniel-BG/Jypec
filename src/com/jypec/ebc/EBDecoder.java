@@ -5,10 +5,10 @@ import com.jypec.ebc.data.CodingPlane;
 import com.jypec.ebc.mq.ContextLabel;
 import com.jypec.ebc.mq.MQArithmeticDecoder;
 import com.jypec.ebc.mq.MQConstants;
-import com.jypec.util.Bit;
-import com.jypec.util.BitStream;
 import com.jypec.util.Pair;
-import com.jypec.util.BitStream.BitStreamConstants;
+import com.jypec.util.bits.Bit;
+import com.jypec.util.bits.BitStream;
+import com.jypec.util.bits.BitStream.BitStreamConstants;
 
 /**
  * MQDecoder dual to the MQcoder

@@ -4,9 +4,9 @@ import com.jypec.ebc.data.CodingBlock;
 import com.jypec.ebc.data.CodingPlane;
 import com.jypec.ebc.mq.ContextLabel;
 import com.jypec.ebc.mq.MQArithmeticCoder;
-import com.jypec.util.Bit;
-import com.jypec.util.BitStream;
 import com.jypec.util.Pair;
+import com.jypec.util.bits.Bit;
+import com.jypec.util.bits.BitStream;
 
 /**
  * MQCoder that given an input block codes it into the
