@@ -1,4 +1,4 @@
-package com.jypec.pca;
+package com.jypec.dimreduction.alg;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -7,8 +7,11 @@ import org.ejml.dense.row.SingularOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 
+import com.jypec.comdec.ComParameters;
+import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
-import com.jypec.util.bits.BitStream;
+import com.jypec.img.ImageDataType;
+import com.jypec.util.MathOperations;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 
 /**
@@ -41,7 +44,7 @@ import com.jypec.util.bits.BitStreamDataReaderWriter;
  */
 
 
-public class PrincipalComponentAnalysis {
+public class PrincipalComponentAnalysis implements DimensionalityReduction {
 
     // principal component subspace is stored in the rows
     private DMatrixRMaj V_t;
@@ -182,27 +185,6 @@ public class PrincipalComponentAnalysis {
 
         return r.data;
     }
-    
-    
-    /**
-     * Projects a whole hyperspectral image "src" onto the destination "dst" image
-     * @param src source of information in the sample space
-     * @param dst where the result is saved in the eigen space
-     */
-    public void imageToEigenSpace(HyperspectralImage src, HyperspectralImage dst) {
-    	if (src.getNumberOfLines() != dst.getNumberOfLines() ||
-    			src.getNumberOfSamples() != dst.getNumberOfSamples() ||
-    			src.getNumberOfBands() != this.sampleSize ||
-    			dst.getNumberOfBands() != this.numComponents) {
-    		throw new IllegalArgumentException("Image dimensions do not match with the expected PCA matrix transform size");
-    	}
-    	
-		for (int i = 0; i < src.getNumberOfLines(); i++) {
-			for (int j = 0; j < src.getNumberOfSamples(); j++) {
-				dst.setPixel(this.sampleToEigenSpace(src.getPixel(i, j)), i, j);
-			}
-		}
-    }
 
     /**
      * Converts a vector from eigen space into sample space.
@@ -223,28 +205,6 @@ public class PrincipalComponentAnalysis {
         CommonOps_DDRM.add(s,mean,s);
 
         return s.data;
-    }
-
-    
-    /**
-     * Undoes the projection of a whole hyperspectral image 
-     * "src" onto the destination "dst" image.
-     * @param src the source of information, in the eigen space
-     * @param dst where the result is saved, in the sample space
-     */
-    public void imageToSampleSpace(HyperspectralImage src, HyperspectralImage dst) {
-    	if (src.getNumberOfLines() != dst.getNumberOfLines() ||
-    			src.getNumberOfSamples() != dst.getNumberOfSamples() ||
-    			src.getNumberOfBands() != this.numComponents ||
-    			dst.getNumberOfBands() != this.sampleSize) {
-    		throw new IllegalArgumentException("Image dimensions do not match with the expected PCA matrix transform size");
-    	}
-    	
-		for (int i = 0; i < src.getNumberOfLines(); i++) {
-			for (int j = 0; j < src.getNumberOfSamples(); j++) {
-				dst.setPixel(this.eigenToSampleSpace(src.getPixel(i, j)), i, j);
-			}
-		}
     }
 
     /**
@@ -292,15 +252,18 @@ public class PrincipalComponentAnalysis {
 
         return NormOps_DDRM.normF(dots);
     }
-    
-    
-    /**
-     * Stores the necessary information in the output stream so that afterwards, a call
-     * can be made to {@link #restoreFromBitStream(BitStream)} to set the PCA up so that
-     * eigen-space samples can be restored onto the original space
-     * @param bw writer to the output stream
-     */
-    public void saveToBitStream(BitStreamDataReaderWriter bw) {
+	
+	/**
+	 * @return the number of components that this PCA reduces to
+	 */
+	public int getNumComponents() {
+		return this.numComponents;
+	}
+
+
+	
+    @Override
+    public void saveTo(BitStreamDataReaderWriter bw) {
     	//write the number of dimensions in the original space
     	bw.writeInt(this.sampleSize);
     	//write the number of dimensions in the reduced space
@@ -311,12 +274,8 @@ public class PrincipalComponentAnalysis {
     	bw.writeDoubleArray(V_t.getData(), this.sampleSize * numComponents);
     }
     
-    /**
-     * Restore the PCA object from the given bitstream so that it can perform projections
-     * (direct and inverse) without training again
-     * @param bw reader to the output stream
-     */
-    public void restoreFromBitStream(BitStreamDataReaderWriter bw) {
+    @Override
+    public void loadFrom(BitStreamDataReaderWriter bw, ComParameters cp) {
     	//read the number of dimensions in the original space
     	this.sampleSize = bw.readInt();
     	//read the number of dimensions in the reduced space
@@ -329,29 +288,60 @@ public class PrincipalComponentAnalysis {
     	V_t.reshape(numComponents,mean.length,true);
     }
 
-	/**
-	 * Computes the PCA algorithm for the given source image, with the target space
-	 * being of dimension pcaDim
-	 * @param srcImg
-	 * @param pcaDim
-	 */
-	public void computeBasisFrom(HyperspectralImage srcImg, int pcaDim) {
-		this.setup(srcImg.getNumberOfLines() * srcImg.getNumberOfSamples(), srcImg.getNumberOfBands());
+	@Override
+	public void reduce(HyperspectralImage src, HyperspectralImage dst) {
+    	if (src.getNumberOfLines() != dst.getNumberOfLines() ||
+    			src.getNumberOfSamples() != dst.getNumberOfSamples() ||
+    			src.getNumberOfBands() != this.sampleSize ||
+    			dst.getNumberOfBands() != this.numComponents) {
+    		throw new IllegalArgumentException("Image dimensions do not match with the expected PCA matrix transform size");
+    	}
+    	
+		for (int i = 0; i < src.getNumberOfLines(); i++) {
+			for (int j = 0; j < src.getNumberOfSamples(); j++) {
+				dst.setPixel(this.sampleToEigenSpace(src.getPixel(i, j)), i, j);
+			}
+		}
+	}
+
+	@Override
+	public void boost(HyperspectralImage src, HyperspectralImage dst) {
+    	if (src.getNumberOfLines() != dst.getNumberOfLines() ||
+    			src.getNumberOfSamples() != dst.getNumberOfSamples() ||
+    			src.getNumberOfBands() != this.numComponents ||
+    			dst.getNumberOfBands() != this.sampleSize) {
+    		throw new IllegalArgumentException("Image dimensions do not match with the expected PCA matrix transform size");
+    	}
+    	
+		for (int i = 0; i < src.getNumberOfLines(); i++) {
+			for (int j = 0; j < src.getNumberOfSamples(); j++) {
+				dst.setPixel(this.eigenToSampleSpace(src.getPixel(i, j)), i, j);
+			}
+		}
+	}
+
+	@Override
+	public void train(HyperspectralImage source, int targetDimension) {
+		this.setup(source.getNumberOfLines() * source.getNumberOfSamples(), source.getNumberOfBands());
 		
-		for (int i = 0; i < srcImg.getNumberOfLines(); i++) {
-			for (int j = 0; j < srcImg.getNumberOfSamples(); j++) {
-				this.addSample(srcImg.getPixel(i, j));
+		for (int i = 0; i < source.getNumberOfLines(); i++) {
+			for (int j = 0; j < source.getNumberOfSamples(); j++) {
+				this.addSample(source.getPixel(i, j));
 			}
 		}
 		
-		this.computeBasis(pcaDim);
+		this.computeBasis(targetDimension);
 	}
-	
-	/**
-	 * @return the number of components that this PCA reduces to
-	 */
-	public int getNumComponents() {
-		return this.numComponents;
+
+	@Override
+	public double getMaxValue(HyperspectralImage img) {
+		return MathOperations.getMaximumDistance(img.getDataType().getMagnitudeAbsoluteRange(), img.getNumberOfBands());
 	}
+
+	@Override
+	public ImageDataType getNewDataType(double maxValue) {
+		return new ImageDataType((int) Math.ceil(MathOperations.logBase(maxValue, 2d)), true);
+	}
+
     
 }

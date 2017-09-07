@@ -1,5 +1,7 @@
 package com.jypec.img;
 
+import com.jypec.util.arrays.MatrixTransforms;
+
 /**
  * Class to give a little more functionality to a 3-dimensional matrix representation of a hyperspectral image
  * @author Daniel
@@ -158,5 +160,16 @@ public class HyperspectralImage {
 				&& this.getNumberOfLines() == other.getNumberOfLines() 
 				&& this.getNumberOfSamples() == other.getNumberOfSamples()
 				&& this.getDataType().equals(other.getDataType());
+	}
+
+	/**
+	 * @param source where to copy data from
+	 */
+	public void copyDataFrom(HyperspectralImage source) {
+		if (!this.sizeAndTypeEquals(source)) {
+			throw new IllegalArgumentException("The image to copy from must have the same type and dimensions as this one");
+		}
+		
+		MatrixTransforms.copy(source.data, this.data, this.bands, this.lines, this.samples);
 	}
 }

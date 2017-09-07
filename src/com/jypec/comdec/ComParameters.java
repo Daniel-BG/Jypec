@@ -3,10 +3,10 @@ package com.jypec.comdec;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 
 /**
- * @author Daniel
  * Used for saving / loading parameters from a bitstream in an easy manner.
  * Initialize the public variables and then save, or load and then use the
  * public variables
+ * @author Daniel
  */
 public class ComParameters {
 	//public variables initialized to random values for testing

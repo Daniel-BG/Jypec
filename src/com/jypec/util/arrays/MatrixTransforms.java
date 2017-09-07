@@ -37,4 +37,22 @@ public class MatrixTransforms {
 		}
 	}
 	
+	
+	/**
+	 * @param src source of the data
+	 * @param dst where the data is to be copied
+	 * @param planes number of planes to be copied
+	 * @param rows number of rows to be copied
+	 * @param cols number of columns to be copied
+	 */
+	public static void copy(int[][][] src, int[][][] dst, int planes, int rows, int cols) {
+		for (int k = 0; k < planes; k++) {
+			for (int i = 0; i < rows; i++) {
+				for (int j = 0; j < cols; j++) {
+					dst[k][i][j] = src[k][i][j];
+				}
+			}
+		}
+	}
+	
 }

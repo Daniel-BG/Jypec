@@ -1,11 +1,11 @@
 package com.jypec.comdec;
 
+import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBand;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
-import com.jypec.pca.PrincipalComponentAnalysis;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.bits.BitStream;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
@@ -23,9 +23,10 @@ public class Decompressor {
 	
 	/**
 	 * @param input
+	 * @param dr dimensionality reduction algorithm to be employed
 	 * @return the resulting image from decompressing the given stream
 	 */
-	public HyperspectralImage decompress(BitStream input) {
+	public HyperspectralImage decompress(BitStream input, DimensionalityReduction dr) {
 		/** Create a wrapper for the stream to easily read/write it */
 		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
 		bw.setStream(input);
@@ -35,18 +36,17 @@ public class Decompressor {
 		cp.loadFrom(bw);
 		
 		/** Recover PCA setup */
-		PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
-		pca.restoreFromBitStream(bw);
+		dr.loadFrom(bw, cp);
 		
 		/** Uncompress the data stream */
-		ImageDataType redDT = new ImageDataType(cp.redBitDepth, true);
-		HyperspectralImage reduced = new HyperspectralImage(null, redDT, pca.getNumComponents(), cp.lines, cp.samples);
+		ImageDataType redDT = dr.getNewDataType(cp.newMaxVal);//new ImageDataType(cp.redBitDepth, true);
+		HyperspectralImage reduced = new HyperspectralImage(null, redDT, dr.getNumComponents(), cp.lines, cp.samples);
 		EBDecoder decoder = new EBDecoder();
 		MatrixQuantizer mq = new MatrixQuantizer(redDT.getBitDepth() - 1, 0, cp.guardBits, -cp.newMaxVal, cp.newMaxVal, 0.5);
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
 		
 		/** Proceed to uncompress the reduced image band by band */
-		for (int i = 0; i < pca.getNumComponents(); i++) {
+		for (int i = 0; i < dr.getNumComponents(); i++) {
 			HyperspectralBand hb = reduced.getBand(i);
 			/** Now divide into blocks and decode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
@@ -68,7 +68,7 @@ public class Decompressor {
 		ImageDataType srcDT = new ImageDataType(cp.srcBitDepth, cp.srcSigned);
 		HyperspectralImage srcImg = new HyperspectralImage(null, srcDT, cp.bands, cp.lines, cp.samples);
 		
-		pca.imageToSampleSpace(reduced, srcImg);
+		dr.boost(reduced, srcImg);
 		
 		
 		//image is decompressed now

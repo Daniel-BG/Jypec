@@ -163,4 +163,12 @@ public class ImageDataType {
 		return false;
 	}
 
+
+	/**
+	 * @return the maximum value this data type can store (positive or negative)
+	 */
+	public double getAbsoluteMaxValue() {
+		return this.magnitudeLimit;
+	}
+
 }

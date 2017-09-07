@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.jypec.pca.PrincipalComponentAnalysis;
+import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 import com.jypec.util.bits.FIFOBitStream;
 
@@ -76,11 +76,11 @@ public class PCARecoveryTest {
 		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
 		bw.setStream(bs);
 		
-		pca.saveToBitStream(bw);
+		pca.saveTo(bw);
 		
 		PrincipalComponentAnalysis pcaRec = new PrincipalComponentAnalysis();
 		
-		pcaRec.restoreFromBitStream(bw);
+		pcaRec.loadFrom(bw, null);
 		
 		
 		for (int i = 0; i < pca.getNumComponents(); i++) {

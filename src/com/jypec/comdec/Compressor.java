@@ -1,13 +1,12 @@
 package com.jypec.comdec;
 
+import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBand;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
-import com.jypec.pca.PrincipalComponentAnalysis;
 import com.jypec.quantization.MatrixQuantizer;
-import com.jypec.util.MathOperations;
 import com.jypec.util.bits.BitStream;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 import com.jypec.wavelet.BidimensionalWavelet;
@@ -40,8 +39,9 @@ public class Compressor {
 	 * Compress a hyperspectral image with this compressor's settings
 	 * @param srcImg the source hyperspectral image
 	 * @param output where to put the compressed image
+	 * @param dr dimensionality reduction algorithm that is to be applied
 	 */
-	public void compress(HyperspectralImage srcImg, BitStream output) {
+	public void compress(HyperspectralImage srcImg, BitStream output, DimensionalityReduction dr) {
 		/** We will need a wrapper around the output to make it easier to save numbers */
 		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
 		bw.setStream(output);
@@ -58,16 +58,15 @@ public class Compressor {
 		cp.guardBits = this.guardBits;
 		
 		/** Now compute the max value that this newly created basis might have, and allocate an image with enough space for it */
-		double newMaxVal = MathOperations.getMaximumDistance(srcImg.getDataType().getMagnitudeAbsoluteRange(), bands);
-		ImageDataType newDataType = new ImageDataType((int) Math.ceil(MathOperations.logBase(newMaxVal, 2d)), true);
+		double newMaxVal = dr.getMaxValue(srcImg); 
+		ImageDataType newDataType = dr.getNewDataType(dr.getMaxValue(srcImg)); 
 		HyperspectralImage reduced = new HyperspectralImage(null, newDataType, this.pcaDim, lines, samples);
 		cp.newMaxVal = newMaxVal;
 		cp.redBitDepth = newDataType.getBitDepth();
 		
 		/** Project all image values onto the reduced space */
-		PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
-		pca.computeBasisFrom(srcImg, this.pcaDim);
-		pca.imageToEigenSpace(srcImg, reduced);
+		dr.train(srcImg, this.pcaDim);
+		dr.reduce(srcImg, reduced);
 		
 		/** create the wavelet transform, quantizer, and coder we'll be using */
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), this.wavePasses);
@@ -76,7 +75,7 @@ public class Compressor {
 		
 		/** Save metadata before compressing the image */
 		cp.saveTo(bw);
-		pca.saveToBitStream(bw);
+		dr.saveTo(bw);
 		
 		/** Proceed to compress the reduced image */
 		for (int i = 0; i < pcaDim; i++) {
