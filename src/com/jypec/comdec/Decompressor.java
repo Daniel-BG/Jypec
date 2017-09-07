@@ -50,7 +50,7 @@ public class Decompressor {
 			HyperspectralBand hb = reduced.getBand(i);
 			/** Now divide into blocks and decode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
-			for (CodingBlock block: blocker) {
+			for (CodingBlock block: blocker) {			
 				block.setDepth(redDT.getBitDepth()); //depth adjusted since there might be more bits
 				decoder.decode(input, block);
 			}

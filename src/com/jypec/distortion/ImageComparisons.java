@@ -87,7 +87,7 @@ public class ImageComparisons {
 		for (int i = 0; i < h1.getNumberOfBands(); i++) {
 			for (int j = 0; j < h1.getNumberOfLines(); j++) {
 				for (int k = 0; k < h1.getNumberOfSamples(); k++) {
-					int val = h1.getValueAt(i, j, k) - h2.getValueAt(i, j, k);
+					double val = h1.getValueAt(i, j, k) - h2.getValueAt(i, j, k);
 					acc += val * val;
 				}
 			}

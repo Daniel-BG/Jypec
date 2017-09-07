@@ -42,7 +42,7 @@ public class MQConstants {
 	public static final int C_ACTIVE_MASK = 0xffff00;
 	/** Mask for the shift needed for the active C register */
 	public static final int C_ACTIVE_SHIFT = 8;
-	/** Start of the interval of markers left unused by the spacing bits selected */
+	/** Start of the interval (inclusive) of markers left unused by the spacing bits selected */
 	public static final int SPECIAL_CODE_START_INTERVAL = 0x80 + (0x1 << (7 - SPACER_BITS));
 	
 }

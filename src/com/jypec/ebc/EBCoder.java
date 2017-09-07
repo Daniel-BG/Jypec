@@ -42,15 +42,13 @@ public class EBCoder {
 		
 		int numberOfBitPlanes = block.getMagnitudeBitPlaneNumber();
 		
-		CodingPlane plane = block.getBitPlane(numberOfBitPlanes - 1);
-		
-		//fist bitplane is coded within a cleanup scheme
-		this.codeCleanup(plane, output);
-		//rest of bitplanes are coded with a 3-step scheme
-		for (int i = numberOfBitPlanes - 2; i >= 0; i--) {
-			plane = block.getBitPlane(i);
-			this.codeSignificance(plane, output);
-			this.codeRefinement(plane, output);
+		//all planes coded with a three pass scheme except the first one
+		for (int i = numberOfBitPlanes - 1; i >= 0; i--) {
+			CodingPlane plane = block.getBitPlane(i);
+			if (i < numberOfBitPlanes - 1) { //Only cleanup for the first one
+				this.codeSignificance(plane, output);
+				this.codeRefinement(plane, output);
+			}
 			this.codeCleanup(plane, output);
 		}
 		//end coding by dumping the remaining bits in the buffer

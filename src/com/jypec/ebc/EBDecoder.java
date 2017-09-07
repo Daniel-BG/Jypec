@@ -29,6 +29,7 @@ public class EBDecoder {
 	 * @param height
 	 */
 	private void initialize(BitStream input, CodingBlock output) {
+		//decoder = new MQArithmeticDecoder(input);
 		if (decoder == null) {
 			decoder = new MQArithmeticDecoder(input);
 		} else {
@@ -49,15 +50,13 @@ public class EBDecoder {
 		this.initialize(input, output);
 		int numberOfBitPlanes = output.getMagnitudeBitPlaneNumber();
 		
-		//decode first cleanup pass
-		CodingPlane plane = output.getBitPlane(numberOfBitPlanes - 1);
-		this.decodeCleanup(input, plane);
-		
-		//decode rest of passes over the remaining planes
-		for (int i = numberOfBitPlanes - 2; i >= 0; i--) {
-			plane = output.getBitPlane(i);
-			this.decodeSignificance(input, plane);
-			this.decodeRefinement(input, plane);
+		//decode over all planes
+		for (int i = numberOfBitPlanes - 1; i >= 0; i--) {
+			CodingPlane plane = output.getBitPlane(i);
+			if (i < numberOfBitPlanes - 1) { //first plane has only cleanup
+				this.decodeSignificance(input, plane);
+				this.decodeRefinement(input, plane);
+			}
 			this.decodeCleanup(input, plane);
 		}
 		

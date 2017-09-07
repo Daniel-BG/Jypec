@@ -23,7 +23,7 @@ public class MQArithmeticDecoder {
 	private int countdownTimer;				//t bar in the books
 	private int codeBytesRead;				//L in the books
 	//specific to the decoder
-	private int maxCodeBytesToRead = -1;
+	private int maxCodeBytesToRead;
 	private int lastByteRead;
 	
 	
@@ -52,9 +52,11 @@ public class MQArithmeticDecoder {
 							contextLabel.getDefaultMPS()));
 		}
 		
+		
 		this.lastByteRead = 0; 
 		this.tempByteBuffer = 0;
 		this.codeBytesRead = 0;
+		this.maxCodeBytesToRead = -1;
 		this.normalizedLowerBound = 0;
 		this.fillLSBs(input);
 		this.normalizedLowerBound <<= this.countdownTimer;
@@ -69,10 +71,6 @@ public class MQArithmeticDecoder {
 	 * Procedure that loads the next byte into C for decoding
 	 */
 	private void fillLSBs(BitStream input) {
-
-		
-
-		//Logger.logger().log("Removing: " + Integer.toHexString(this.lastByteRead));
 		this.countdownTimer = 8;
 		if (this.codeBytesRead == this.maxCodeBytesToRead) {
 			this.normalizedLowerBound += 0xff;

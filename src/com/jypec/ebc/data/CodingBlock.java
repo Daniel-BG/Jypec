@@ -153,4 +153,16 @@ public class CodingBlock {
 		}
 	}
 	
+	
+	/**
+	 * @param row
+	 * @param column
+	 * @return true if this block is responsible for coding the specified position.
+	 * i.e: if it falls within this block's boundary
+	 */
+	public boolean isEncoding(int row, int column) {
+		return row >= this.rowOffset && row < this.rowOffset + this.rows &&
+				column >= this.columnOffset && column < this.columnOffset + this.columns;
+	}
+	
 }

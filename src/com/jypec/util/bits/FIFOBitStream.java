@@ -209,8 +209,4 @@ public class FIFOBitStream implements BitStream {
 	}
 
 
-
-
-
-
 }
