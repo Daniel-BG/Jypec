@@ -55,4 +55,21 @@ public class MatrixTransforms {
 		}
 	}
 	
+	/**
+	 * @param src source of the data
+	 * @param value what to multiply for
+	 * @param planes number of planes to be copied
+	 * @param rows number of rows to be copied
+	 * @param cols number of columns to be copied
+	 */
+	public static void multiply(int[][][] src, int value, int planes, int rows, int cols) {
+		for (int k = 0; k < planes; k++) {
+			for (int i = 0; i < rows; i++) {
+				for (int j = 0; j < cols; j++) {
+					src[k][i][j] *= value;
+				}
+			}
+		}
+	}
+	
 }

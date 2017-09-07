@@ -61,6 +61,7 @@ public class Decompressor {
 			
 			/** Apply the reverse wavelet transform */
 			bdw.reverseTransform(waveForm, cp.lines, cp.samples);
+			hb.fromWave(waveForm, 0, 0, cp.lines, cp.samples);
 		}
 		
 		
@@ -69,6 +70,7 @@ public class Decompressor {
 		HyperspectralImage srcImg = new HyperspectralImage(null, srcDT, cp.bands, cp.lines, cp.samples);
 		
 		dr.boost(reduced, srcImg);
+		
 		
 		
 		//image is decompressed now
