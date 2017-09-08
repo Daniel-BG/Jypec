@@ -61,7 +61,7 @@ public class Decompressor {
 			
 			/** dequantize the wave */
 			double[][] waveForm = new double[cp.lines][cp.samples];
-			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, bandMin, bandMax, 0.5);
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, bandMin, bandMax, 0.375);
 			mq.dequantize(hb, waveForm, 0, 0, cp.lines, cp.samples);
 			
 			/** Apply the reverse wavelet transform */

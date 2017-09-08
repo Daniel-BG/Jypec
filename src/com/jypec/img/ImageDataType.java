@@ -213,4 +213,9 @@ public class ImageDataType {
 		return findBest((int) Math.floor(newMinVal), (int) Math.ceil(newMaxVal));
 	}
 
+	
+	@Override
+	public String toString() {
+		return this.bitDepth + "bit " + (this.signed ? "signed" : "unsigned");
+	}
 }

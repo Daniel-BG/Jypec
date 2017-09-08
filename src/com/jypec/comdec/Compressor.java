@@ -87,8 +87,9 @@ public class Compressor {
 			double[] minMax = MatrixOperations.minMax(waveForm);
 			/** get max and min from the resulting transform, and create the best data type possible */
 			ImageDataType targetType = ImageDataType.findBest(minMax[0], minMax[1]);
+			System.out.println("Compressing band " + i + " with " + targetType);
 			/** asd */
-			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.5);
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.375);
 			
 			bw.writeDouble(minMax[0]);
 			bw.writeDouble(minMax[1]);
