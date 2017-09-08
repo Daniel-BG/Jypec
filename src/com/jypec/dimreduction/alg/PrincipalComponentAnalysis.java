@@ -290,11 +290,11 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
 
 	@Override
 	public double[][][] reduce(HyperspectralImage src) {
-		double[][][] res = new double[src.getNumberOfBands()][src.getNumberOfLines()][src.getNumberOfSamples()];
+		double[][][] res = new double[this.numComponents][src.getNumberOfLines()][src.getNumberOfSamples()];
 		for (int i = 0; i < src.getNumberOfLines(); i++) {
 			for (int j = 0; j < src.getNumberOfSamples(); j++) {
 				double[] proj = this.sampleToEigenSpace(src.getPixel(i, j));
-				for (int k = 0; k < src.getNumberOfBands(); k++) {
+				for (int k = 0; k < this.numComponents; k++) {
 					res[k][i][j] = proj[k];
 				}
 			}
@@ -304,10 +304,10 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
 
 	@Override
 	public void boost(double[][][] src, HyperspectralImage dst) {
-		double[] pixel = new double[dst.getNumberOfSamples()];
+		double[] pixel = new double[this.numComponents];
 		for (int i = 0; i < dst.getNumberOfLines(); i++) {
 			for (int j = 0; j < dst.getNumberOfSamples(); j++) {
-				for (int k = 0; k < dst.getNumberOfBands(); k++) {
+				for (int k = 0; k < this.numComponents; k++) {
 					pixel[k] = src[k][i][j];
 				}
 				dst.setPixel(this.eigenToSampleSpace(pixel), i, j);

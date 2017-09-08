@@ -64,4 +64,54 @@ public class DataMatrixReader {
 	}
 	
 	
+	/**
+	 * @param file
+	 * @param bands bands in file
+	 * @param lines lines in file
+	 * @param samples samples in file
+	 * @param reqB bands to read
+	 * @param reqL lines to read
+	 * @param reqS samples to read
+	 * @param format format of the samples 
+	 * @param isLittleEndian if the format is lil endian
+	 * @return the image
+	 * @throws FileNotFoundException
+	 */
+	public static final HyperspectralImage readSkippingBIP(String file, int bands, int lines, int samples, int reqB, int reqL, int reqS, ImageDataType format, boolean isLittleEndian) throws FileNotFoundException {
+		HyperspectralImage hi = new HyperspectralImage(null, format, reqB, reqL, reqS);
+		InputStream is = new FileInputStream(new File(file));	//read a file
+		is = new BufferedInputStream(is);						//buffer it
+		if (isLittleEndian) {
+			is = new EndiannessChangerReader(is, format.getByteDepth());
+		}
+		
+		IntegerReader bdr = new IntegerReader(is, format.getBitDepth());
+		
+		
+		for (int j = 0; j < lines; j++) {
+			for (int k = 0; k < samples; k++) {
+				for (int i = 0; i < bands; i++) {
+					try {
+						int data = bdr.read();
+						if (i < reqB && j < reqL && k < reqS) {
+							hi.setDataAt(data, i, j, k);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+						System.exit(0);
+					}
+				}
+			}
+		}
+		
+		try {
+			bdr.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return hi;
+	}
+	
+	
 }
