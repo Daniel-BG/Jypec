@@ -35,11 +35,9 @@ public class ComParametersRecoveryTest {
 			cp.bands = r.nextInt(0x10000);
 			cp.lines = r.nextInt(0x10000);
 			cp.samples = r.nextInt(0x10000);
-			cp.redBitDepth = r.nextInt(0x100);
 			cp.srcBitDepth = r.nextInt(0x100);
 			cp.srcSigned = r.nextBoolean();
 			cp.wavePasses = r.nextInt(0x100);
-			cp.newMaxVal = r.nextDouble();
 			
 			cp.saveTo(bw);
 			cpr.loadFrom(bw);

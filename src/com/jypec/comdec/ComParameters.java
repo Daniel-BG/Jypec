@@ -1,5 +1,6 @@
 package com.jypec.comdec;
 
+import com.jypec.img.HyperspectralImage;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 
 /**
@@ -18,16 +19,10 @@ public class ComParameters {
 	public int samples;
 	/** Number of passes of the wavelet transform */
 	public int wavePasses;
-	/** Bit depth of the reduced image (after dimensionality reduction) */
-	public int redBitDepth;
 	/** Bit depth of the source image */
 	public int srcBitDepth;
 	/** Flag indicating if the source image's samples are signed (the reduced one is always signed) */
 	public boolean srcSigned;
-	/** Max value of reduced image */
-	public double newMaxVal;
-	/** Min value of reduced image*/
-	public double newMinVal;
 	/** Number of bits eliminated from each bitplane */
 	public int bitReduction;
 
@@ -43,11 +38,8 @@ public class ComParameters {
 		bw.writeNBitNumber(this.lines, ComDecConstants.LINE_BITS);
 		bw.writeNBitNumber(this.samples, ComDecConstants.SAMPLE_BITS);
 		bw.writeNBitNumber(this.wavePasses, ComDecConstants.WAVE_PASSES_BITS);
-		bw.writeNBitNumber(this.redBitDepth, ComDecConstants.IMAGE_BIT_DEPTH_BITS);
 		bw.writeNBitNumber(this.srcBitDepth, ComDecConstants.IMAGE_BIT_DEPTH_BITS);
 		bw.writeBoolean(this.srcSigned);
-		bw.writeDouble(this.newMaxVal);
-		bw.writeDouble(this.newMinVal);
 		bw.writeNBitNumber(this.bitReduction, ComDecConstants.REDUCTION_BITS_BITS);
 	}
 	
@@ -61,11 +53,8 @@ public class ComParameters {
 		this.lines = bw.readNBitNumber(ComDecConstants.LINE_BITS);
 		this.samples = bw.readNBitNumber(ComDecConstants.SAMPLE_BITS);
 		this.wavePasses = bw.readNBitNumber(ComDecConstants.WAVE_PASSES_BITS);
-		this.redBitDepth = bw.readNBitNumber(ComDecConstants.IMAGE_BIT_DEPTH_BITS);
 		this.srcBitDepth = bw.readNBitNumber(ComDecConstants.IMAGE_BIT_DEPTH_BITS);
 		this.srcSigned = bw.readBoolean();
-		this.newMaxVal = bw.readDouble();
-		this.newMinVal = bw.readDouble();
 		this.bitReduction = bw.readNBitNumber(ComDecConstants.REDUCTION_BITS_BITS);
 	}
 	
@@ -81,12 +70,23 @@ public class ComParameters {
 				this.lines == other.lines &&
 				this.samples == other.samples &&
 				this.wavePasses == other.wavePasses &&
-				this.redBitDepth == other.redBitDepth &&
 				this.srcBitDepth == other.srcBitDepth &&
 				this.srcSigned == other.srcSigned &&
-				this.newMaxVal == other.newMaxVal &&
-				this.newMinVal == other.newMinVal &&
 				this.bitReduction == other.bitReduction;
+	}
+
+
+	/**
+	 * Take the dimensions and type from the given image and save
+	 * in this compression parameter object
+	 * @param srcImg 
+	 */
+	public void feedFrom(HyperspectralImage srcImg) {
+		this.bands = srcImg.getNumberOfBands();
+		this.lines = srcImg.getNumberOfLines();
+		this.samples = srcImg.getNumberOfSamples();
+		this.srcSigned = srcImg.getDataType().isSigned();
+		this.srcBitDepth = srcImg.getDataType().getBitDepth();
 	}
 
 

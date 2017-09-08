@@ -17,10 +17,8 @@ public interface DimensionalityReduction {
 	 * @param source the source image. Pixels will be analyzed (in the spectral dimension) and
 	 * based on similarities, will later be reduced without the loss of significant information,
 	 * with calls to {@link #reduce(HyperspectralImage, HyperspectralImage)}
-	 * @param targetDimension target dimension, which can be met for some algorithms, and for others
-	 * will act as a guide
 	 */
-	public void train(HyperspectralImage source, int targetDimension);
+	public void train(HyperspectralImage source);
 	
 	
 	/**
@@ -65,6 +63,12 @@ public interface DimensionalityReduction {
 	 * @return the target dimension the algorithm is reducing to / restoring from
 	 */
 	public int getNumComponents();
+	
+	/**
+	 * Set the number of components this dimensionality reduction will be reducing to
+	 * @param numComponents 
+	 */
+	public void setNumComponents(int numComponents);
 
 	/**
 	 * @param img where to get the max value from

@@ -21,19 +21,13 @@ import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
  */
 public class Compressor {
 
-	private int pcaDim;
-	private int wavePasses;
-	private int bitReduction;
-
+	private ComParameters cp;
+	
 	/**
-	 * @param pcaDim value of the reduced PCA dimension
-	 * @param wavePasses passes that the wavelet transform does over each band before compressing
-	 * @param bitReduction bits reduced when quantizing
+	 * @param cp compressor parameters that will dictate how this compressor behaves
 	 */
-	public Compressor(int pcaDim, int wavePasses, int bitReduction) {
-		this.pcaDim = pcaDim;
-		this.wavePasses = wavePasses;
-		this.bitReduction = bitReduction;
+	public Compressor(ComParameters cp) {
+		this.cp = cp;
 	}
 	
 	/**
@@ -48,31 +42,14 @@ public class Compressor {
 		bw.setStream(output);
 		
 		/** First off, extract necessary information from the image and save to stream */
-		int bands = srcImg.getNumberOfBands(), lines = srcImg.getNumberOfLines(), samples = srcImg.getNumberOfSamples();
-		ComParameters cp = new ComParameters();
-		cp.bands = bands;
-		cp.lines = lines;
-		cp.samples = samples;
-		cp.srcSigned = srcImg.getDataType().isSigned();
-		cp.srcBitDepth = srcImg.getDataType().getBitDepth();
-		cp.wavePasses = this.wavePasses;
-		cp.bitReduction = this.bitReduction;
-		
-		/** Now compute the max value that this newly created basis might have, and allocate an image with enough space for it */
-		double newMaxVal = dr.getMaxValue(srcImg);
-		double newMinVal = dr.getMinValue(srcImg);
-		//ImageDataType newDataType = ImageDataType.findBest(newMinVal, newMaxVal);
-
-		cp.newMaxVal = newMaxVal;
-		cp.newMinVal = newMinVal;
-		//cp.redBitDepth = newDataType.getBitDepth();
+		cp.feedFrom(srcImg);
 		
 		/** Project all image values onto the reduced space */
-		dr.train(srcImg, this.pcaDim);
+		dr.train(srcImg);
 		double[][][] reduced = dr.reduce(srcImg);
 		
 		/** create the wavelet transform, and coder we'll be using, which won't change over the bands */
-		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), this.wavePasses);
+		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
 		EBCoder coder = new EBCoder();
 		
 		/** Save metadata before compressing the image */
@@ -80,11 +57,11 @@ public class Compressor {
 		dr.saveTo(bw);
 		
 		/** Proceed to compress the reduced image */
-		for (int i = 0; i < pcaDim; i++) {
+		for (int i = 0; i < dr.getNumComponents(); i++) {
 			/** Apply the wavelet transform */
 			double[][] waveForm = reduced[i];
 
-			bdw.forwardTransform(waveForm, lines, samples);
+			bdw.forwardTransform(waveForm, cp.lines, cp.samples);
 			double[] minMax = MatrixOperations.minMax(waveForm);
 			/** get max and min from the resulting transform, and create the best data type possible */
 			ImageDataType targetType = ImageDataType.findBest(minMax[0], minMax[1], 0);
@@ -97,11 +74,11 @@ public class Compressor {
 			
 			
 			/** quantize the transform and save the quantization over the current band */
-			HyperspectralBand hb = HyperspectralBand.generateRogueBand(targetType, lines, samples);
-			mq.quantize(waveForm, hb, 0, 0, lines, samples);
+			HyperspectralBand hb = HyperspectralBand.generateRogueBand(targetType, cp.lines, cp.samples);
+			mq.quantize(waveForm, hb, 0, 0, cp.lines, cp.samples);
 			
 			/** Now divide into blocks and encode it*/
-			Blocker blocker = new Blocker(hb, this.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
+			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
 			for (CodingBlock block: blocker) {
 				block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
 				coder.code(block, output);

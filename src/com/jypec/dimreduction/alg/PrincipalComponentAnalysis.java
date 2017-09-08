@@ -315,7 +315,11 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
 	}
 
 	@Override
-	public void train(HyperspectralImage source, int targetDimension) {
+	public void train(HyperspectralImage source) {
+		if (this.numComponents <= 0) {
+			throw new IllegalStateException("Please first set the number of components for this dimensionality reduction algorithm");
+		}
+		int nc = this.numComponents;
 		this.setup(source.getNumberOfLines() * source.getNumberOfSamples(), source.getNumberOfBands());
 		
 		for (int i = 0; i < source.getNumberOfLines(); i++) {
@@ -324,8 +328,15 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
 			}
 		}
 		
-		this.computeBasis(targetDimension);
+		this.computeBasis(nc);
 	}
+	
+
+	@Override
+	public void setNumComponents(int numComponents) {
+		this.numComponents = numComponents;
+	}
+
 
 	@Override
 	public double getMaxValue(HyperspectralImage img) {
@@ -336,6 +347,7 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
 	public double getMinValue(HyperspectralImage img) {
 		return -MathOperations.getMaximumDistance(img.getDataType().getMagnitudeAbsoluteRange(), img.getNumberOfBands());
 	}
+
 
     
 }

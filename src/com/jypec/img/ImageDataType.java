@@ -202,9 +202,9 @@ public class ImageDataType {
 	 * @return a data type that can fit the whole given range in the least bits possible
 	 */
 	public static ImageDataType findBest(int newMinVal, int newMaxVal, int extra) {
-		if (newMinVal > 0 || newMaxVal < 0) {
-			throw new IllegalArgumentException("These values will work but are not ideal. Maybe fix this to shift the values to the [0, max-min] range");
-		}
+		/*if (newMinVal > 0 || newMaxVal < 0) {
+			System.err.println("@ImageDataType.findBest: These values will probably work but are not ideal. Maybe fix this to shift the values to the [0, max-min] range");
+		}*/
 		
 		int absMax = Math.max(Math.abs(newMaxVal), Math.abs(newMinVal));
 		boolean signed = newMinVal < 0;

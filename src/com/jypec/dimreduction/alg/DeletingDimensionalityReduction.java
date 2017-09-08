@@ -7,23 +7,24 @@ import com.jypec.util.bits.BitStreamDataReaderWriter;
 
 /**
  * @author Daniel
- * Implementation of {@link DimensionalityReduction} that does nothing, leaving
- * the reduced exactly as the original
+ * Implementation of {@link DimensionalityReduction} that just removes dimensions
+ * if required, leaving the set number of components untouched
  */
-public class NoDimensionalityReduction implements DimensionalityReduction{
+public class DeletingDimensionalityReduction implements DimensionalityReduction {
 	
-	private int numComponents;
+	private int numComponents = -1;
 
 	@Override
-	public void train(HyperspectralImage source, int targetDimension) {
-		//targetDimension can be negative for all we care, we won't use it
-		this.numComponents = source.getNumberOfBands();
+	public void train(HyperspectralImage source) {
+		//no training needed. If unset just preserve dimension
+		if (numComponents == -1)
+			this.numComponents = source.getNumberOfBands();
 	}
 
 	@Override
 	public double[][][] reduce(HyperspectralImage src) {
-		double [][][] res = new double[src.getNumberOfBands()][src.getNumberOfLines()][src.getNumberOfSamples()];
-		for (int i = 0; i < src.getNumberOfBands(); i++) {
+		double [][][] res = new double[this.numComponents][src.getNumberOfLines()][src.getNumberOfSamples()];
+		for (int i = 0; i < this.numComponents; i++) {
 			for (int j = 0; j < src.getNumberOfLines(); j++) {
 				for (int k = 0; k < src.getNumberOfSamples(); k++) {
 					res[i][j][k] = src.getValueAt(i, j, k);
@@ -35,7 +36,7 @@ public class NoDimensionalityReduction implements DimensionalityReduction{
 
 	@Override
 	public void boost(double[][][] src, HyperspectralImage dst) {
-		for (int i = 0; i < dst.getNumberOfBands(); i++) {
+		for (int i = 0; i < this.numComponents; i++) {
 			for (int j = 0; j < dst.getNumberOfLines(); j++) {
 				for (int k = 0; k < dst.getNumberOfSamples(); k++) {
 					dst.setValueAt(src[i][j][k], i, j, k);
@@ -67,6 +68,11 @@ public class NoDimensionalityReduction implements DimensionalityReduction{
 	@Override
 	public double getMinValue(HyperspectralImage img) {
 		return img.getDataType().getMinValue();
+	}
+
+	@Override
+	public void setNumComponents(int numComponents) {
+		this.numComponents = numComponents;
 	}
 
 }
