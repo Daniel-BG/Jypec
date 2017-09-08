@@ -289,33 +289,28 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
     }
 
 	@Override
-	public void reduce(HyperspectralImage src, HyperspectralImage dst) {
-    	if (src.getNumberOfLines() != dst.getNumberOfLines() ||
-    			src.getNumberOfSamples() != dst.getNumberOfSamples() ||
-    			src.getNumberOfBands() != this.sampleSize ||
-    			dst.getNumberOfBands() != this.numComponents) {
-    		throw new IllegalArgumentException("Image dimensions do not match with the expected PCA matrix transform size");
-    	}
-    	
+	public double[][][] reduce(HyperspectralImage src) {
+		double[][][] res = new double[src.getNumberOfBands()][src.getNumberOfLines()][src.getNumberOfSamples()];
 		for (int i = 0; i < src.getNumberOfLines(); i++) {
 			for (int j = 0; j < src.getNumberOfSamples(); j++) {
-				dst.setPixel(this.sampleToEigenSpace(src.getPixel(i, j)), i, j);
+				double[] proj = this.sampleToEigenSpace(src.getPixel(i, j));
+				for (int k = 0; k < src.getNumberOfBands(); k++) {
+					res[k][i][j] = proj[k];
+				}
 			}
 		}
+		return res;
 	}
 
 	@Override
-	public void boost(HyperspectralImage src, HyperspectralImage dst) {
-    	if (src.getNumberOfLines() != dst.getNumberOfLines() ||
-    			src.getNumberOfSamples() != dst.getNumberOfSamples() ||
-    			src.getNumberOfBands() != this.numComponents ||
-    			dst.getNumberOfBands() != this.sampleSize) {
-    		throw new IllegalArgumentException("Image dimensions do not match with the expected PCA matrix transform size");
-    	}
-    	
-		for (int i = 0; i < src.getNumberOfLines(); i++) {
-			for (int j = 0; j < src.getNumberOfSamples(); j++) {
-				dst.setPixel(this.eigenToSampleSpace(src.getPixel(i, j)), i, j);
+	public void boost(double[][][] src, HyperspectralImage dst) {
+		double[] pixel = new double[dst.getNumberOfSamples()];
+		for (int i = 0; i < dst.getNumberOfLines(); i++) {
+			for (int j = 0; j < dst.getNumberOfSamples(); j++) {
+				for (int k = 0; k < dst.getNumberOfBands(); k++) {
+					pixel[k] = src[k][i][j];
+				}
+				dst.setPixel(this.eigenToSampleSpace(pixel), i, j);
 			}
 		}
 	}

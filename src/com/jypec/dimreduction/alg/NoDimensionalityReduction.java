@@ -23,13 +23,27 @@ public class NoDimensionalityReduction implements DimensionalityReduction{
 	}
 
 	@Override
-	public void reduce(HyperspectralImage source, HyperspectralImage dst) {
-		dst.copyDataFrom(source);
+	public double[][][] reduce(HyperspectralImage src) {
+		double [][][] res = new double[src.getNumberOfBands()][src.getNumberOfLines()][src.getNumberOfSamples()];
+		for (int i = 0; i < src.getNumberOfBands(); i++) {
+			for (int j = 0; j < src.getNumberOfLines(); j++) {
+				for (int k = 0; k < src.getNumberOfSamples(); k++) {
+					res[i][j][k] = src.getValueAt(i, j, k);
+				}
+			}
+		}
+		return res;
 	}
 
 	@Override
-	public void boost(HyperspectralImage source, HyperspectralImage dst) {
-		dst.copyDataFrom(source);
+	public void boost(double[][][] src, HyperspectralImage dst) {
+		for (int i = 0; i < dst.getNumberOfBands(); i++) {
+			for (int j = 0; j < dst.getNumberOfLines(); j++) {
+				for (int k = 0; k < dst.getNumberOfSamples(); k++) {
+					dst.setValueAt(src[i][j][k], i, j, k);
+				}
+			}
+		}
 	}
 
 	@Override

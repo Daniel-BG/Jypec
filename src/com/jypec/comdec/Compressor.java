@@ -60,13 +60,13 @@ public class Compressor {
 		/** Now compute the max value that this newly created basis might have, and allocate an image with enough space for it */
 		double newMaxVal = dr.getMaxValue(srcImg);
 		ImageDataType newDataType = dr.getNewDataType(dr.getMaxValue(srcImg)); 
-		HyperspectralImage reduced = new HyperspectralImage(null, newDataType, this.pcaDim, lines, samples);
+		HyperspectralImage result = new HyperspectralImage(null, newDataType, this.pcaDim, lines, samples);
 		cp.newMaxVal = newMaxVal;
 		cp.redBitDepth = newDataType.getBitDepth();
 		
 		/** Project all image values onto the reduced space */
 		dr.train(srcImg, this.pcaDim);
-		dr.reduce(srcImg, reduced);
+		double[][][] reduced = dr.reduce(srcImg);
 		
 		/** create the wavelet transform, quantizer, and coder we'll be using */
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), this.wavePasses);
@@ -80,8 +80,8 @@ public class Compressor {
 		/** Proceed to compress the reduced image */
 		for (int i = 0; i < pcaDim; i++) {
 			/** Apply the wavelet transform */
-			HyperspectralBand hb = reduced.getBand(i);
-			double[][] waveForm = hb.toWave(0, 0, lines, samples);
+			HyperspectralBand hb = result.getBand(i);
+			double[][] waveForm = reduced[i];
 			bdw.forwardTransform(waveForm, lines, samples);
 			
 			//TODO try to calculate here the max and min values of the transformed wave, and then create the quantizer based on those. Bit depth might also be adjusted if

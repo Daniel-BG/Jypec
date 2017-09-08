@@ -40,14 +40,15 @@ public class Decompressor {
 		
 		/** Uncompress the data stream */
 		ImageDataType redDT = dr.getNewDataType(cp.newMaxVal);//new ImageDataType(cp.redBitDepth, true);
-		HyperspectralImage reduced = new HyperspectralImage(null, redDT, dr.getNumComponents(), cp.lines, cp.samples);
+		HyperspectralImage result = new HyperspectralImage(null, redDT, dr.getNumComponents(), cp.lines, cp.samples);
+		double[][][] reduced = new double[result.getNumberOfBands()][result.getNumberOfLines()][result.getNumberOfSamples()];
 		EBDecoder decoder = new EBDecoder();
 		MatrixQuantizer mq = new MatrixQuantizer(redDT.getBitDepth() - 1, 0, cp.guardBits, -cp.newMaxVal, cp.newMaxVal, 0.5);
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
 		
 		/** Proceed to uncompress the reduced image band by band */
 		for (int i = 0; i < dr.getNumComponents(); i++) {
-			HyperspectralBand hb = reduced.getBand(i);
+			HyperspectralBand hb = result.getBand(i);
 			/** Now divide into blocks and decode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
 			for (CodingBlock block: blocker) {			
@@ -56,12 +57,11 @@ public class Decompressor {
 			}
 			
 			/** dequantize the wave */
-			double[][] waveForm = new double[cp.lines][cp.samples];
+			double[][] waveForm = reduced[i];
 			mq.dequantize(hb, waveForm, 0, 0, cp.lines, cp.samples);
 			
 			/** Apply the reverse wavelet transform */
 			bdw.reverseTransform(waveForm, cp.lines, cp.samples);
-			hb.fromWave(waveForm, 0, 0, cp.lines, cp.samples);
 		}
 		
 		

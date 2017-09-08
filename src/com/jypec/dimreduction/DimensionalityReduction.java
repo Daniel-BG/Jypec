@@ -28,9 +28,9 @@ public interface DimensionalityReduction {
 	 * Reduces the spectral dimension of the given image, into a new space. 
 	 * The spatial dimensions of the image remain unchanged. 
 	 * @param source the source image
-	 * @param dst will hold the result: the source image projected into the smaller dimension space
+	 * @return the source image projected into the smaller dimension space
 	 */
-	public void reduce(HyperspectralImage source, HyperspectralImage dst);
+	public double[][][] reduce(HyperspectralImage source);
 	
 	
 	
@@ -40,7 +40,7 @@ public interface DimensionalityReduction {
 	 * @param source the source image (in the reduced dimension space)
 	 * @param dst will hold the result: the original image in the original space
 	 */
-	public void boost(HyperspectralImage source, HyperspectralImage dst);
+	public void boost(double[][][] source, HyperspectralImage dst);
 	
 	
 	
