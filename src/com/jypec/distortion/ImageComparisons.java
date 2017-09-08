@@ -64,6 +64,31 @@ public class ImageComparisons {
 		return PSNR(mse, maxVal);
 	}
 	
+	
+	/**
+	 * @param h1
+	 * @param h2
+	 * @return the signal noise ratio between the given images
+	 */
+	public static double SNR(HyperspectralImage h1, HyperspectralImage h2) {
+		double var = ImageOperations.variance(h1);
+		double mse = MSE(h1, h2);
+		return 10 * Math.log10(var / mse);
+	}
+	
+	
+	/**
+	 * @param h1
+	 * @param h2
+	 * @return the signal noise ratio between the given images
+	 */
+	public static double SNR(HyperspectralBand h1, HyperspectralBand h2) {
+		double var = ImageOperations.variance(h1);
+		double mse = MSE(h1, h2);
+		return 10 * Math.log10(var / mse);
+	}
+	
+	
 	private static double PSNR (double mse, double max) {
 		if (mse == 0d) {
 			return Double.POSITIVE_INFINITY;
@@ -120,6 +145,51 @@ public class ImageComparisons {
 	}
 	
 	
-
+	/**
+	 * @param h1
+	 * @param h2
+	 * @return the maximum squared error (difference between samples squared)
+	 */
+	public static double maxSE (HyperspectralImage h1, HyperspectralImage h2) {
+		if (!h1.sizeAndTypeEquals(h2)) {
+			throw new IllegalArgumentException("Image sizes do not match!");
+		}
+		//add up all squared differences
+		double acc = 0;
+		for (int i = 0; i < h1.getNumberOfBands(); i++) {
+			for (int j = 0; j < h1.getNumberOfLines(); j++) {
+				for (int k = 0; k < h1.getNumberOfSamples(); k++) {
+					double val = h1.getValueAt(i, j, k) - h2.getValueAt(i, j, k);
+					val *= val;
+					if (val > acc)
+						acc = val;
+				}
+			}
+		}
+		return acc;
+	}
+	
+	
+	/**
+	 * @param h1
+	 * @param h2
+	 * @return the maximum squared error (difference between samples squared)
+	 */
+	public static double maxSE (HyperspectralBand h1, HyperspectralBand h2) {
+		if (!h1.sizeAndTypeEquals(h2)) {
+			throw new IllegalArgumentException("Image sizes do not match!");
+		}
+		//add up all squared differences
+		double acc = 0;
+		for (int j = 0; j < h1.getNumberOfLines(); j++) {
+			for (int k = 0; k < h1.getNumberOfSamples(); k++) {
+				double val = h1.getValueAt(j, k) - h2.getValueAt(j, k);
+				val *= val;
+				if (val > acc)
+					acc = val;
+			}
+		}
+		return acc;
+	}
 	
 }

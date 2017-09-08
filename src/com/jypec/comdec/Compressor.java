@@ -58,7 +58,7 @@ public class Compressor {
 		cp.guardBits = this.guardBits;
 		
 		/** Now compute the max value that this newly created basis might have, and allocate an image with enough space for it */
-		double newMaxVal = dr.getMaxValue(srcImg); 
+		double newMaxVal = dr.getMaxValue(srcImg);
 		ImageDataType newDataType = dr.getNewDataType(dr.getMaxValue(srcImg)); 
 		HyperspectralImage reduced = new HyperspectralImage(null, newDataType, this.pcaDim, lines, samples);
 		cp.newMaxVal = newMaxVal;
@@ -83,6 +83,9 @@ public class Compressor {
 			HyperspectralBand hb = reduced.getBand(i);
 			double[][] waveForm = hb.toWave(0, 0, lines, samples);
 			bdw.forwardTransform(waveForm, lines, samples);
+			
+			//TODO try to calculate here the max and min values of the transformed wave, and then create the quantizer based on those. Bit depth might also be adjusted if
+			//necessary.
 			
 			/** quantize the transform and save the quantization over the old image */
 			mq.quantize(waveForm, hb, 0, 0, lines, samples);

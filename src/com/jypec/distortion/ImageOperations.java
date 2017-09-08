@@ -57,4 +57,75 @@ public class ImageOperations {
 		}
 		return minMax;
 	}
+	
+	
+	/**
+	 * @param h1
+	 * @return the average value of the samples in h1
+	 */
+	public static double averageValue(HyperspectralImage h1) {
+		double acc = 0;
+		for (int i = 0; i < h1.getNumberOfBands(); i++) {
+			for (int j = 0; j < h1.getNumberOfLines(); j++) {
+				for (int k = 0; k < h1.getNumberOfSamples(); k++) {
+					acc += (double) h1.getValueAt(i, j, k);
+				}
+			}
+		}
+		int dim = h1.getNumberOfBands() * h1.getNumberOfLines() * h1.getNumberOfSamples();
+		return acc / (double) dim;
+	}
+	
+	
+	/**
+	 * @param h1
+	 * @return the average value of the samples in h1
+	 */
+	public static double averageValue(HyperspectralBand h1) {
+		double acc = 0;
+		for (int j = 0; j < h1.getNumberOfLines(); j++) {
+			for (int k = 0; k < h1.getNumberOfSamples(); k++) {
+				acc += (double) h1.getValueAt(j, k);
+			}
+		}
+		int dim = h1.getNumberOfLines() * h1.getNumberOfSamples();
+		return acc / (double) dim;
+	}
+	
+	
+	/**
+	 * @param h1
+	 * @return the variance of the samples of the given image
+	 */
+	public static double variance(HyperspectralImage h1) {
+		double avg = averageValue(h1);
+		double acc = 0;
+		for (int i = 0; i < h1.getNumberOfBands(); i++) {
+			for (int j = 0; j < h1.getNumberOfLines(); j++) {
+				for (int k = 0; k < h1.getNumberOfSamples(); k++) {
+					double val = (double) h1.getValueAt(i, j, k) - avg;
+					acc += val * val;
+				}
+			}
+		}
+		int dim = h1.getNumberOfBands() * h1.getNumberOfLines() * h1.getNumberOfSamples();
+		return acc / (double) dim;
+	}
+	
+	/**
+	 * @param h1
+	 * @return the variance of the samples of the given image
+	 */
+	public static double variance(HyperspectralBand h1) {
+		double avg = averageValue(h1);
+		double acc = 0;
+		for (int j = 0; j < h1.getNumberOfLines(); j++) {
+			for (int k = 0; k < h1.getNumberOfSamples(); k++) {
+				double val = (double) h1.getValueAt(j, k) - avg;
+				acc += val * val;
+			}
+		}
+		int dim = h1.getNumberOfLines() * h1.getNumberOfSamples();
+		return acc / (double) dim;
+	}
 }

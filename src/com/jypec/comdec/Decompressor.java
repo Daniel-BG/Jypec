@@ -56,7 +56,7 @@ public class Decompressor {
 			}
 			
 			/** dequantize the wave */
-			double[][] waveForm = hb.toWave(0, 0, cp.lines, cp.samples);
+			double[][] waveForm = new double[cp.lines][cp.samples];
 			mq.dequantize(hb, waveForm, 0, 0, cp.lines, cp.samples);
 			
 			/** Apply the reverse wavelet transform */
