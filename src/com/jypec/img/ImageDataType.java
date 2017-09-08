@@ -1,5 +1,7 @@
 package com.jypec.img;
 
+import com.jypec.util.MathOperations;
+
 /**
  * Types of data that can be contained in the images and functions to treat them properly
  * @author Daniel
@@ -43,7 +45,7 @@ public class ImageDataType {
 	
 	
 	/**
-	 * @return this type's bit depth
+	 * @return this type's bit depth. Sign is included here. So bitDepth of 8 signed is 7 magnitude + 1 sign
 	 */
 	public int getBitDepth() {
 		return this.bitDepth;
@@ -167,8 +169,48 @@ public class ImageDataType {
 	/**
 	 * @return the maximum value this data type can store (positive or negative)
 	 */
-	public double getAbsoluteMaxValue() {
+	public int getAbsoluteMaxValue() {
 		return this.magnitudeLimit;
+	}
+	
+	/**
+	 * @return the maximum value this data type can have
+	 */
+	public int getMaxValue() {
+		return this.magnitudeLimit;
+	}
+
+	/**
+	 * @return the minimum value this data type can have
+	 */
+	public int getMinValue() {
+		return this.isSigned() ? -this.magnitudeLimit : 0;
+	}
+
+
+	/**
+	 * @param newMinVal
+	 * @param newMaxVal
+	 * @return a data type that can fit the whole given range in the least bits possible
+	 */
+	public static ImageDataType findBest(int newMinVal, int newMaxVal) {
+		if (newMinVal > 0 || newMaxVal < 0) {
+			throw new IllegalArgumentException("These values will work but are not ideal. Maybe fix this to shift the values to the [0, max-min] range");
+		}
+		
+		int absMax = Math.max(Math.abs(newMaxVal), Math.abs(newMinVal));
+		boolean signed = newMinVal < 0;
+		
+		return new ImageDataType((int) Math.ceil(MathOperations.logBase(absMax, 2d)), signed);
+	}
+	
+	/**
+	 * @param newMinVal
+	 * @param newMaxVal
+	 * @return same as {@link #findBest(int, int)} but ceiling max and flooring min
+	 */
+	public static ImageDataType findBest(double newMinVal, double newMaxVal) {
+		return findBest((int) Math.floor(newMinVal), (int) Math.ceil(newMaxVal));
 	}
 
 }

@@ -24,10 +24,13 @@ public class ComParameters {
 	public int srcBitDepth;
 	/** Flag indicating if the source image's samples are signed (the reduced one is always signed) */
 	public boolean srcSigned;
-	/** Max values of reduced image */
+	/** Max value of reduced image */
 	public double newMaxVal;
+	/** Min value of reduced image*/
+	public double newMinVal;
 	/** Number of guard bits */
 	public int guardBits;
+
 	
 	
 	
@@ -44,6 +47,7 @@ public class ComParameters {
 		bw.writeNBitNumber(this.srcBitDepth, ComDecConstants.IMAGE_BIT_DEPTH_BITS);
 		bw.writeBoolean(this.srcSigned);
 		bw.writeDouble(this.newMaxVal);
+		bw.writeDouble(this.newMinVal);
 		bw.writeNBitNumber(this.guardBits, ComDecConstants.GUARD_BITS_BITS);
 	}
 	
@@ -61,6 +65,7 @@ public class ComParameters {
 		this.srcBitDepth = bw.readNBitNumber(ComDecConstants.IMAGE_BIT_DEPTH_BITS);
 		this.srcSigned = bw.readBoolean();
 		this.newMaxVal = bw.readDouble();
+		this.newMinVal = bw.readDouble();
 		this.guardBits = bw.readNBitNumber(ComDecConstants.GUARD_BITS_BITS);
 	}
 	
@@ -80,6 +85,7 @@ public class ComParameters {
 				this.srcBitDepth == other.srcBitDepth &&
 				this.srcSigned == other.srcSigned &&
 				this.newMaxVal == other.newMaxVal &&
+				this.newMinVal == other.newMinVal &&
 				this.guardBits == other.guardBits;
 	}
 

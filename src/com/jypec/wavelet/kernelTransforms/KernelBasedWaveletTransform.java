@@ -47,4 +47,35 @@ public class KernelBasedWaveletTransform implements Wavelet {
 		ArrayTransforms.copy(res, s, n);
 	}
 
+
+	private double getLimit(double max, double min, double fp, double fn) {
+		double limit = 0;
+		limit += max > 0 ? fp * max : 0;
+		limit += min < 0 ? fn * min : 0;
+		return limit;
+	}
+
+	@Override
+	public double maxResult(double min, double max) {
+		double hpp = this.reverseHighpass.positiveSum();
+		double hpn = this.reverseHighpass.negativeSum();
+		double lpp = this.reverseLowpass.positiveSum();
+		double lpn = this.reverseLowpass.negativeSum();
+		
+		return Math.max(getLimit(max, min, hpp, hpn), getLimit(max, min, lpp, lpn));
+	}
+
+
+
+	@Override
+	public double minResult(double min, double max) {
+		double hpp = this.reverseHighpass.positiveSum();
+		double hpn = this.reverseHighpass.negativeSum();
+		double lpp = this.reverseLowpass.positiveSum();
+		double lpn = this.reverseLowpass.negativeSum();
+
+		//reverse the pn and pp since this goes the other way aroudn
+		return Math.min(getLimit(max, min, hpn, hpp), getLimit(max, min, lpn, lpp));
+	}
+
 }

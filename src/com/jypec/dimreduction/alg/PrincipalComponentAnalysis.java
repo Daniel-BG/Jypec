@@ -10,7 +10,6 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
-import com.jypec.img.ImageDataType;
 import com.jypec.util.MathOperations;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 
@@ -339,8 +338,8 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
 	}
 
 	@Override
-	public ImageDataType getNewDataType(double maxValue) {
-		return new ImageDataType((int) Math.ceil(MathOperations.logBase(maxValue, 2d)), true);
+	public double getMinValue(HyperspectralImage img) {
+		return -MathOperations.getMaximumDistance(img.getDataType().getMagnitudeAbsoluteRange(), img.getNumberOfBands());
 	}
 
     

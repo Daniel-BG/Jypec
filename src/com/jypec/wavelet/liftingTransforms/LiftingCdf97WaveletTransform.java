@@ -2,6 +2,7 @@ package com.jypec.wavelet.liftingTransforms;
 
 import com.jypec.util.arrays.ArrayTransforms;
 import com.jypec.wavelet.Wavelet;
+import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
 
 /**
  * CDF 9 7 adaptation from:
@@ -103,6 +104,16 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 		predict(s, n, -LiftingCdf97WaveletTransform.COEFF_PREDICT_2);
 		update(s, n, -LiftingCdf97WaveletTransform.COEFF_UPDATE_1);
 		predict(s, n, -LiftingCdf97WaveletTransform.COEFF_PREDICT_1);
+	}
+
+	@Override
+	public double maxResult(double min, double max) {
+		return new KernelCdf97WaveletTransform().maxResult(min, max);
+	}
+
+	@Override
+	public double minResult(double min, double max) {
+		return new KernelCdf97WaveletTransform().minResult(min, max);
 	}
 	
 }

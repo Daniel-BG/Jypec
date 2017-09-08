@@ -2,7 +2,6 @@ package com.jypec.dimreduction;
 
 import com.jypec.comdec.ComParameters;
 import com.jypec.img.HyperspectralImage;
-import com.jypec.img.ImageDataType;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 
 /**
@@ -72,12 +71,12 @@ public interface DimensionalityReduction {
 	 * @return the maximum value that the reduced image can have on its samples
 	 */
 	public double getMaxValue(HyperspectralImage img);
-
+	
 	/**
-	 * @param maxValue the max absolute value of the image for which to calculate the reduced data type
-	 * @return the reduced image's data type
+	 * @param img where to get the min value from
+	 * @return the minimum value that the reduced image can have on its samples
 	 */
-	public ImageDataType getNewDataType(double maxValue);
+	public double getMinValue(HyperspectralImage img);
 	
 
 }

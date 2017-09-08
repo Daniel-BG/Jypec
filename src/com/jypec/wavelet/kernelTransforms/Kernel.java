@@ -133,4 +133,32 @@ public abstract class Kernel {
 	public double cornerCaseFactor() {
 		return 1.0;
 	}
+	
+	/**
+	 * @return the sum of all positive coefficients within the kernel
+	 * this result is always >= 0
+	 */
+	public double positiveSum() {
+		double acc = 0;
+		for (int i = 0; i < this.lenght; i++) {
+			if (this.coefficients[i] > 0) {
+				acc += this.coefficients[i] * i == 0 ? 1 : 2;
+			}
+		}
+		return acc;
+	}
+	
+	/**
+	 * @return the sum of all negative coefficients within the kernel
+	 * this result is always <= 0
+	 */
+	public double negativeSum() {
+		double acc = 0;
+		for (int i = 0; i < this.lenght; i++) {
+			if (this.coefficients[i] < 0) {
+				acc += this.coefficients[i] * i == 0 ? 1 : 2;
+			}
+		}
+		return acc;
+	}
 }

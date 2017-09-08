@@ -7,6 +7,7 @@ import com.jypec.img.HyperspectralBand;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
 import com.jypec.quantization.MatrixQuantizer;
+import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.bits.BitStream;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 import com.jypec.wavelet.BidimensionalWavelet;
@@ -59,18 +60,19 @@ public class Compressor {
 		
 		/** Now compute the max value that this newly created basis might have, and allocate an image with enough space for it */
 		double newMaxVal = dr.getMaxValue(srcImg);
-		ImageDataType newDataType = dr.getNewDataType(dr.getMaxValue(srcImg)); 
+		double newMinVal = dr.getMinValue(srcImg);
+		ImageDataType newDataType = ImageDataType.findBest(newMinVal, newMaxVal);
 		HyperspectralImage reduced = new HyperspectralImage(null, newDataType, this.pcaDim, lines, samples);
 		cp.newMaxVal = newMaxVal;
+		cp.newMinVal = newMinVal;
 		cp.redBitDepth = newDataType.getBitDepth();
 		
 		/** Project all image values onto the reduced space */
 		dr.train(srcImg, this.pcaDim);
 		dr.reduce(srcImg, reduced);
 		
-		/** create the wavelet transform, quantizer, and coder we'll be using */
+		/** create the wavelet transform, and coder we'll be using, which won't change over the bands */
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), this.wavePasses);
-		MatrixQuantizer mq = new MatrixQuantizer(newDataType.getBitDepth() - 1, 0, cp.guardBits, -newMaxVal, newMaxVal, 0.5);
 		EBCoder coder = new EBCoder();
 		
 		/** Save metadata before compressing the image */
@@ -80,20 +82,26 @@ public class Compressor {
 		/** Proceed to compress the reduced image */
 		for (int i = 0; i < pcaDim; i++) {
 			/** Apply the wavelet transform */
-			HyperspectralBand hb = reduced.getBand(i);
-			double[][] waveForm = hb.toWave(0, 0, lines, samples);
+			double[][] waveForm = reduced.getBand(i).toWave(0, 0, lines, samples);
 			bdw.forwardTransform(waveForm, lines, samples);
+			double[] minMax = MatrixOperations.minMax(waveForm);
+			/** get max and min from the resulting transform, and create the best data type possible */
+			ImageDataType targetType = ImageDataType.findBest(minMax[0], minMax[1]);
+			/** asd */
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.5);
 			
-			//TODO try to calculate here the max and min values of the transformed wave, and then create the quantizer based on those. Bit depth might also be adjusted if
-			//necessary.
+			bw.writeDouble(minMax[0]);
+			bw.writeDouble(minMax[1]);
 			
-			/** quantize the transform and save the quantization over the old image */
+			
+			/** quantize the transform and save the quantization over the current band */
+			HyperspectralBand hb = HyperspectralBand.generateRogueBand(targetType, lines, samples);
 			mq.quantize(waveForm, hb, 0, 0, lines, samples);
 			
 			/** Now divide into blocks and encode it*/
 			Blocker blocker = new Blocker(hb, this.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
 			for (CodingBlock block: blocker) {
-				block.setDepth(newDataType.getBitDepth()); //depth adjusted since there might be more bits
+				block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
 				coder.code(block, output);
 			}
 		}
