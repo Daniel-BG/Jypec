@@ -3,8 +3,6 @@ package com.jypec.dimreduction.alg;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
-import com.jypec.img.ImageDataType;
-import com.jypec.util.MathOperations;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 
 /**
@@ -63,12 +61,12 @@ public class NoDimensionalityReduction implements DimensionalityReduction{
 
 	@Override
 	public double getMaxValue(HyperspectralImage img) {
-		return img.getDataType().getAbsoluteMaxValue();
+		return img.getDataType().getMaxValue();
 	}
 
 	@Override
-	public ImageDataType getNewDataType(double maxValue) {
-		return new ImageDataType((int) Math.ceil(MathOperations.logBase(maxValue, 2d)), false);
+	public double getMinValue(HyperspectralImage img) {
+		return img.getDataType().getMinValue();
 	}
 
 }

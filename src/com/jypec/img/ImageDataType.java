@@ -1,5 +1,7 @@
 package com.jypec.img;
 
+import com.jypec.util.MathOperations;
+
 /**
  * Types of data that can be contained in the images and functions to treat them properly
  * @author Daniel
@@ -33,6 +35,13 @@ public class ImageDataType {
 	 * @param signed
 	 */
 	public ImageDataType(int bitDepth, boolean signed) {
+		this.setup(bitDepth, signed);
+	}
+	
+	private void setup(int bitDepth, boolean signed) {
+		if (bitDepth == 0 || bitDepth > 32) {
+			throw new IllegalArgumentException("Data type not valid. Bit depth is between 1 and 32 both inclusive");
+		}
 		this.bitDepth = bitDepth;
 		this.signed = signed;
 		this.magnitudeDepth = this.bitDepth - (this.signed ? 1 : 0);
@@ -43,7 +52,7 @@ public class ImageDataType {
 	
 	
 	/**
-	 * @return this type's bit depth
+	 * @return this type's bit depth. Sign is included here. So bitDepth of 8 signed is 7 magnitude + 1 sign
 	 */
 	public int getBitDepth() {
 		return this.bitDepth;
@@ -167,8 +176,64 @@ public class ImageDataType {
 	/**
 	 * @return the maximum value this data type can store (positive or negative)
 	 */
-	public double getAbsoluteMaxValue() {
+	public int getAbsoluteMaxValue() {
+		return this.magnitudeLimit;
+	}
+	
+	/**
+	 * @return the maximum value this data type can have
+	 */
+	public int getMaxValue() {
 		return this.magnitudeLimit;
 	}
 
+	/**
+	 * @return the minimum value this data type can have
+	 */
+	public int getMinValue() {
+		return this.isSigned() ? -this.magnitudeLimit : 0;
+	}
+
+
+	/**
+	 * @param newMinVal
+	 * @param newMaxVal
+	 * @param extra extra bits to add over the minimum detected
+	 * @return a data type that can fit the whole given range in the least bits possible
+	 */
+	public static ImageDataType findBest(int newMinVal, int newMaxVal, int extra) {
+		if (newMinVal > 0 || newMaxVal < 0) {
+			throw new IllegalArgumentException("These values will work but are not ideal. Maybe fix this to shift the values to the [0, max-min] range");
+		}
+		
+		int absMax = Math.max(Math.abs(newMaxVal), Math.abs(newMinVal));
+		boolean signed = newMinVal < 0;
+		
+		return new ImageDataType(extra + (int) Math.ceil(MathOperations.logBase(absMax, 2d)), signed);
+	}
+	
+	/**
+	 * @param newMinVal
+	 * @param newMaxVal
+	 * @param extra extra bits to add over the minimum detected
+	 * @return same as {@link #findBest(int, int)} but ceiling max and flooring min
+	 */
+	public static ImageDataType findBest(double newMinVal, double newMaxVal, int extra) {
+		return findBest((int) Math.floor(newMinVal), (int) Math.ceil(newMaxVal), extra);
+	}
+	
+	
+	/**
+	 * Change the precision of this type
+	 * @param precisionChange the change in bit depth precision
+	 */
+	public void mutatePrecision(int precisionChange) {
+		this.setup(this.bitDepth + precisionChange, this.signed);
+	}
+
+	
+	@Override
+	public String toString() {
+		return this.bitDepth + "bit " + (this.signed ? "signed" : "unsigned");
+	}
 }

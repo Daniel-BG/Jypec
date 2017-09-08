@@ -28,4 +28,20 @@ public interface Wavelet {
 	 */
 	public void reverseTransform(double[] s, int n);
 	
+	/**
+	 * @param min
+	 * @param max
+	 * @return the maximum value that this wavelet will output when fed
+	 * values in the given range
+	 */
+	public double maxResult(double min, double max);
+	
+	/**
+	 * @param min
+	 * @param max
+	 * @return the minimum value that this wavelet will output when fed
+	 * values in the given range
+	 */
+	public double minResult(double min, double max);
+	
 }

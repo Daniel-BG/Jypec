@@ -34,6 +34,17 @@ public class HyperspectralBand implements IntegerMatrix {
 		this.samples = samples;
 	}
 	
+	/**
+	 * Builds a hyperspectral band with no image attached (one will be created underneath with 1 band)
+	 * @param type 
+	 * @param lines 
+	 * @param samples
+	 * @return a band with no image attached
+	 */
+	public static HyperspectralBand generateRogueBand (ImageDataType type, int lines, int samples) {
+		return new HyperspectralImage(null, type, 1, lines, samples).getBand(0);
+	}
+	
 	@Override
 	public int getDataAt(int line, int sample) {
 		return this.hyimg.getDataAt(this.band, line, sample);

@@ -17,4 +17,6 @@ public class ComDecConstants {
 	public static final int WAVE_PASSES_BITS = 8;
 	/** Bit depth of the number of guard bits */
 	public static final int GUARD_BITS_BITS = 8;
+	/** Bit depth of the number of bits reduced */
+	public static final int REDUCTION_BITS_BITS = 8;
 }

@@ -39,25 +39,31 @@ public class Decompressor {
 		dr.loadFrom(bw, cp);
 		
 		/** Uncompress the data stream */
-		ImageDataType redDT = dr.getNewDataType(cp.newMaxVal);//new ImageDataType(cp.redBitDepth, true);
-		HyperspectralImage result = new HyperspectralImage(null, redDT, dr.getNumComponents(), cp.lines, cp.samples);
-		double[][][] reduced = new double[result.getNumberOfBands()][result.getNumberOfLines()][result.getNumberOfSamples()];
+		//ImageDataType redDT = ImageDataType.findBest(cp.newMinVal, cp.newMaxVal);//new ImageDataType(cp.redBitDepth, true);
+		double[][][] reduced = new double[dr.getNumComponents()][cp.lines][cp.samples];
+
 		EBDecoder decoder = new EBDecoder();
-		MatrixQuantizer mq = new MatrixQuantizer(redDT.getBitDepth() - 1, 0, cp.guardBits, -cp.newMaxVal, cp.newMaxVal, 0.5);
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
 		
 		/** Proceed to uncompress the reduced image band by band */
 		for (int i = 0; i < dr.getNumComponents(); i++) {
-			HyperspectralBand hb = result.getBand(i);
+			/** Get this band's max and min values, and use that to create the quantizer */
+			double bandMin = bw.readDouble();
+			double bandMax = bw.readDouble();
+			ImageDataType targetType = ImageDataType.findBest(bandMin, bandMax, 0);
+			targetType.mutatePrecision(-cp.bitReduction);
+			HyperspectralBand hb = HyperspectralBand.generateRogueBand(targetType, cp.lines, cp.samples);
 			/** Now divide into blocks and decode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
 			for (CodingBlock block: blocker) {			
-				block.setDepth(redDT.getBitDepth()); //depth adjusted since there might be more bits
+				block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
 				decoder.decode(input, block);
 			}
 			
 			/** dequantize the wave */
 			double[][] waveForm = reduced[i];
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, bandMin, bandMax, 0.375);
+
 			mq.dequantize(hb, waveForm, 0, 0, cp.lines, cp.samples);
 			
 			/** Apply the reverse wavelet transform */
