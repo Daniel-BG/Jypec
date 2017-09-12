@@ -6,6 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import com.jypec.img.HyperspectralImage;
+import com.jypec.util.io.imagewriting.ImageWriterFactory;
+import com.jypec.util.io.imagewriting.ImageWriterFactory.ByteOrdering;
+import com.jypec.util.io.imagewriting.ImageWriterFactory.ImageOrdering;
 
 /**
  * Class for storing data matrices (mostly hyperspectral images)
@@ -30,16 +33,10 @@ public class DataMatrixWriter {
 			out = new RandomAccessFile(fileName, "rw"); //need rw for the file.map function to work
 			FileChannel file = out.getChannel();
 			int expectedBytes = hi.getNumberOfBands() * hi.getNumberOfLines() * hi.getNumberOfSamples() * 2;
-
+			
 			ByteBuffer buf = file.map(FileChannel.MapMode.READ_WRITE, 0, expectedBytes);
-			for (int i = 0; i < hi.getNumberOfBands(); i++) {
-				for (int j = 0; j < hi.getNumberOfLines(); j++) {
-					for (int k = 0; k < hi.getNumberOfSamples(); k++) {
-						short val = (short) hi.getDataAt(i, j, k);
-						buf.putShort((short) (((val << 8) & 0xff00) | ((val >> 8) & 0xff)));
-					}
-				}
-			}
+			ImageWriterFactory.getWriter(ImageOrdering.BSQ, ByteOrdering.LITTLE_ENDIAN, hi.getDataType()).writeToBuffer(hi, buf);
+
 			file.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);

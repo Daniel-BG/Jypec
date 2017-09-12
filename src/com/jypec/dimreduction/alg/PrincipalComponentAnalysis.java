@@ -9,11 +9,8 @@ import org.ejml.data.Complex_F64;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.NormOps_DDRM;
-import org.ejml.dense.row.SingularOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
@@ -90,12 +87,12 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
         numComponents = -1;
     }
 
-    /**
-     * Adds a new sample of the raw data to internal data structure for later processing.  All the samples
-     * must be added before computeBasis is called.
-     *
-     * @param sampleData Sample from original raw data.
-     */
+	/**
+	 * Adds a new sample of the raw data to internal data structure for later processing.  All the samples
+	 * must be added before computeBasis is called.
+	 *
+	 * @param sampleData Sample from original raw data.
+	 */
     public void addSample( double[] sampleData ) {
         if( this.sampleSize != sampleData.length )
             throw new IllegalArgumentException("Unexpected sample size");
