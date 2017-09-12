@@ -3,10 +3,10 @@ package com.jypec.util.io.imagewriting;
 import java.nio.ByteBuffer;
 
 import com.jypec.img.HyperspectralImage;
-import com.jypec.util.io.DataMatrixWriter;
+import com.jypec.util.io.HyperspectralImageWriter;
 
 /**
- * Interface for writing hyperspectral images using {@link DataMatrixWriter}
+ * Interface for writing hyperspectral images using {@link HyperspectralImageWriter}
  * @author Daniel
  *
  */

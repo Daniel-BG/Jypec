@@ -6,62 +6,48 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
+import com.jypec.util.io.IODataTypes.ByteOrdering;
+import com.jypec.util.io.IODataTypes.ImageOrdering;
+import com.jypec.util.io.imagereading.ImageReaderFactory;
 
 /**
  * Generic reader for hyperspectral image data
  * @author Daniel
  *
  */
-public class DataMatrixReader {
+public class HyperspectralImageReader {
 
 	
 	/**
-	 * Reads a hyperspectral image from the given file. The dimensions of the image must be specified, as well as the format.
-	 * A flag indicating if the data is in Little endian format ensures that a wrapper is placed around the reader in order
-	 * to invert the bit-order of the values
-	 * @param file
-	 * @param bands number of bands in the image
-	 * @param lines number of lines in the image
-	 * @param samples number of samples in the image
-	 * @param format format of the image
-	 * @param isLittleEndian if the input data is in LittleEndian format (BigEndian otherwise)
-	 * @return the read image
-	 * @throws FileNotFoundException
+	 * Reads an image from the specified file (containing only the raw data, no headers)
+	 * @param fileName
+	 * @param image
 	 */
-	public static final HyperspectralImage read(String file, int bands, int lines, int samples, ImageDataType format, boolean isLittleEndian) throws FileNotFoundException {
-		HyperspectralImage hi = new HyperspectralImage(null, format, bands, lines, samples);
-		InputStream is = new FileInputStream(new File(file));	//read a file
-		is = new BufferedInputStream(is);						//buffer it
-		if (isLittleEndian) {
-			is = new EndiannessChangerReader(is, format.getByteDepth());
-		}
-		
-		IntegerReader bdr = new IntegerReader(is, format.getBitDepth());
-		
-		for (int i = 0; i < bands; i++) {
-			for (int j = 0; j < lines; j++) {
-				for (int k = 0; k < samples; k++) {
-					try {
-						hi.setDataAt(bdr.read(), i, j, k);
-					} catch (IOException e) {
-						e.printStackTrace();
-						System.exit(0);
-					}
-				}
-			}
-		}
-		
+	public static void readImage(String fileName, HyperspectralImage image) {
+		FileInputStream in = null;
 		try {
-			bdr.close();
+			File f = new File(fileName);
+			in = new FileInputStream(f); 
+			FileChannel file = in.getChannel();
+			ByteBuffer buf = file.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
+			
+			ImageReaderFactory.getReader(ImageOrdering.BSQ, ByteOrdering.LITTLE_ENDIAN, image.getDataType()).readFromBuffer(buf, image);
+
+			file.close();
 		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		return hi;
+			throw new RuntimeException(e);
+		} finally {
+			IOUtilities.safeClose(in);
+		}	
 	}
+	
+
+	
+
 	
 	
 	/**
@@ -112,6 +98,5 @@ public class DataMatrixReader {
 		
 		return hi;
 	}
-	
 	
 }

@@ -3,40 +3,16 @@ package com.jypec.util.io.imagewriting;
 import java.nio.ByteBuffer;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
+import com.jypec.util.io.IOUtilities;
+import com.jypec.util.io.IODataTypes.ByteOrdering;
+import com.jypec.util.io.IODataTypes.ImageOrdering;
 
 /**
  * Factory that gets you your desired ImageWriter object
  * @author Daniel
  *
  */
-public class ImageWriterFactory {
-	
-	/**
-	 * Defines the order of the image samples in the image file
-	 * @author Daniel
-	 */
-	public enum ImageOrdering {
-		/** Band Sequential. Band -> Line -> Sample */
-		BSQ, 
-		/** Band Interleaved by Pixel. Line -> Sample -> Band */
-		BIP, 
-		/** Band Interleaved by Line. Line -> Band -> Sample */
-		BIL
-	};
-	
-	/**
-	 * Ordering of the bytes in the image file. 
-	 * Only applies to byte-width data types
-	 * @author Daniel
-	 *
-	 */
-	public enum ByteOrdering {
-		/** Big endian. Start with the most significant byte in the lowest memory address */
-		BIG_ENDIAN, 
-		/** Little endian. Start with the least significant byte in the lowest memory address */
-		LITTLE_ENDIAN
-	};
-	
+public class ImageWriterFactory {	
 	
 	/**
 	 * @param imgOrdering 
@@ -95,7 +71,7 @@ public class ImageWriterFactory {
 			for (int j = 0; j < hi.getNumberOfLines(); j++) {
 				for (int k = 0; k < hi.getNumberOfSamples(); k++) {
 					for (int i = 0; i < hi.getNumberOfBands(); i++) {
-						putBytes(hi.getDataAt(i, j, k), this.byteOrdering, this.dataBytes, bb);
+						IOUtilities.putBytes(hi.getDataAt(i, j, k), this.byteOrdering, this.dataBytes, bb);
 					}
 				}
 			}
@@ -112,7 +88,7 @@ public class ImageWriterFactory {
 			for (int j = 0; j < hi.getNumberOfLines(); j++) {
 				for (int i = 0; i < hi.getNumberOfBands(); i++) {
 					for (int k = 0; k < hi.getNumberOfSamples(); k++) {
-						putBytes(hi.getDataAt(i, j, k), this.byteOrdering, this.dataBytes, bb);
+						IOUtilities.putBytes(hi.getDataAt(i, j, k), this.byteOrdering, this.dataBytes, bb);
 					}
 				}
 			}
@@ -129,7 +105,7 @@ public class ImageWriterFactory {
 			for (int i = 0; i < hi.getNumberOfBands(); i++) {
 				for (int j = 0; j < hi.getNumberOfLines(); j++) {
 					for (int k = 0; k < hi.getNumberOfSamples(); k++) {
-						putBytes(hi.getDataAt(i, j, k), this.byteOrdering, this.dataBytes, bb);
+						IOUtilities.putBytes(hi.getDataAt(i, j, k), this.byteOrdering, this.dataBytes, bb);
 					}
 				}
 			}
@@ -213,21 +189,6 @@ public class ImageWriterFactory {
 			emptyBuffer(this, bb);
 		}
 	}
-
-	/**
-	 * Puts the specified number of bytes from the value into the buffer, taking into account 
-	 * the ordering requested
-	 * @param val
-	 * @param byteOrdering
-	 * @param dataBytes
-	 * @param bb
-	 */
-	private static void putBytes(int val, ByteOrdering byteOrdering, int dataBytes, ByteBuffer bb) {
-		if (byteOrdering == ByteOrdering.LITTLE_ENDIAN) {
-			val = flipBytes(val, dataBytes);
-		} 
-		putRightBytes(val, dataBytes, bb);
-	}
 	
 	/**
 	 * Empties the specified number of bits from the accumulator
@@ -238,7 +199,7 @@ public class ImageWriterFactory {
 	 */
 	private static void emptyBuffer(BitImageWriter biw, ByteBuffer bb) {
 		if (biw.accBits > 0) {
-			putLeftBytes(biw.acc, (biw.accBits + 7) % 8, bb);
+			IOUtilities.putLeftBytes(biw.acc, (biw.accBits + 7) % 8, bb);
 		}
 		biw.acc = 0;
 		biw.accBits = 0;
@@ -261,82 +222,12 @@ public class ImageWriterFactory {
 		biw.accBits += biw.dataBits;
 		int accBytes = biw.accBits >> 3;
 		if (accBytes > 0) {
-			putLeftBytes(biw.acc, accBytes, bb);
+			IOUtilities.putLeftBytes(biw.acc, accBytes, bb);
 		}
 		int bitsLost = (biw.accBits + biw.dataBits) & 0xf8;
 		biw.acc <<= bitsLost;
 		biw.accBits -= bitsLost;
 	}
 
-	/**
-	 * Put the leftmost bytes in the buffer (from left to right)
-	 * @param val where to take the bytes from
-	 * @param bytes number of bytes to take 
-	 * @param bb where to put the bytes
-	 * @see {@link #putRightBytes(int, int, ByteBuffer)}
-	 */
-	private static void putLeftBytes(int val, int bytes, ByteBuffer bb) {
-		switch (bytes) {
-		case 1:
-			bb.put((byte) (val >> 24));
-			break;
-		case 2:
-			bb.putShort((short) (val >> 16));
-			break;
-		case 3:
-			bb.put((byte) (val >> 24));
-			bb.putShort((short) (val >> 16));
-			break;
-		case 4:
-			bb.putInt(val);
-			break;
-		}
-	}
-	
-	/**
-	 * Put the rightmost bytes in the buffer (from left to right)
-	 * @param val where to take the bytes from
-	 * @param bytes number of bytes to take 
-	 * @param bb where to put the bytes
-	 * @see {@link #putLeftBytes(int, int, ByteBuffer)}
-	 */
-	private static void putRightBytes(int val, int bytes, ByteBuffer bb) {
-		switch (bytes) {
-		case 1:
-			bb.put((byte) val);
-			break;
-		case 2:
-			bb.putShort((short) val);
-			break;
-		case 3:
-			bb.put((byte) (val >> 16));
-			bb.putShort((short) val);
-			break;
-		case 4:
-			bb.putInt(val);
-			break;
-		}
-	}
-	
-	/**
-	 * flip the given number of bytes (basically change from lil endian to big endian
-	 * and vice versa
-	 * @param source integer to be flipped
-	 * @param bytes number of bytes to be flipped
-	 * @return the flipped integer
-	 */
-	private static int flipBytes(int source, int bytes) {
-		switch(bytes) {
-		case 1:
-			return source;
-		case 2:
-			return ((source >> 8) & 0xff) | ((source & 0xff) << 8);
-		case 3:
-			return (source & 0xff00) | ((source >> 16) & 0xff) | ((source & 0xff) << 16);
-		case 4:
-			return ((source & 0xff) << 24) | ((source & 0xff00) << 8) | ((source & 0xff0000) >> 8) | ((source >> 24) & 0xff);
-		}
-		throw new IllegalArgumentException("Cannot work with that size");
-	}
 
 }

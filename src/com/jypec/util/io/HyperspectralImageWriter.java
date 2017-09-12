@@ -6,9 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import com.jypec.img.HyperspectralImage;
+import com.jypec.util.io.IODataTypes.ByteOrdering;
+import com.jypec.util.io.IODataTypes.ImageOrdering;
 import com.jypec.util.io.imagewriting.ImageWriterFactory;
-import com.jypec.util.io.imagewriting.ImageWriterFactory.ByteOrdering;
-import com.jypec.util.io.imagewriting.ImageWriterFactory.ImageOrdering;
 
 /**
  * Class for storing data matrices (mostly hyperspectral images)
@@ -16,7 +16,7 @@ import com.jypec.util.io.imagewriting.ImageWriterFactory.ImageOrdering;
  * @author Daniel
  *
  */
-public class DataMatrixWriter {
+public class HyperspectralImageWriter {
 
 	/**
 	 * From
@@ -41,22 +41,10 @@ public class DataMatrixWriter {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
-			safeClose(out);
+			IOUtilities.safeClose(out);
 		}
 	}
 
-	/**
-	 * Close taking into account a null pointer possibility
-	 * @param out
-	 */
-	private static void safeClose(RandomAccessFile out) {
-		try {
-			if (out != null) {
-				out.close();
-			}
-		} catch (IOException e) {
-			// do nothing
-		}
-	}
+
 
 }
