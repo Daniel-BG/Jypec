@@ -27,8 +27,7 @@ public class ComParametersRecoveryTest {
 		ComParameters cp = new ComParameters();
 		ComParameters cpr = new ComParameters();
 		BitStream bs = new FIFOBitStream();
-		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
-		bw.setStream(bs);
+		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter(bs);
 		Random r = new Random(0);
 		
 		for (int i = 0; i < 100; i++) {

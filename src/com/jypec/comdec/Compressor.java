@@ -38,8 +38,7 @@ public class Compressor {
 	 */
 	public void compress(HyperspectralImage srcImg, BitStream output, DimensionalityReduction dr) {
 		/** We will need a wrapper around the output to make it easier to save numbers */
-		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
-		bw.setStream(output);
+		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter(output);
 		
 		/** First off, extract necessary information from the image and save to stream */
 		cp.feedFrom(srcImg);

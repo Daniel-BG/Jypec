@@ -73,8 +73,8 @@ public class PCARecoveryTest {
 		pca.computeBasis(eigenSize);
 		
 		FIFOBitStream bs = new FIFOBitStream();
-		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
-		bw.setStream(bs);
+		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter(bs);
+		
 		
 		pca.saveTo(bw);
 		

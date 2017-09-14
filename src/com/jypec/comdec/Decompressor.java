@@ -28,8 +28,7 @@ public class Decompressor {
 	 */
 	public HyperspectralImage decompress(BitStream input, DimensionalityReduction dr) {
 		/** Create a wrapper for the stream to easily read/write it */
-		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter();
-		bw.setStream(input);
+		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter(input);
 		
 		/** Need to know the image dimensions and some other values */
 		ComParameters cp = new ComParameters();

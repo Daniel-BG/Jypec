@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.jypec.util.Utilities;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 import com.jypec.util.io.IOUtilities;
 
@@ -74,9 +76,11 @@ public class ImageHeaderData {
 	 */
 	public void loadFromCompressedStream(BitStreamDataReaderWriter brw) {
 		this.setUp();
-		//TODO still does not uncompress streams with embedded data!
 		while (brw.availableBytes() > 0) {
 			ParameterReaderWriter prw = ParameterReaderWriter.readNextCompressedParameter(brw);
+			if (prw.getHeaderConstant() == HeaderConstants.HEADER_TERMINATION) {
+				break;
+			}
 			this.setData(prw.getHeaderConstant(), prw.getData());
 		}
 	}
@@ -90,8 +94,11 @@ public class ImageHeaderData {
 		for (Entry<HeaderConstants, Object> e: this.data.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			prw.setData(e.getValue());
-			prw.compress(brw);
+			if (prw.getHeaderConstant() != HeaderConstants.HEADER_OFFSET) { //do not save the header offset as it is different
+				prw.compress(brw);
+			}
 		}
+		brw.writeByte((byte)HeaderConstants.HEADER_TERMINATION.ordinal());
 	}
 	
 	/**
@@ -100,12 +107,35 @@ public class ImageHeaderData {
 	 * @throws IOException 
 	 */
 	public void saveToUncompressedStream(OutputStream brw) throws IOException {
+		ArrayList<Byte> list = new ArrayList<Byte>();
+		byte[] lineSeparator = "\n".getBytes(StandardCharsets.UTF_8);
+
 		for (Entry<HeaderConstants, Object> e: this.data.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			prw.setData(e.getValue());
-			brw.write(prw.toString().getBytes(StandardCharsets.UTF_8));
-			brw.write("\n".getBytes(StandardCharsets.UTF_8));
+			//add the parameter
+			Utilities.addAllBytes(list, prw.toString().getBytes(StandardCharsets.UTF_8));
+			//add a newline
+			Utilities.addAllBytes(list, lineSeparator);
 		}
+		Utilities.addAllBytes(list, "header offset = ".getBytes(StandardCharsets.UTF_8));
+		
+		Integer listSize = list.size() + lineSeparator.length;
+		Integer totalSize = listSize + listSize.toString().length();
+		if (totalSize.toString().length() != listSize.toString().length()) {
+			totalSize++;
+		}
+		Utilities.addAllBytes(list, totalSize.toString().getBytes());
+		Utilities.addAllBytes(list, lineSeparator);
+		//now the data could be compressed into the outputstream
+		
+		byte[] result = new byte[list.size()];
+		int index = 0;
+		for (Byte b: list) {
+			result[index] = b;
+			index++;
+		}
+		brw.write(result);
 	}
 	
 	

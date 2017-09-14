@@ -16,6 +16,10 @@ public class ImageDataType {
 	public static final ImageDataType UNSIGNED_TWO_BYTE = new ImageDataType(16, false); 
 	/** represents a signed two-byte data type in sign-magnitude form (from -32767 to 32767) */
 	public static final ImageDataType SIGNED_TWO_BYTE = new ImageDataType(16, true); 
+	/** signed 4 byte */
+	public static final ImageDataType SIGNED_FOUR_BYTE = new ImageDataType(32, true);
+	/** unsigned 4 byte */
+	public static final ImageDataType UNSIGNED_FOUR_BYTE = new ImageDataType(32, true);
 	
 	
 	private int bitDepth;
@@ -235,5 +239,34 @@ public class ImageDataType {
 	@Override
 	public String toString() {
 		return this.bitDepth + "bit " + (this.signed ? "signed" : "unsigned");
+	}
+	
+	
+	/**
+	 * @param code
+	 * @return the image data type for the given header code
+	 */
+	public static ImageDataType fromHeaderCode(byte code) {
+		switch((int)code) {
+		case 1:
+			return ImageDataType.UNSIGNED_BYTE;
+		case 2:
+			return ImageDataType.SIGNED_TWO_BYTE;
+		case 3: 
+			return ImageDataType.SIGNED_FOUR_BYTE;
+		case 12:
+			return ImageDataType.UNSIGNED_TWO_BYTE;
+		case 13:
+			return ImageDataType.UNSIGNED_FOUR_BYTE;
+			
+		case 4: //float 32 bit
+		case 5: //double 64 bit
+		case 6: //complex pair of 32 bits
+		case 9: //complex pair of 64 bits
+		case 14: //signed 64 bit long
+		case 15: //unsigned 64 bit long
+		default:
+			throw new UnsupportedOperationException("This data type is not yet supported: " + code);
+		}
 	}
 }

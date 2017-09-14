@@ -6,6 +6,7 @@ import com.jypec.util.io.headerio.primitives.ArrayValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.ByteValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.FloatValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.IntegerValueCompressorDecompressor;
+import com.jypec.util.io.headerio.primitives.NullValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.StringValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.ValueCompressorDecompressor;
 
@@ -150,7 +151,9 @@ public enum HeaderConstants {
 	/** Min and max for z_plot */
 	HEADER_Z_PLOT_RANGE,
 	/** X and Y axis titles for z_plots */
-	HEADER_Z_PLOT_TITLES;
+	HEADER_Z_PLOT_TITLES, 
+	/** Spetial constant that indicates compressed header termination */
+	HEADER_TERMINATION;
 	
 	//create reverse dictionary
 	private static HashMap<String, HeaderConstants> stringValueTranslator;
@@ -261,6 +264,8 @@ public enum HeaderConstants {
 			return "z plot range";
 		case HEADER_Z_PLOT_TITLES:
 			return "z plot titles";
+		case HEADER_TERMINATION: //no string representation
+			return null;
 		default:
 			throw new UnsupportedOperationException("This data type is not implemented. Implement it!");
 		}
@@ -353,6 +358,8 @@ public enum HeaderConstants {
 		case HEADER_SOLAR_IRRADIANCE:
 		case HEADER_WAVELENGTH_UNITS://can be enum'd
 			return new StringValueCompressorDecompressor();
+		case HEADER_TERMINATION:
+			return new NullValueCompressorDecompressor();
 		default:
 			throw new UnsupportedOperationException("This Header constant is not yet implemented");	
 		}

@@ -12,6 +12,16 @@ public class BitStreamDataReaderWriter {
 	
 	private BitStream stream;
 	
+
+	
+	/**
+	 * Create a readerwriter over the given stream
+	 * @param stream
+	 */
+	public BitStreamDataReaderWriter(BitStream stream) {
+		this.setStream(stream);
+	}
+	
 	/**
 	 * @param stream the stream to be used with this IO object
 	 */

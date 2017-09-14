@@ -22,8 +22,8 @@ public class TestBitStreamReaderWriter {
 	@Test
 	public void testDoubles() {
 		BitStream b = new FIFOBitStream();
-		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter();
-		rw.setStream(b);
+		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter(b);
+		
 		Random r = new Random();
 		double[] data = new double[this.testSampleSize];
 		double[] defData = {0d, 1d, -1d, Double.MAX_VALUE, Double.MIN_VALUE, Double.NaN,
@@ -50,8 +50,8 @@ public class TestBitStreamReaderWriter {
 	@Test
 	public void testFloats() {
 		BitStream b = new FIFOBitStream();
-		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter();
-		rw.setStream(b);
+		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter(b);
+		
 		Random r = new Random();
 		float[] data = new float[this.testSampleSize];
 		float[] defData = {0f, 1f, -1f, Float.MAX_VALUE, Float.MIN_VALUE, Float.NaN,
@@ -79,8 +79,8 @@ public class TestBitStreamReaderWriter {
 	@Test
 	public void testInts() {
 		BitStream b = new FIFOBitStream();
-		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter();
-		rw.setStream(b);
+		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter(b);
+		
 		Random r = new Random();
 		int[] data = new int[this.testSampleSize];
 		int[] defData = {0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE};
@@ -107,8 +107,8 @@ public class TestBitStreamReaderWriter {
 	@Test
 	public void testDifferentIntBitDepths() {
 		BitStream b = new FIFOBitStream();
-		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter();
-		rw.setStream(b);
+		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter(b);
+		
 		Random r = new Random();
 		
 		for (int depth = 1; depth <= 32; depth++) {
