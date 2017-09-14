@@ -208,5 +208,4 @@ public class FIFOBitStream implements BitStream {
 		return this.lastReadBits;
 	}
 
-
 }

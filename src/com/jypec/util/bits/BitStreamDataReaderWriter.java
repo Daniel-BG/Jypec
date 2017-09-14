@@ -1,5 +1,7 @@
 package com.jypec.util.bits;
 
+import java.nio.charset.StandardCharsets;
+
 import com.jypec.util.bits.BitStream.BitStreamConstants;
 
 /**
@@ -97,6 +99,20 @@ public class BitStreamDataReaderWriter {
 	}
 	
 	/**
+	 * @return a character
+	 */
+	private char readChar() {
+		return (char) this.readNBitNumber(Character.SIZE);
+	}
+	
+	/**
+	 * @param c the character to be written
+	 */
+	private void writeChar(char c) {
+		this.writeNBitNumber(c, Character.SIZE);
+	}
+	
+	/**
 	 * @param bits
 	 * @return the specified number of bits inside of an integer
 	 */
@@ -175,5 +191,78 @@ public class BitStreamDataReaderWriter {
 		return res;
 	}
 
-
+	/**
+	 * Writes the given array up to the given position
+	 * @param array
+	 * @param length
+	 */
+	public void writeByteArray(byte[] array, int length) {
+		for (int i = 0; i < length; i++) {
+			this.writeByte(array[i]);
+		}
+	}
+	
+	/**
+	 * Reads an array of the specified length
+	 * @param length
+	 * @return the read array
+	 */
+	public byte[] readByteArray(int length) {
+		byte[] res = new byte[length];
+		for (int i = 0; i < length; i++) {
+			res[i] = this.readByte();
+		}
+		return res;
+	}
+	
+	/**
+	 * Writes the given array up to the given position
+	 * @param array
+	 * @param length
+	 */
+	public void writeCharArray(char[] array, int length) {
+		for (int i = 0; i < length; i++) {
+			this.writeChar(array[i]);
+		}
+	}
+	
+	/**
+	 * Reads an array of the specified length
+	 * @param length
+	 * @return the read array
+	 */
+	public char[] readCharArray(int length) {
+		char[] res = new char[length];
+		for (int i = 0; i < length; i++) {
+			res[i] = this.readChar();
+		}
+		return res;
+	}
+	
+	/**
+	 * Writes the given string
+	 * @param val
+	 */
+	public void writeString(String val) {
+		byte[] chars = val.getBytes(StandardCharsets.US_ASCII);
+		this.writeByteArray(chars, chars.length);
+	}
+	
+	/**
+	 * Reads a String of the specified length
+	 * @param length
+	 * @return the read string
+	 */
+	public String readString(int length) {
+		byte[] chars = this.readByteArray(length);
+		return new String(chars, StandardCharsets.US_ASCII);
+	}
+	
+	/**
+	 * @return the number of bytes still available
+	 */
+	public int availableBytes() {
+		return this.stream.getNumberOfBits() >> 3;
+	}
+	
 }

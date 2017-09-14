@@ -11,9 +11,8 @@ import com.jypec.util.io.headerio.primitives.ValueCompressorDecompressor;
 public class ParameterReaderWriter {
 
 
-	private HeaderConstants parameterType;
+	private HeaderConstants headerConstant;
 	private ValueCompressorDecompressor comDec;
-	private Object data;
 	
 	/**
 	 * Creates a parameter reader/writer for the given parameter. 
@@ -22,8 +21,22 @@ public class ParameterReaderWriter {
 	 * @param comDec 
 	 */
 	public ParameterReaderWriter(String parameter) {
-		this.parameterType = HeaderConstants.valueOf(parameter);
-		this.comDec = this.parameterType.getValueComDec();
+		this.headerConstant = HeaderConstants.fromString(parameter);
+		this.setUp();
+	}
+	
+	/**
+	 * Create a parameter reader/writer for the specified header constant
+	 * @param hc
+	 */
+	public ParameterReaderWriter(HeaderConstants hc) {
+		this.headerConstant = hc;
+		this.setUp();
+	}
+	
+	
+	private void setUp() {
+		this.comDec = this.headerConstant.getValueComDec();
 	}
 	
 	
@@ -33,24 +46,47 @@ public class ParameterReaderWriter {
 	 * @param argument
 	 * @param brw
 	 */
-	public final void compress(String argument, BitStreamDataReaderWriter brw) {
+	public final void compress(BitStreamDataReaderWriter brw) {
 		this.compressParameterType(brw);
-		this.compressData(argument, brw);
+		this.compressData(brw);
 	}
 	
 	private final void compressParameterType(BitStreamDataReaderWriter brw) {
-		brw.writeByte(parameterType.getCode());
+		brw.writeByte(headerConstant.getCode());
 	}
 	
+	/**
+	 * Reads a byte from the bitstream, creating the ParameterReaderWriter
+	 * for that code. Then it reads the parameter. The Stream is left at the 
+	 * end of the reading
+	 * @param brw
+	 * @return the parameterReaderWriter for the next parameter, with the parameter read
+	 */
+	public static ParameterReaderWriter readNextCompressedParameter(BitStreamDataReaderWriter brw) {
+		int type = brw.readByte();
+		if (type < 0 || type > HeaderConstants.values().length) {
+			throw new IllegalStateException("I do not recognize the parameter code");
+		}
+		ParameterReaderWriter prw = new ParameterReaderWriter(HeaderConstants.values()[type]);
+		prw.decompressData(brw);
+		return prw;
+	}
 	
 	/**
-	 * Compresses the data of this parameter (given in the string variable)
-	 * into the reader writer
+	 * Parses the data but does not compress it
+	 * @param data to be parsed
+	 */
+	public void parseData(String data) {
+		this.comDec.parse(data);
+	}
+	
+	/**
+	 * Compresses the data parsed with {@link #parseData(String)}
 	 * @param argument
 	 * @param brw
 	 */
-	public void compressData(String argument, BitStreamDataReaderWriter brw) {
-		this.comDec.compress(argument, brw);
+	private void compressData(BitStreamDataReaderWriter brw) {
+		this.comDec.compress(brw);
 	}
 	
 	
@@ -61,20 +97,37 @@ public class ParameterReaderWriter {
 	 * @param brw
 	 */
 	public void decompressData(BitStreamDataReaderWriter brw) {
-		this.data = this.comDec.uncompress(brw);
+		this.comDec.uncompress(brw);
 	}
 	
 	/**
-	 * @return the data decompressed with {@link #decompressData(BitStreamDataReaderWriter)}
+	 * @return the data processed with {@link #decompressData(BitStreamDataReaderWriter)} 
+	 * or {@link #parseData(String)}
 	 */
-	public Object getDecompressedData() {
-		return this.data;
+	public Object getData() {
+		return this.comDec.getObject();
 	}
 	
+	/**
+	 * Sets the data to be written
+	 * @param data
+	 */
+	public void setData(Object data) {
+		this.comDec.setObject(data);
+	}
+	
+	/**
+	 * @return the type of header constant this ParameterReaderWriter reads/writes
+	 */
+	public HeaderConstants getHeaderConstant() {
+		return this.headerConstant;
+	}
 	
 	@Override
 	public String toString() {
-		return this.parameterType.toString() + " = " + this.data;
+		return this.headerConstant.toString() + " = " + this.comDec.unParse();
 	}
+
+
 	
 }

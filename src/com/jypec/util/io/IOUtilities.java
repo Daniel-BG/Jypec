@@ -1,13 +1,16 @@
 package com.jypec.util.io;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import com.jypec.util.io.IODataTypes.ByteOrdering;
 
 /**
- * Utilities for io
+ * Utilities for io that don't fit anywhere else
  * @author Daniel
  *
  */
@@ -173,6 +176,24 @@ public class IOUtilities {
 			return ((source & 0xff) << 24) | ((source & 0xff00) << 8) | ((source & 0xff0000) >> 8) | ((source >> 24) & 0xff);
 		}
 		throw new IllegalArgumentException("Cannot work with that size");
+	}
+	
+	
+	/**
+	 * @param stream
+	 * @return the fully read stream in String form
+	 * @throws IOException
+	 * @see "https://stackoverflow.com/questions/309424/read-convert-an-inputstream-to-a-string"
+	 */
+	public static String fullyReadStream(InputStream stream) throws IOException {
+		ByteArrayOutputStream result = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int length;
+		while ((length = stream.read(buffer)) != -1) {
+		    result.write(buffer, 0, length);
+		}
+
+		return result.toString(StandardCharsets.UTF_8.name());
 	}
 
 }

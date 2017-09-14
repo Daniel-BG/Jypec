@@ -3,21 +3,23 @@ package com.jypec.util.io.headerio.primitives;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 
 /**
- * R/W for integers
+ * Com/Dec for Strings
  * @author Daniel
+ *
  */
-public class IntegerValueCompressorDecompressor extends SingleValueCompressorDecompressor {
+public class StringValueCompressorDecompressor extends SingleValueCompressorDecompressor {
 
-	private Integer value;
+	private String value;
 
 	@Override
 	public void uncompress(BitStreamDataReaderWriter brw) {
-		this.value = brw.readInt();
+		int len = brw.readInt();
+		value =  brw.readString(len);
 	}
 
 	@Override
 	public void parse(Object obj) {
-		value = Integer.parseInt(obj.toString());
+		value = obj.toString().trim();
 	}
 
 	@Override
@@ -27,12 +29,13 @@ public class IntegerValueCompressorDecompressor extends SingleValueCompressorDec
 
 	@Override
 	public void compress(BitStreamDataReaderWriter brw) {
-		brw.writeInt(value);
+		brw.writeInt(value.length());
+		brw.writeString(value);
 	}
 
 	@Override
 	public void setObject(Object obj) {
-		this.value = (Integer) obj;
+		this.value = (String) obj;
 	}
 
 }

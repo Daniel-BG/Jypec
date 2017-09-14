@@ -3,36 +3,37 @@ package com.jypec.util.io.headerio.primitives;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 
 /**
- * R/W for integers
+ * Compresses/Decompresses floats
  * @author Daniel
+ * @see {@link ValueCompressorDecompressor}
  */
-public class IntegerValueCompressorDecompressor extends SingleValueCompressorDecompressor {
+public class FloatValueCompressorDecompressor extends SingleValueCompressorDecompressor {
 
-	private Integer value;
+	private Float value;
 
 	@Override
 	public void uncompress(BitStreamDataReaderWriter brw) {
-		this.value = brw.readInt();
+		this.value = new Float(brw.readFloat());
 	}
 
 	@Override
 	public void parse(Object obj) {
-		value = Integer.parseInt(obj.toString());
+		this.value = Float.parseFloat(obj.toString());
 	}
 
 	@Override
 	public Object getObject() {
-		return value;
+		return this.value;
 	}
 
 	@Override
 	public void compress(BitStreamDataReaderWriter brw) {
-		brw.writeInt(value);
+		brw.writeFloat(this.value);
 	}
 
 	@Override
 	public void setObject(Object obj) {
-		this.value = (Integer) obj;
+		this.value = (Float) obj;
 	}
 
 }

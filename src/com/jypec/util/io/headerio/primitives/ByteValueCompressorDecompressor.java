@@ -3,36 +3,37 @@ package com.jypec.util.io.headerio.primitives;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 
 /**
- * R/W for integers
+ * Compresses/uncompresses a byte (8 bit) value
  * @author Daniel
+ *
  */
-public class IntegerValueCompressorDecompressor extends SingleValueCompressorDecompressor {
-
-	private Integer value;
+public class ByteValueCompressorDecompressor extends SingleValueCompressorDecompressor {
+	
+	private Byte value;
 
 	@Override
 	public void uncompress(BitStreamDataReaderWriter brw) {
-		this.value = brw.readInt();
+		this.value = new Byte(brw.readByte());
 	}
 
 	@Override
 	public void parse(Object obj) {
-		value = Integer.parseInt(obj.toString());
+		this.value = (byte) Integer.parseInt(obj.toString());
 	}
 
 	@Override
 	public Object getObject() {
-		return value;
+		return this.value;
 	}
 
 	@Override
 	public void compress(BitStreamDataReaderWriter brw) {
-		brw.writeInt(value);
+		brw.writeByte(this.value);
 	}
 
 	@Override
 	public void setObject(Object obj) {
-		this.value = (Integer) obj;
+		this.value = (Byte) obj;
 	}
 
 }

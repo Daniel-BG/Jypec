@@ -5,5 +5,9 @@ package com.jypec.util.io.headerio.primitives;
  * @author Daniel
  */
 public abstract class SingleValueCompressorDecompressor extends ValueCompressorDecompressor{
-
+	
+	@Override
+	public String unParse() {
+		return this.getObject().toString();
+	}
 }

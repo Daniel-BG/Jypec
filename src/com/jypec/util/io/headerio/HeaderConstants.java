@@ -1,9 +1,12 @@
 package com.jypec.util.io.headerio;
 
-import org.apache.commons.collections4.BidiMap;
-import org.apache.commons.collections4.bidimap.TreeBidiMap;
+import java.util.HashMap;
 
+import com.jypec.util.io.headerio.primitives.ArrayValueCompressorDecompressor;
+import com.jypec.util.io.headerio.primitives.ByteValueCompressorDecompressor;
+import com.jypec.util.io.headerio.primitives.FloatValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.IntegerValueCompressorDecompressor;
+import com.jypec.util.io.headerio.primitives.StringValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.ValueCompressorDecompressor;
 
 /**
@@ -148,6 +151,16 @@ public enum HeaderConstants {
 	HEADER_Z_PLOT_RANGE,
 	/** X and Y axis titles for z_plots */
 	HEADER_Z_PLOT_TITLES;
+	
+	//create reverse dictionary
+	private static HashMap<String, HeaderConstants> stringValueTranslator;
+	static {
+		stringValueTranslator = new HashMap<String, HeaderConstants>();
+		for (HeaderConstants hc: HeaderConstants.values()) {
+			stringValueTranslator.put(hc.toString(), hc);
+		}
+	}
+	
 
 	@Override
 	public String toString() {
@@ -252,6 +265,15 @@ public enum HeaderConstants {
 			throw new UnsupportedOperationException("This data type is not implemented. Implement it!");
 		}
 	}
+	
+	
+	/**
+	 * @param s
+	 * @return the HeaderConstant which corresponds to the given string
+	 */
+	public static HeaderConstants fromString(String s) {
+		return HeaderConstants.stringValueTranslator.get(s);
+	}
 
 	/**
 	 * @return the byte code of this header constant for use in compressed headers
@@ -262,111 +284,79 @@ public enum HeaderConstants {
 	
 
 	/**
-	 * @return the compressor decompressor for this header constant
+	 * @return the compressor decompressor for this header constant. a new one is returned each time
+	 * to ensure no overwriting
 	 */
 	public ValueCompressorDecompressor getValueComDec() {
 		switch(this) {
-		case HEADER_ACQ_TIME:
-			return new DateValueCompressorDecompressor(); //TODO complete this
-			break;
+		/* Integer values */
 		case HEADER_BANDS:
-			return new IntegerValueCompressorDecompressor();
-		case HEADER_BAND_NAMES:
-			break;
-		case HEADER_BBL:
-			break;
-		case HEADER_BYTE_ORDER:
-			break;
 		case HEADER_CLASSES:
-			break;
-		case HEADER_CLASS_LOOKUP:
-			break;
-		case HEADER_CLASS_NAMES:
-			break;
-		case HEADER_CLOUD_COVER:
-			break;
-		case HEADER_COMPLEX_FUNC:
-			break;
-		case HEADER_COORD_SYS_STR:
-			break;
-		case HEADER_DATA_GAIN_VALUES:
-			break;
-		case HEADER_DATA_IGNORE_VAL:
-			break;
-		case HEADER_DATA_OFFSET_VALUES:
-			break;
-		case HEADER_DATA_REF_GAIN_VALUES:
-			break;
-		case HEADER_DATA_REF_OFF_VALUES:
-			break;
-		case HEADER_DATA_TYPE:
-			break;
 		case HEADER_DEFAULT_BANDS:
-			break;
-		case HEADER_DEFAULT_STRETCH:
-			break;
 		case HEADER_DEM_BAND:
-			break;
-		case HEADER_DEM_FILE:
-			break;
-		case HEADER_DESCRIPTION:
-			break;
-		case HEADER_FILE_TYPE:
-			break;
-		case HEADER_FWHM:
-			break;
-		case HEADER_GEO_POINTS:
-			break;
-		case HEADER_INTERLEAVE:
-			break;
-		case HEADER_LINES:
-			break;
-		case HEADER_MAP_INFO:
-			break;
 		case HEADER_OFFSET:
-			break;
-		case HEADER_PIXEL_SIZE:
-			break;
-		case HEADER_PROJECTION_INFO:
-			break;
-		case HEADER_READ_PROCEDURES:
-			break;
-		case HEADER_REFL_SCALE_FACTOR:
-			break;
-		case HEADER_RPC_INFO:
-			break;
+		case HEADER_LINES:
 		case HEADER_SAMPLES:
-			break;
-		case HEADER_SECURITY_TAG:
-			break;
-		case HEADER_SENSOR_TYPE:
-			break;
-		case HEADER_SOLAR_IRRADIANCE:
-			break;
-		case HEADER_SPECTRA_NAMES:
-			break;
+			return new IntegerValueCompressorDecompressor();
+		/* Float values */
+		case HEADER_CLOUD_COVER:
+		case HEADER_REFL_SCALE_FACTOR:
 		case HEADER_SUN_AZIMUTH:
-			break;
 		case HEADER_SUN_ELEVATION:
-			break;
-		case HEADER_WAVELENGTH:
-			break;
-		case HEADER_WAVELENGTH_UNITS:
-			break;
 		case HEADER_X_START:
-			break;
 		case HEADER_Y_START:
-			break;
+			return new FloatValueCompressorDecompressor();
+		/* Byte values */
+		case HEADER_BYTE_ORDER:
+		case HEADER_DATA_TYPE:
+			return new ByteValueCompressorDecompressor();
+		/* Array of integers */
+		case HEADER_DATA_IGNORE_VAL:
 		case HEADER_Z_PLOT_AVG:
-			break;
+			return new ArrayValueCompressorDecompressor(new IntegerValueCompressorDecompressor());
+		/* Array of floats */
+		case HEADER_BBL:
+		case HEADER_DATA_GAIN_VALUES:
+		case HEADER_DATA_OFFSET_VALUES:
+		case HEADER_DATA_REF_GAIN_VALUES:
+		case HEADER_DATA_REF_OFF_VALUES:
+		case HEADER_FWHM:
+		case HEADER_GEO_POINTS:
+		case HEADER_PIXEL_SIZE:
+		case HEADER_WAVELENGTH:
 		case HEADER_Z_PLOT_RANGE:
-			break;
+			return new ArrayValueCompressorDecompressor(new FloatValueCompressorDecompressor());
+		/* Array of bytes */
+		case HEADER_CLASS_LOOKUP:
+			return new ArrayValueCompressorDecompressor(new ByteValueCompressorDecompressor());
+		/* Array of strings */
+		case HEADER_BAND_NAMES:
+		case HEADER_CLASS_NAMES:
+		case HEADER_SPECTRA_NAMES:
 		case HEADER_Z_PLOT_TITLES:
-			break;
+			return new ArrayValueCompressorDecompressor(new StringValueCompressorDecompressor());
+		/* Strings or other non easily parseable data */
+		case HEADER_ACQ_TIME:		//is a date, would need to be parsed
+		case HEADER_COMPLEX_FUNC:	//can be enum'd
+		case HEADER_COORD_SYS_STR:	//weird coordinate format
+		case HEADER_DEFAULT_STRETCH://can be enum'd
+		case HEADER_DEM_FILE:
+		case HEADER_DESCRIPTION:
+		case HEADER_FILE_TYPE:
+		case HEADER_INTERLEAVE:		//can be enum'd
+		case HEADER_MAP_INFO:		//list of different types
+		case HEADER_PROJECTION_INFO:
+		case HEADER_READ_PROCEDURES:
+		case HEADER_RPC_INFO:
+		case HEADER_SECURITY_TAG:
+		case HEADER_SENSOR_TYPE:
+		case HEADER_SOLAR_IRRADIANCE:
+		case HEADER_WAVELENGTH_UNITS://can be enum'd
+			return new StringValueCompressorDecompressor();
 		default:
-			break;
+			throw new UnsupportedOperationException("This Header constant is not yet implemented");	
 		}
-		throw new UnsupportedOperationException("This Header constant is not yet implemented");
+		
 	}
 
 

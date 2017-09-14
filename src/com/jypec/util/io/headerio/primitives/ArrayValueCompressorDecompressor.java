@@ -10,6 +10,7 @@ import com.jypec.util.bits.BitStreamDataReaderWriter;
 public class ArrayValueCompressorDecompressor extends ValueCompressorDecompressor {
 
 	SingleValueCompressorDecompressor childComDec;
+	private Object[] values;
 	
 	/**
 	 * Create an array value decompressor which stores values of the given type
@@ -18,28 +19,63 @@ public class ArrayValueCompressorDecompressor extends ValueCompressorDecompresso
 	public ArrayValueCompressorDecompressor(SingleValueCompressorDecompressor childComDec) {
 		this.childComDec = childComDec;
 	}
-	
+
 	@Override
-	public void compress(Object obj, BitStreamDataReaderWriter brw) {
-		String str = obj.toString();
-		//remove initial and ending braces, then split 
-		str = str.substring(1, str.length() - 1);
-		String[] values = str.split(",");
-		//indicate array length
-		brw.writeInt(values.length);
-		for (String val: values) {
-			childComDec.compress(val, brw);
+	public void uncompress(BitStreamDataReaderWriter brw) {
+		int len = brw.readInt();
+		this.values = new Object[len];
+		for (int i = 0; i < len; i++) {
+			childComDec.uncompress(brw);
+			this.values[i] = childComDec.getObject();
 		}
 	}
 
 	@Override
-	public Object uncompress(BitStreamDataReaderWriter brw) {
-		int len = brw.readInt();
-		Object[] arr = new Object[len];
-		for (int i = 0; i < len; i++) {
-			arr[i] = childComDec.uncompress(brw);
+	public void parse(Object obj) {
+		String str = obj.toString();
+		//remove initial and ending braces, then split 
+		str = str.substring(1, str.length() - 1).trim();
+		String[] strings = str.split(",");
+		
+		this.values = new Object[strings.length];
+		for (int i = 0; i < values.length; i++) {
+			childComDec.parse(strings[i]);
+			values[i] = childComDec.getObject();
 		}
-		return arr;
+	}
+
+	@Override
+	public Object getObject() {
+		return this.values;
+	}
+
+	@Override
+	public void compress(BitStreamDataReaderWriter brw) {
+		brw.writeInt(this.values.length);
+		for (int i = 0; i < this.values.length; i++) {
+			childComDec.setObject(this.values[i]);
+			childComDec.compress(brw);
+		}
+	}
+
+	@Override
+	public void setObject(Object obj) {
+		this.values = (Object[]) obj;
+	}
+
+	@Override
+	public String unParse() {
+		String res = "{";
+		for (int i = 0; i < this.values.length; i++) {
+			childComDec.setObject(values[i]);
+			if (i < this.values.length - 1) {
+				res += childComDec.unParse() + ",";
+			} else {
+				res += childComDec.unParse();
+			}
+		}
+		
+		return res + "}";
 	}
 
 }
