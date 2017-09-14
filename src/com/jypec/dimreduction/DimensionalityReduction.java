@@ -1,6 +1,9 @@
 package com.jypec.dimreduction;
 
+import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
+import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
+import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 import com.jypec.util.io.headerio.ImageHeaderData;
@@ -83,6 +86,25 @@ public interface DimensionalityReduction {
 	 * @return the minimum value that the reduced image can have on its samples
 	 */
 	public double getMinValue(HyperspectralImage img);
+
+	/**
+	 * Load the proper dimensionality reduction algorithm selected in the input arguments
+	 * @param args
+	 * @return the selected algorithm
+	 */
+	public static DimensionalityReduction loadFrom(InputArguments args) {
+		if (args.requestReduction) {
+			//only PCA for now
+			if (args.reductionArgs.length == 2 && args.reductionArgs[0].toLowerCase().equals("pca")) {
+				int dimensions = Integer.parseInt(args.reductionArgs[1]);
+				PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
+				pca.setNumComponents(dimensions);
+				return pca;
+			}
+		}
+		//default to no reduction
+		return new DeletingDimensionalityReduction();
+	}
 	
 
 }

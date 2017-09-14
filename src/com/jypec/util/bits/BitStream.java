@@ -1,6 +1,5 @@
 package com.jypec.util.bits;
 
-
 /**
  * Interface for creating bitstreams for the coder
  * @author Daniel
@@ -84,5 +83,4 @@ public interface BitStream {
 	 * @return the contents of the stream in hex format. Zeros are appended if needed
 	 */
 	public String dumpHex();
-	
 }

@@ -9,10 +9,13 @@ import com.jypec.util.bits.BitStreamDataReaderWriter;
  * @author Daniel
  */
 public class ComParameters {
+	private static final int DEFAULT_WAVE_PASSES = 0;
+	private static final int DEFAULT_BIT_REDUCTION = 0;
+	
 	/** Number of passes of the wavelet transform */
-	public int wavePasses;
+	public int wavePasses = DEFAULT_WAVE_PASSES;
 	/** Number of bits eliminated from each bitplane */
-	public int bitReduction;
+	public int bitReduction = DEFAULT_BIT_REDUCTION;
 
 	/**
 	 * Saves this parameters to the given BitStreamDataReaderWriter
