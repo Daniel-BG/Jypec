@@ -83,11 +83,27 @@ public class Jypec {
 			System.out.println("Bpppb: " + redsize / (double) (bands * lines * samples));
 		}
 		
-		File f = new File(args.output);
-		
-		System.err.println("Still not fully implemented. Missing file output");
 
 		
+		BitStreamDataReaderWriter brw = new BitStreamDataReaderWriter(output);
+		byte[] bytes = brw.readByteArray(output.getNumberOfBits() >> 3);
+		
+		
+		File f = new File(args.output);
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(f);
+			fos.write(bytes);
+			if (output.getNumberOfBits() > 0) {
+				throw new IllegalStateException("Padding was not added properly");
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
