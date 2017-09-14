@@ -17,6 +17,7 @@ import com.jypec.img.HyperspectralImage;
 import com.jypec.util.MathOperations;
 import com.jypec.util.Pair;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.io.headerio.ImageHeaderData;
 
 /**
  * <p>
@@ -299,7 +300,7 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
     }
     
     @Override
-    public void loadFrom(BitStreamDataReaderWriter bw, ComParameters cp) {
+    public void loadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd) {
     	//read the number of dimensions in the original space
     	this.sampleSize = bw.readInt();
     	//read the number of dimensions in the reduced space

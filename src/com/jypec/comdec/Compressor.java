@@ -10,6 +10,7 @@ import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.bits.BitStream;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.io.headerio.ImageHeaderData;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
@@ -31,7 +32,8 @@ public class Compressor {
 	}
 	
 	/**
-	 * Compress a hyperspectral image with this compressor's settings
+	 * Compress a hyperspectral image with this compressor's settings. This only compresses
+	 * the data, and the metadata needs to be compressed with {@link ImageHeaderData}
 	 * @param srcImg the source hyperspectral image
 	 * @param output where to put the compressed image
 	 * @param dr dimensionality reduction algorithm that is to be applied
@@ -39,9 +41,6 @@ public class Compressor {
 	public void compress(HyperspectralImage srcImg, BitStream output, DimensionalityReduction dr) {
 		/** We will need a wrapper around the output to make it easier to save numbers */
 		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter(output);
-		
-		/** First off, extract necessary information from the image and save to stream */
-		cp.feedFrom(srcImg);
 		
 		/** Project all image values onto the reduced space */
 		dr.train(srcImg);
@@ -60,7 +59,7 @@ public class Compressor {
 			/** Apply the wavelet transform */
 			double[][] waveForm = reduced[i];
 
-			bdw.forwardTransform(waveForm, cp.lines, cp.samples);
+			bdw.forwardTransform(waveForm, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
 			double[] minMax = MatrixOperations.minMax(waveForm);
 			/** get max and min from the resulting transform, and create the best data type possible */
 			ImageDataType targetType = ImageDataType.findBest(minMax[0], minMax[1], 0);
@@ -73,8 +72,8 @@ public class Compressor {
 			
 			
 			/** quantize the transform and save the quantization over the current band */
-			HyperspectralBand hb = HyperspectralBand.generateRogueBand(targetType, cp.lines, cp.samples);
-			mq.quantize(waveForm, hb, 0, 0, cp.lines, cp.samples);
+			HyperspectralBand hb = HyperspectralBand.generateRogueBand(targetType, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
+			mq.quantize(waveForm, hb, 0, 0, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
 			
 			/** Now divide into blocks and encode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);

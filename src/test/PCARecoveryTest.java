@@ -80,7 +80,7 @@ public class PCARecoveryTest {
 		
 		PrincipalComponentAnalysis pcaRec = new PrincipalComponentAnalysis();
 		
-		pcaRec.loadFrom(bw, null);
+		pcaRec.loadFrom(bw, null, null);
 		
 		
 		for (int i = 0; i < pca.getNumComponents(); i++) {

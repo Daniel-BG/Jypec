@@ -4,6 +4,8 @@ import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.io.headerio.HeaderConstants;
+import com.jypec.util.io.headerio.ImageHeaderData;
 
 /**
  * @author Daniel
@@ -51,8 +53,8 @@ public class DeletingDimensionalityReduction implements DimensionalityReduction 
 	}
 
 	@Override
-	public void loadFrom(BitStreamDataReaderWriter bw, ComParameters cp) {
-		this.numComponents = cp.bands;
+	public void loadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd) {
+		this.numComponents = (int) ihd.getData(HeaderConstants.HEADER_BANDS);
 	}
 
 	@Override

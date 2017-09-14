@@ -31,11 +31,6 @@ public class ComParametersRecoveryTest {
 		Random r = new Random(0);
 		
 		for (int i = 0; i < 100; i++) {
-			cp.bands = r.nextInt(0x10000);
-			cp.lines = r.nextInt(0x10000);
-			cp.samples = r.nextInt(0x10000);
-			cp.srcBitDepth = r.nextInt(0x100);
-			cp.srcSigned = r.nextBoolean();
 			cp.wavePasses = r.nextInt(0x100);
 			
 			cp.saveTo(bw);

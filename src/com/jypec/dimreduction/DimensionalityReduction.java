@@ -3,6 +3,7 @@ package com.jypec.dimreduction;
 import com.jypec.comdec.ComParameters;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.io.headerio.ImageHeaderData;
 
 /**
  * @author Daniel
@@ -55,8 +56,9 @@ public interface DimensionalityReduction {
 	 * {@link #saveTo(BitStreamDataReaderWriter)}
 	 * @param bw The BitStream handler that encapsulates the BitStream
 	 * @param cp Compressor Parameters in case it needs global info to restore
+	 * @param ihd Image parameters in case it needs information
 	 */
-	public void loadFrom(BitStreamDataReaderWriter bw, ComParameters cp);
+	public void loadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd);
 	
 	
 	/**
