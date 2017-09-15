@@ -12,6 +12,7 @@ import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
 import com.jypec.util.io.IODataTypes.ByteOrdering;
 import com.jypec.util.io.IODataTypes.ImageOrdering;
+import com.jypec.util.io.headerio.ImageHeaderData;
 import com.jypec.util.io.imagereading.ImageReaderFactory;
 
 /**
@@ -23,17 +24,20 @@ public class HyperspectralImageReader {
 
 	
 	/**
-	 * Reads an image from the specified file (containing only the raw data, no headers)
-	 * @param fileName
-	 * @param image
+	 * Reads an image from the specified file. If headers are present, the offset must
+	 * be indicated via the parameter. It can be found with 
+	 * {@link ImageHeaderData#loadFromUncompressedStream(InputStream)}
+	 * @param fileName name of the file
+	 * @param offset where the image data starts within the file
+	 * @param image where the data is sent to
 	 */
-	public static void readImage(String fileName, HyperspectralImage image) {
+	public static void readImage(String fileName, int offset, HyperspectralImage image) {
 		FileInputStream in = null;
 		try {
 			File f = new File(fileName);
 			in = new FileInputStream(f); 
 			FileChannel file = in.getChannel();
-			ByteBuffer buf = file.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
+			ByteBuffer buf = file.map(FileChannel.MapMode.READ_ONLY, offset, f.length());
 			
 			ImageReaderFactory.getReader(ImageOrdering.BSQ, ByteOrdering.LITTLE_ENDIAN, image.getDataType()).readFromBuffer(buf, image);
 
@@ -43,6 +47,15 @@ public class HyperspectralImageReader {
 		} finally {
 			IOUtilities.safeClose(in);
 		}	
+	}
+	
+	/**
+	 * Same as {@link #readImage(String, int, HyperspectralImage)} with an offset of zero
+	 * @param fileName
+	 * @param image
+	 */
+	public static void readImage(String fileName, HyperspectralImage image) {
+		readImage(fileName, 0, image);
 	}
 	
 

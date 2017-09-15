@@ -34,16 +34,22 @@ public class Jypec {
 			throw new UnsupportedOperationException("Cannot work with the given arguments. Need an input, output and metadata file path");
 		}
 		
+		int headerOffset = 0;
 		FileInputStream fis;
 		try {
-			fis = new FileInputStream(args.metadata);
+			if (args.metadata != null) { //read metadata from outside
+				fis = new FileInputStream(args.metadata);
+			} else { //unless we do not have outside, then read from input
+				fis = new FileInputStream(args.input);
+			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return;
 		}
 		ImageHeaderData ihd = new ImageHeaderData();
 		try {
-			ihd.loadFromUncompressedStream(fis);
+			//update header offset for later
+			headerOffset = ihd.loadFromUncompressedStream(fis);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
@@ -67,7 +73,7 @@ public class Jypec {
 		DimensionalityReduction dr = DimensionalityReduction.loadFrom(args);
 		
 		HyperspectralImage hi = new HyperspectralImage(null, type, bands, lines, samples);
-		HyperspectralImageReader.readImage(args.input, hi);
+		HyperspectralImageReader.readImage(args.input, headerOffset, hi);
 
 		BitStream output = new FIFOBitStream();
 

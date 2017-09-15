@@ -30,8 +30,9 @@ public class Main {
 	        	Jypec.decompress(iArgs);
 	        } else if (iArgs.help){
 	        	printHelp();
-	        } 
-	        throw new ParseException("Missing options, i don't know what to do");
+	        } else {
+	        	throw new ParseException("Missing options -c -d, i don't know what to do");
+	        }
 	    }
 	    catch( ParseException exp ) {
 	        System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
