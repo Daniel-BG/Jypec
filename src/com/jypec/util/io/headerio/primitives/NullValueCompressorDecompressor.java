@@ -20,7 +20,7 @@ public class NullValueCompressorDecompressor extends ValueCompressorDecompressor
 	public void setObject(Object obj) {}
 
 	@Override
-	public void compress(BitStreamDataReaderWriter brw) {}
+	public int compress(BitStreamDataReaderWriter brw) { return 0; }
 
 	@Override
 	public void uncompress(BitStreamDataReaderWriter brw) {}

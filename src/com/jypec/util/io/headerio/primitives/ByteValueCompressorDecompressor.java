@@ -27,8 +27,8 @@ public class ByteValueCompressorDecompressor extends SingleValueCompressorDecomp
 	}
 
 	@Override
-	public void compress(BitStreamDataReaderWriter brw) {
-		brw.writeByte(this.value);
+	public int compress(BitStreamDataReaderWriter brw) {
+		return brw.writeByte(this.value);
 	}
 
 	@Override

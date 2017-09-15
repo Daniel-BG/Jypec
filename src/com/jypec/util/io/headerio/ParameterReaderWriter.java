@@ -45,14 +45,18 @@ public class ParameterReaderWriter {
 	 * plus the parameter argument.
 	 * @param argument
 	 * @param brw
+	 * @return the number of bits of the compressed data
 	 */
-	public final void compress(BitStreamDataReaderWriter brw) {
-		this.compressParameterType(brw);
-		this.compressData(brw);
+	public final int compress(BitStreamDataReaderWriter brw) {
+		int res = 0;
+		res += this.compressParameterType(brw);
+		res += this.compressData(brw);
+		return res;
 	}
 	
-	private final void compressParameterType(BitStreamDataReaderWriter brw) {
+	private final int compressParameterType(BitStreamDataReaderWriter brw) {
 		brw.writeByte(headerConstant.getCode());
+		return 8;
 	}
 	
 	/**
@@ -84,9 +88,10 @@ public class ParameterReaderWriter {
 	 * Compresses the data parsed with {@link #parseData(String)}
 	 * @param argument
 	 * @param brw
+	 * @return the number of bits compressed
 	 */
-	private void compressData(BitStreamDataReaderWriter brw) {
-		this.comDec.compress(brw);
+	private int compressData(BitStreamDataReaderWriter brw) {
+		return this.comDec.compress(brw);
 	}
 	
 	

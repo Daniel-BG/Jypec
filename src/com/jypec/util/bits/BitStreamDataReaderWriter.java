@@ -31,9 +31,11 @@ public class BitStreamDataReaderWriter {
 	
 	/**
 	 * @param f float to be written into the inner BitStream
+	 * @return the number of bits used to write it
 	 */
-	public void writeFloat(float f) {
-		this.writeNBitNumber(Float.floatToIntBits(f), 32);
+	public int writeFloat(float f) {
+		this.writeNBitNumber(Float.floatToIntBits(f), Integer.SIZE);
+		return Integer.SIZE;
 	}
 	
 	/**
@@ -65,11 +67,13 @@ public class BitStreamDataReaderWriter {
 	}
 	
 	/**
-	 * writes the given integer in the output stream
+	 * writes the given integer in the output stream,
 	 * @param i
+	 * @return the number of bits used
 	 */
-	public void writeInt(int i) {
+	public int writeInt(int i) {
 		this.writeNBitNumber(i, Integer.SIZE);
+		return Integer.SIZE;
 	}
 	
 	/**
@@ -103,9 +107,11 @@ public class BitStreamDataReaderWriter {
 	
 	/**
 	 * @param i the byte to be written
+	 * @return the number of bits used to write it
 	 */
-	public void writeByte(byte i) {
+	public int writeByte(byte i) {
 		this.writeNBitNumber(i, Byte.SIZE);
+		return Byte.SIZE;
 	}
 	
 	/**
@@ -205,11 +211,13 @@ public class BitStreamDataReaderWriter {
 	 * Writes the given array up to the given position
 	 * @param array
 	 * @param length
+	 * @return the number of bits used to write the array
 	 */
-	public void writeByteArray(byte[] array, int length) {
+	public int writeByteArray(byte[] array, int length) {
 		for (int i = 0; i < length; i++) {
 			this.writeByte(array[i]);
 		}
+		return Byte.SIZE * length;
 	}
 	
 	/**
@@ -252,10 +260,11 @@ public class BitStreamDataReaderWriter {
 	/**
 	 * Writes the given string
 	 * @param val
+	 * @return the number of bits used to write the array
 	 */
-	public void writeString(String val) {
+	public int writeString(String val) {
 		byte[] chars = val.getBytes(StandardCharsets.US_ASCII);
-		this.writeByteArray(chars, chars.length);
+		return this.writeByteArray(chars, chars.length);
 	}
 	
 	/**
@@ -273,6 +282,13 @@ public class BitStreamDataReaderWriter {
 	 */
 	public int availableBytes() {
 		return this.stream.getNumberOfBits() >> 3;
+	}
+	
+	/**
+	 * @return the number of bits still available
+	 */
+	public int availableBits() {
+		return this.stream.getNumberOfBits();
 	}
 	
 }

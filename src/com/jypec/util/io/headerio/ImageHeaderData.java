@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jypec.util.Utilities;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
-import com.jypec.util.io.IOUtilities;
 
 /**
  * Stores image header data
@@ -22,15 +22,16 @@ import com.jypec.util.io.IOUtilities;
 public class ImageHeaderData {
 	
 	private Map<HeaderConstants, Object> data;
+	private static final String DATA_PATTERN = "^([^=\\n\\r]+?)\\s+=\\s+([^\\{].*?|\\{.*?\\})$";
 	
 	/**
 	 * Create a new header data
 	 */
 	public ImageHeaderData() {
-		 this.setUp();	
+		 this.reset();	
 	}
 	
-	private void setUp() {
+	private void reset() {
 		this.data = new EnumMap<HeaderConstants, Object>(HeaderConstants.class);	
 	}
 	
@@ -54,28 +55,50 @@ public class ImageHeaderData {
 	/**
 	 * @param stream Stream where to load from
 	 * @throws IOException if something fails when reading
+	 * @return if the data is embbeded in the input stream, the number of BYTES at which it is offset
+	 * counting from where the pointer was when this function was called. Note that the pointer for
+	 * stream might have gone past the data starting point!. If the data is not embedded, then return 0
 	 */
-	public void loadFromUncompressedStream(InputStream stream) throws IOException {
-		this.setUp();
-		//TODO in case the header is embedded, read only up to the data!
-		String s = IOUtilities.fullyReadStream(stream);		
-		
-		Matcher m = Pattern.compile("^([^=\\n\\r]+?)\\s+=\\s+([^\\{].*?|\\{.*?\\})$", Pattern.MULTILINE | Pattern.DOTALL).matcher(s);
-		
-		/** Split the charsequence into the different data groups and parse all */
-		while (m.find()) {
+	public int loadFromUncompressedStream(InputStream stream) throws IOException {
+		this.reset();
+		Scanner scn = new Scanner(stream);
+		int horizon = 0; //for now no limit. If we find the "header offset" keyword, set the horizon to it
+		while (true) {
+			//find the next within horizon
+			String s = scn.findWithinHorizon(Pattern.compile(DATA_PATTERN, Pattern.MULTILINE | Pattern.DOTALL), horizon);
+			if (s == null) {
+				break;
+			}
+			//split into individual parts and create the parameter
+			Matcher m = Pattern.compile(DATA_PATTERN, Pattern.MULTILINE | Pattern.DOTALL).matcher(s);
+			m.find(); //should always work since s is this pattern, we only use this to split it
 			ParameterReaderWriter prw = new ParameterReaderWriter(m.group(1));
 			prw.parseData(m.group(2));
-			this.data.put(prw.getHeaderConstant(), prw.getData());
+			//if it is the offset, set the new horizon
+			if (prw.getHeaderConstant() == HeaderConstants.HEADER_OFFSET) {
+				/** 
+				 * Note that setting the horizon this way will probably make the scanner go past
+				 * the header limit, maybe with some other data structures this can be fixed so 
+				 * that this function returns the input stream in the exact position it needs to be
+				 * for the data to start to be read
+				 */
+				horizon = (int) prw.getData();
+			} else { //otherwise save it. Do not save the offset since it'll probably change
+				this.data.put(prw.getHeaderConstant(), prw.getData());
+			}
 		}
+		scn.close();
+		return horizon;
 	}
 
 	/**
 	 * Load the header from the given compressed stream
 	 * @param brw
+	 * @return the number of BYTES read
 	 */
-	public void loadFromCompressedStream(BitStreamDataReaderWriter brw) {
-		this.setUp();
+	public int loadFromCompressedStream(BitStreamDataReaderWriter brw) {
+		int bits = brw.availableBits();
+		this.reset();
 		while (brw.availableBytes() > 0) {
 			ParameterReaderWriter prw = ParameterReaderWriter.readNextCompressedParameter(brw);
 			if (prw.getHeaderConstant() == HeaderConstants.HEADER_TERMINATION) {
@@ -83,14 +106,22 @@ public class ImageHeaderData {
 			}
 			this.setData(prw.getHeaderConstant(), prw.getData());
 		}
+		bits -= brw.availableBits();
+		if (bits % 8 == 0) {
+			return bits / 8;
+		} else {
+			throw new IllegalStateException("The number of bits read is not a multiple of 8. Padding bits must not have been read somewhere");
+		}
 	}
 	
 	
 	/**
 	 * save inner information into a compressed stream
 	 * @param brw
+	 * @return the number of BYTES written to the stream
 	 */
-	public void saveToCompressedStream(BitStreamDataReaderWriter brw) {
+	public int saveToCompressedStream(BitStreamDataReaderWriter brw) {
+		int bits = brw.availableBits();
 		for (Entry<HeaderConstants, Object> e: this.data.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			prw.setData(e.getValue());
@@ -99,14 +130,22 @@ public class ImageHeaderData {
 			}
 		}
 		brw.writeByte((byte)HeaderConstants.HEADER_TERMINATION.ordinal());
+		
+		bits = brw.availableBits() - bits;
+		if (bits % 8 == 0) {
+			return bits / 8;
+		} else {
+			throw new IllegalStateException("The number of bits saved is not a multiple of 8. Padding bits must be missing somewhere");
+		}
 	}
 	
 	/**
 	 * Save inner information into an uncompressed stream
 	 * @param brw where to save it
+	 * @return the number of BYTES written
 	 * @throws IOException 
 	 */
-	public void saveToUncompressedStream(OutputStream brw) throws IOException {
+	public int saveToUncompressedStream(OutputStream brw) throws IOException {
 		ArrayList<Byte> list = new ArrayList<Byte>();
 		byte[] lineSeparator = "\n".getBytes(StandardCharsets.UTF_8);
 
@@ -136,6 +175,8 @@ public class ImageHeaderData {
 			index++;
 		}
 		brw.write(result);
+		
+		return result.length;
 	}
 	
 	

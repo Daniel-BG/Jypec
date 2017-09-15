@@ -32,8 +32,9 @@ public abstract class ValueCompressorDecompressor {
 	/**
 	 * Compress the inner object (see {@link #getObject()}) into the given stream
 	 * @param brw
+	 * @return the number of bits of the compressed object
 	 */
-	public abstract void compress(BitStreamDataReaderWriter brw);
+	public abstract int compress(BitStreamDataReaderWriter brw);
 	
 	/**
 	 * Does {@link #parse(Object)} followed by 

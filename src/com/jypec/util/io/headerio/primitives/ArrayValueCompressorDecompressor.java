@@ -50,12 +50,14 @@ public class ArrayValueCompressorDecompressor extends ValueCompressorDecompresso
 	}
 
 	@Override
-	public void compress(BitStreamDataReaderWriter brw) {
-		brw.writeInt(this.values.length);
+	public int compress(BitStreamDataReaderWriter brw) {
+		int acc = 0;
+		acc += brw.writeInt(this.values.length);
 		for (int i = 0; i < this.values.length; i++) {
 			childComDec.setObject(this.values[i]);
-			childComDec.compress(brw);
+			acc += childComDec.compress(brw);
 		}
+		return acc;
 	}
 
 	@Override

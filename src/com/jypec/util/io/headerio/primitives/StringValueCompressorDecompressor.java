@@ -28,9 +28,11 @@ public class StringValueCompressorDecompressor extends SingleValueCompressorDeco
 	}
 
 	@Override
-	public void compress(BitStreamDataReaderWriter brw) {
-		brw.writeInt(value.length());
-		brw.writeString(value);
+	public int compress(BitStreamDataReaderWriter brw) {
+		int res = 0;
+		res += brw.writeInt(value.length());
+		res += brw.writeString(value);
+		return res;
 	}
 
 	@Override

@@ -277,7 +277,11 @@ public enum HeaderConstants {
 	 * @return the HeaderConstant which corresponds to the given string
 	 */
 	public static HeaderConstants fromString(String s) {
-		return HeaderConstants.stringValueTranslator.get(s);
+		HeaderConstants result = HeaderConstants.stringValueTranslator.get(s);
+		if (result == null) {
+			throw new IllegalArgumentException("There is no header constant with the name: " + s);
+		}
+		return result;
 	}
 
 	/**

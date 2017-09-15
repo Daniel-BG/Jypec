@@ -16,7 +16,7 @@ public class Main {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {		
+	public static void main(String[] args) {
 	    //create the parser
 	    CommandLineParser parser = new DefaultParser();
 	    try {
