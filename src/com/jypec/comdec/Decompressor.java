@@ -26,10 +26,9 @@ public class Decompressor {
 	/**
 	 * @param ihd the image header metadata, for now reading the appropiate number of bits
 	 * @param input
-	 * @param dr dimensionality reduction algorithm to be employed
 	 * @return the resulting image from decompressing the given stream
 	 */
-	public HyperspectralImage decompress(ImageHeaderData ihd, BitStream input, DimensionalityReduction dr) {
+	public HyperspectralImage decompress(ImageHeaderData ihd, BitStream input) {
 		/** Create a wrapper for the stream to easily read/write it */
 		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter(input);
 		
@@ -42,8 +41,8 @@ public class Decompressor {
 		ComParameters cp = new ComParameters();
 		cp.loadFrom(bw);
 		
-		/** Recover PCA setup */
-		dr.loadFrom(bw, cp, ihd);
+		/** Recover dr setup */
+		DimensionalityReduction dr = DimensionalityReduction.loadFrom(bw, cp, ihd);
 		
 		/** Uncompress the data stream */
 		//ImageDataType redDT = ImageDataType.findBest(cp.newMinVal, cp.newMaxVal);//new ImageDataType(cp.redBitDepth, true);

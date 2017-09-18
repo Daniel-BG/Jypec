@@ -5,10 +5,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
 import com.jypec.comdec.Compressor;
+import com.jypec.comdec.Decompressor;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
@@ -16,6 +19,7 @@ import com.jypec.util.bits.BitStream;
 import com.jypec.util.bits.BitStreamDataReaderWriter;
 import com.jypec.util.bits.FIFOBitStream;
 import com.jypec.util.io.HyperspectralImageReader;
+import com.jypec.util.io.HyperspectralImageWriter;
 import com.jypec.util.io.headerio.HeaderConstants;
 import com.jypec.util.io.headerio.ImageHeaderData;
 
@@ -30,11 +34,7 @@ public class Jypec {
 	 * @param args
 	 */
 	public static void compress(InputArguments args) {
-		if (args.input == null || args.metadata == null || args.output == null) {
-			throw new UnsupportedOperationException("Cannot work with the given arguments. Need an input, output and metadata file path");
-		}
-		
-		int headerOffset = 0;
+		//select header source
 		FileInputStream fis;
 		try {
 			if (args.metadata != null) { //read metadata from outside
@@ -46,6 +46,9 @@ public class Jypec {
 			e.printStackTrace();
 			return;
 		}
+		
+		//reade header
+		int headerOffset = 0;
 		ImageHeaderData ihd = new ImageHeaderData();
 		try {
 			//update header offset for later
@@ -55,7 +58,7 @@ public class Jypec {
 			return;
 		}
 		
-		//load image data from header
+		//load image metadata from header
 		int bands = (int) ihd.getData(HeaderConstants.HEADER_BANDS);
 		int lines = (int) ihd.getData(HeaderConstants.HEADER_LINES);
 		int samples = (int) ihd.getData(HeaderConstants.HEADER_SAMPLES);
@@ -104,20 +107,72 @@ public class Jypec {
 				throw new IllegalStateException("Padding was not added properly");
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	/**
 	 * Decompresses whatever the args tell it to
-	 * @param iArgs
+	 * @param args arguments in a readable form
 	 */
-	public static void decompress(InputArguments iArgs) {
-		throw new UnsupportedOperationException("not yet implemented");
+	public static void decompress(InputArguments args) {
+		//select header source. can be embedded or not, compressed or not, so many things to check for
+		/*FileInputStream fis;
+		try {
+			if (args.metadata != null) { //read metadata from outside
+				fis = new FileInputStream(args.metadata);
+			} else { //unless we do not have outside, then read from input
+				fis = new FileInputStream(args.input);
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return;
+		}*/
+		
+		
+		//read image data (potentially header as well but we don't know that yet
+		BitStream bs = new FIFOBitStream();
+		BitStreamDataReaderWriter brw = new BitStreamDataReaderWriter(bs);
+		byte[] data;
+		try {
+			data = Files.readAllBytes(Paths.get(args.input));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			return;
+		}
+		brw.writeByteArray(data, data.length);
+		
+		//read header and data
+		ImageHeaderData ihd = new ImageHeaderData();
+		try {
+			//if header is embedded read from same stream
+			if (args.embed) {
+				ihd.loadFromCompressedStream(brw);
+			} else { 
+				//assume header is uncompressed somewhere else
+				if (args.metadata != null) {
+					FileInputStream fis;
+					fis = new FileInputStream(args.metadata);
+					ihd.loadFromUncompressedStream(fis);
+				}
+			}		
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		
+		Decompressor d = new Decompressor();
+		HyperspectralImage res = d.decompress(ihd, bs);
+		
+		HyperspectralImageWriter.writeBSQ(res, args.output);
+		
+		if (args.showCompressionStats) {
+			System.out.println("Image decompressed succesfully with: " + bs.getNumberOfBits() + " bits remaining (should be zero)");
+		}
+		
 	}
 	
 }

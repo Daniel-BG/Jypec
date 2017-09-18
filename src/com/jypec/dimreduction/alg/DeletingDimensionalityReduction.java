@@ -12,8 +12,13 @@ import com.jypec.util.io.headerio.ImageHeaderData;
  * Implementation of {@link DimensionalityReduction} that just removes dimensions
  * if required, leaving the set number of components untouched
  */
-public class DeletingDimensionalityReduction implements DimensionalityReduction {
+public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	
+	/** Default constructor */
+	public DeletingDimensionalityReduction() {
+		super(DimensionalityReductionAlgorithm.DRA_DELETING_DIMENSIONALITY_REDUCTION);
+	}
+
 	private int numComponents = -1;
 
 	@Override
@@ -48,12 +53,7 @@ public class DeletingDimensionalityReduction implements DimensionalityReduction 
 	}
 
 	@Override
-	public void saveTo(BitStreamDataReaderWriter bw) {
-		//do nothing
-	}
-
-	@Override
-	public void loadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd) {
+	public void doLoadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd) {
 		this.numComponents = (int) ihd.getData(HeaderConstants.HEADER_BANDS);
 	}
 
@@ -75,6 +75,11 @@ public class DeletingDimensionalityReduction implements DimensionalityReduction 
 	@Override
 	public void setNumComponents(int numComponents) {
 		this.numComponents = numComponents;
+	}
+
+	@Override
+	public void doSaveTo(BitStreamDataReaderWriter bw) {
+		//nothing to do, saved already in the header metadata
 	}
 
 }

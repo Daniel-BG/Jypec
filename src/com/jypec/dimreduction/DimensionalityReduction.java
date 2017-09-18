@@ -12,7 +12,28 @@ import com.jypec.util.io.headerio.ImageHeaderData;
  * @author Daniel
  * Base interface for implementing various dimensionality reduction algorithms
  */
-public interface DimensionalityReduction {
+public abstract class DimensionalityReduction {
+	
+	/**
+	 * @author Daniel
+	 * enums all subclasses so that save and loads methods can use codes to reload them
+	 */
+	public enum DimensionalityReductionAlgorithm {
+		/** {@link PrincipalComponentAnalysis}*/
+		DRA_PCA, 
+		/** {@link DeletingDimensionalityReduction} */
+		DRA_DELETING_DIMENSIONALITY_REDUCTION
+	}
+	
+	private DimensionalityReductionAlgorithm dra;
+	
+	/**
+	 * @param dra indicates the type of reduction being made
+	 */
+	public DimensionalityReduction(DimensionalityReductionAlgorithm dra) {
+		this.dra = dra;
+	}
+	
 	
 	/**
 	 * Train this dimensionality reduction with the given image, to analize and then
@@ -22,7 +43,7 @@ public interface DimensionalityReduction {
 	 * based on similarities, will later be reduced without the loss of significant information,
 	 * with calls to {@link #reduce(HyperspectralImage, HyperspectralImage)}
 	 */
-	public void train(HyperspectralImage source);
+	public abstract void train(HyperspectralImage source);
 	
 	
 	/**
@@ -31,7 +52,7 @@ public interface DimensionalityReduction {
 	 * @param source the source image
 	 * @return the source image projected into the smaller dimension space
 	 */
-	public double[][][] reduce(HyperspectralImage source);
+	public abstract double[][][] reduce(HyperspectralImage source);
 	
 	
 	
@@ -41,8 +62,7 @@ public interface DimensionalityReduction {
 	 * @param source the source image (in the reduced dimension space)
 	 * @param dst will hold the result: the original image in the original space
 	 */
-	public void boost(double[][][] source, HyperspectralImage dst);
-	
+	public abstract void boost(double[][][] source, HyperspectralImage dst);
 	
 	
 	/**
@@ -50,7 +70,17 @@ public interface DimensionalityReduction {
 	 * reconstruct this Object from a call to {@link #loadFrom(BitStreamDataReaderWriter)}
 	 * @param bw The BitStream handler that encapsulates the BitStream
 	 */
-	public void saveTo(BitStreamDataReaderWriter bw);
+	public final void saveTo(BitStreamDataReaderWriter bw) {
+		bw.writeByte((byte) this.dra.ordinal());
+		this.doSaveTo(bw);
+	}
+	
+
+	/**
+	 * Save the information specific to each algorithm
+	 * @param bw
+	 */
+	public abstract void doSaveTo(BitStreamDataReaderWriter bw);
 	
 	
 	/**
@@ -60,32 +90,65 @@ public interface DimensionalityReduction {
 	 * @param bw The BitStream handler that encapsulates the BitStream
 	 * @param cp Compressor Parameters in case it needs global info to restore
 	 * @param ihd Image parameters in case it needs information
+	 * @return the proper dimensionality reduction algorithm
 	 */
-	public void loadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd);
+	public static final DimensionalityReduction loadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd) {
+		DimensionalityReduction dr;
+		byte type = bw.readByte();
+		
+		if (type < 0 || type > DimensionalityReductionAlgorithm.values().length) {
+			throw new IllegalArgumentException("Cannot load that kind of Dimensionality Reduction algorithm: " + type);
+		}
+		
+		DimensionalityReductionAlgorithm dra = DimensionalityReductionAlgorithm.values()[type];
+		
+		switch(dra) {
+		case DRA_DELETING_DIMENSIONALITY_REDUCTION:
+			dr = new DeletingDimensionalityReduction();
+			break;
+		case DRA_PCA:
+			dr = new PrincipalComponentAnalysis();
+			break;
+		default:
+			throw new IllegalArgumentException("Cannot load that kind of Dimensionality Reduction algorithm: " + type);
+		}
+		
+		dr.doLoadFrom(bw, cp, ihd);
+		
+		return dr;
+	}
+	
+	/**
+	 * Load the information specific to this algorithm
+	 * @param bw
+	 * @param cp
+	 * @param ihd
+	 */
+	public abstract void doLoadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd);
 	
 	
 	/**
 	 * @return the target dimension the algorithm is reducing to / restoring from
 	 */
-	public int getNumComponents();
+	public abstract int getNumComponents();
 	
 	/**
 	 * Set the number of components this dimensionality reduction will be reducing to
 	 * @param numComponents 
 	 */
-	public void setNumComponents(int numComponents);
+	public abstract void setNumComponents(int numComponents);
 
 	/**
 	 * @param img where to get the max value from
 	 * @return the maximum value that the reduced image can have on its samples
 	 */
-	public double getMaxValue(HyperspectralImage img);
+	public abstract double getMaxValue(HyperspectralImage img);
 	
 	/**
 	 * @param img where to get the min value from
 	 * @return the minimum value that the reduced image can have on its samples
 	 */
-	public double getMinValue(HyperspectralImage img);
+	public abstract double getMinValue(HyperspectralImage img);
 
 	/**
 	 * Load the proper dimensionality reduction algorithm selected in the input arguments

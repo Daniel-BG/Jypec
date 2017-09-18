@@ -50,7 +50,7 @@ import com.jypec.util.io.headerio.ImageHeaderData;
  */
 
 
-public class PrincipalComponentAnalysis implements DimensionalityReduction {
+public class PrincipalComponentAnalysis extends DimensionalityReduction {
 
     // principal component subspace is stored in the rows
     private DMatrixRMaj V_t;
@@ -72,6 +72,7 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
      * Create a PCA object
      */
     public PrincipalComponentAnalysis() {
+    	super(DimensionalityReductionAlgorithm.DRA_PCA);
     }
 
     /**
@@ -288,7 +289,7 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
 
 	
     @Override
-    public void saveTo(BitStreamDataReaderWriter bw) {
+    public void doSaveTo(BitStreamDataReaderWriter bw) {
     	//write the number of dimensions in the original space
     	bw.writeInt(this.sampleSize);
     	//write the number of dimensions in the reduced space
@@ -300,7 +301,7 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
     }
     
     @Override
-    public void loadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd) {
+    public void doLoadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd) {
     	//read the number of dimensions in the original space
     	this.sampleSize = bw.readInt();
     	//read the number of dimensions in the reduced space
@@ -373,6 +374,7 @@ public class PrincipalComponentAnalysis implements DimensionalityReduction {
 	public double getMinValue(HyperspectralImage img) {
 		return -MathOperations.getMaximumDistance(img.getDataType().getMagnitudeAbsoluteRange(), img.getNumberOfBands());
 	}
+
 
 
     
