@@ -13,7 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jypec.util.Utilities;
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 
 /**
  * Stores image header data
@@ -95,18 +96,19 @@ public class ImageHeaderData {
 	 * Load the header from the given compressed stream
 	 * @param brw
 	 * @return the number of BYTES read
+	 * @throws IOException 
 	 */
-	public int loadFromCompressedStream(BitStreamDataReaderWriter brw) {
-		int bits = brw.availableBits();
+	public int loadFromCompressedStream(BitInputStream brw) throws IOException {
+		int bits = brw.getBitsInput();
 		this.reset();
-		while (brw.availableBytes() > 0) {
+		while (brw.available() > 0) {
 			ParameterReaderWriter prw = ParameterReaderWriter.readNextCompressedParameter(brw);
 			if (prw.getHeaderConstant() == HeaderConstants.HEADER_TERMINATION) {
 				break;
 			}
 			this.setData(prw.getHeaderConstant(), prw.getData());
 		}
-		bits -= brw.availableBits();
+		bits = brw.getBitsInput() - bits;
 		if (bits % 8 == 0) {
 			return bits / 8;
 		} else {
@@ -119,9 +121,10 @@ public class ImageHeaderData {
 	 * save inner information into a compressed stream
 	 * @param brw
 	 * @return the number of BYTES written to the stream
+	 * @throws IOException 
 	 */
-	public int saveToCompressedStream(BitStreamDataReaderWriter brw) {
-		int bits = brw.availableBits();
+	public int saveToCompressedStream(BitOutputStream brw) throws IOException {
+		int bits = brw.getBitsOutput();
 		for (Entry<HeaderConstants, Object> e: this.data.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			prw.setData(e.getValue());
@@ -131,7 +134,7 @@ public class ImageHeaderData {
 		}
 		brw.writeByte((byte)HeaderConstants.HEADER_TERMINATION.ordinal());
 		
-		bits = brw.availableBits() - bits;
+		bits = brw.getBitsOutput() - bits;
 		if (bits % 8 == 0) {
 			return bits / 8;
 		} else {

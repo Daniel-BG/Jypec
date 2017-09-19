@@ -1,5 +1,7 @@
 package com.jypec.comdec;
 
+import java.io.IOException;
+
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.data.CodingBlock;
@@ -8,8 +10,7 @@ import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.arrays.MatrixOperations;
-import com.jypec.util.bits.BitStream;
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.io.headerio.ImageHeaderData;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
@@ -37,11 +38,9 @@ public class Compressor {
 	 * @param srcImg the source hyperspectral image
 	 * @param output where to put the compressed image
 	 * @param dr dimensionality reduction algorithm that is to be applied
+	 * @throws IOException 
 	 */
-	public void compress(HyperspectralImage srcImg, BitStream output, DimensionalityReduction dr) {
-		/** We will need a wrapper around the output to make it easier to save numbers */
-		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter(output);
-		
+	public void compress(HyperspectralImage srcImg, BitOutputStream output, DimensionalityReduction dr) throws IOException {
 		/** Project all image values onto the reduced space */
 		dr.train(srcImg);
 		double[][][] reduced = dr.reduce(srcImg);
@@ -51,8 +50,8 @@ public class Compressor {
 		EBCoder coder = new EBCoder();
 		
 		/** Save metadata before compressing the image */
-		cp.saveTo(bw);
-		dr.saveTo(bw);
+		cp.saveTo(output);
+		dr.saveTo(output);
 		
 		/** Proceed to compress the reduced image */
 		for (int i = 0; i < dr.getNumComponents(); i++) {
@@ -67,8 +66,8 @@ public class Compressor {
 			/** custom quantizer for this band */
 			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.375);
 			
-			bw.writeDouble(minMax[0]);
-			bw.writeDouble(minMax[1]);
+			output.writeDouble(minMax[0]);
+			output.writeDouble(minMax[1]);
 			
 			
 			/** quantize the transform and save the quantization over the current band */

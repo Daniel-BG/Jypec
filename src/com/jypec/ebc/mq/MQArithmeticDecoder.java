@@ -1,12 +1,13 @@
 package com.jypec.ebc.mq;
 
+import java.io.IOException;
 import java.util.EnumMap;
 
 import com.jypec.ebc.EBCoder;
 import com.jypec.util.bits.Bit;
-import com.jypec.util.bits.BitStream;
+import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitTwiddling;
-import com.jypec.util.bits.BitStream.BitStreamConstants;
+import com.jypec.util.bits.BitStreamConstants;
 
 /**
  * Implementation of the MQ arithmetic decoder
@@ -32,16 +33,18 @@ public class MQArithmeticDecoder {
 	/**
 	 * Initialize the decoder, make it ready to rumble
 	 * @param input where to read from
+	 * @throws IOException 
 	 */
-	public MQArithmeticDecoder(BitStream input) {
+	public MQArithmeticDecoder(BitInputStream input) throws IOException {
 		this.initialize(input);
 	}
 	
 	/**
 	 * Initializes this decoder starting inmmediately with the bits in the input BitStream
 	 * @param input
+	 * @throws IOException 
 	 */
-	public void initialize(BitStream input) {
+	public void initialize(BitInputStream input) throws IOException {
 		this.contextStates = new EnumMap<ContextLabel, MQProbabilityTable>(ContextLabel.class);
 		
 		for (ContextLabel contextLabel: ContextLabel.values()) {
@@ -69,8 +72,9 @@ public class MQArithmeticDecoder {
 	
 	/**
 	 * Procedure that loads the next byte into C for decoding
+	 * @throws IOException 
 	 */
-	private void fillLSBs(BitStream input) {
+	private void fillLSBs(BitInputStream input) throws IOException {
 		this.countdownTimer = 8;
 		if (this.codeBytesRead == this.maxCodeBytesToRead) {
 			this.normalizedLowerBound += 0xff;
@@ -95,8 +99,9 @@ public class MQArithmeticDecoder {
 	 * @param bitsToDecode
 	 * @param context
 	 * @return the next unsigned integer in the input stream decoded using the given context 
+	 * @throws IOException 
 	 */
-	public int decodeNumberWithContext(BitStream input, int bitsToDecode, ContextLabel context) {
+	public int decodeNumberWithContext(BitInputStream input, int bitsToDecode, ContextLabel context) throws IOException {
 		int res = 0;
 		for (int i = 0; i < bitsToDecode; i++) {
 			res <<= 1;
@@ -112,8 +117,9 @@ public class MQArithmeticDecoder {
 	 * @param input
 	 * @param context
 	 * @return the next bit decoded from input using context
+	 * @throws IOException 
 	 */
-	public Bit decodeSymbol(BitStream input, ContextLabel context) {
+	public Bit decodeSymbol(BitInputStream input, ContextLabel context) throws IOException {
 		//get the table associated to this context
 		MQProbabilityTable table = this.contextStates.get(context);
 		//get the elements from the table
@@ -163,8 +169,9 @@ public class MQArithmeticDecoder {
 	 * Renormalize-one procedure that adjusts the intervals
 	 * and reads from the input if necessary
 	 * @param input
+	 * @throws IOException 
 	 */
-	private void renormalizeOnce(BitStream input) {
+	private void renormalizeOnce(BitInputStream input) throws IOException {
 		if (this.countdownTimer == 0) {
 			this.fillLSBs(input);
 		} 

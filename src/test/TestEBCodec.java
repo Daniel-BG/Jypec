@@ -1,5 +1,8 @@
 package test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Random;
 
 import org.junit.Test;
@@ -10,8 +13,8 @@ import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
-import com.jypec.util.bits.BitStream;
-import com.jypec.util.bits.FIFOBitStream;
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.data.BidimensionalArrayIntegerMatrix;
 import com.jypec.util.data.IntegerMatrix;
 import com.jypec.util.debug.Logger;
@@ -38,14 +41,29 @@ public class TestEBCodec {
 		
 		//Code it
 		CodingBlock block = new CodingBlock(data, height, width, 0, 0, depth, band);
-		BitStream output = new FIFOBitStream();
+		ByteArrayOutputStream bais = new ByteArrayOutputStream();
+		BitOutputStream output = new BitOutputStream(bais);
+		
+		
 		EBCoder coder = new EBCoder();
-		coder.code(block, output);
+		try {
+			coder.code(block, output);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
 		
 		//decode it
 		CodingBlock blockOut = new CodingBlock(height, width, depth, band);
 		EBDecoder decoder = new EBDecoder();
-		decoder.decode(output, blockOut);
+		
+		BitInputStream input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
+		try {
+			decoder.decode(input, blockOut);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
 
 		boolean right = true;
 		for (int i = 0; i < height; i++) {

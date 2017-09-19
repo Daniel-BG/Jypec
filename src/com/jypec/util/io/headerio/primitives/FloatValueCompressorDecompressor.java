@@ -1,6 +1,10 @@
 package com.jypec.util.io.headerio.primitives;
 
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import java.io.IOException;
+
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
+
 
 /**
  * Compresses/Decompresses floats
@@ -12,7 +16,7 @@ public class FloatValueCompressorDecompressor extends SingleValueCompressorDecom
 	private Float value;
 
 	@Override
-	public void uncompress(BitStreamDataReaderWriter brw) {
+	public void uncompress(BitInputStream brw) throws IOException {
 		this.value = new Float(brw.readFloat());
 	}
 
@@ -27,8 +31,8 @@ public class FloatValueCompressorDecompressor extends SingleValueCompressorDecom
 	}
 
 	@Override
-	public int compress(BitStreamDataReaderWriter brw) {
-		return brw.writeFloat(this.value);
+	public void compress(BitOutputStream brw) throws IOException {
+		brw.writeFloat(this.value);
 	}
 
 	@Override

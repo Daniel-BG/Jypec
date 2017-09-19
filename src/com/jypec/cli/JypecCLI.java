@@ -15,14 +15,14 @@ public class JypecCLI {
 	public static final String OPTION_COMPRESS = "compress";
 	/** Decompress option constant. Use for retrieving arguments and/or flags */
 	public static final String OPTION_DECOMPRESS = "decompress";
-	/** Embed option constant. Use for retrieving arguments and/or flags */
-	public static final String OPTION_EMBED = "embed";
 	/** Input option constant. Use for retrieving arguments and/or flags */
 	public static final String OPTION_INPUT = "input";
+	/** Input header option constant. Use for retrieving arguments and/or flags */
+	public static final String OPTION_INPUT_HEADER = "input_header";
 	/** Output option constant. Use for retrieving arguments and/or flags */
 	public static final String OPTION_OUTPUT = "output";
-	/** Metadata option constant. Use for retrieving arguments and/or flags */
-	public static final String OPTION_METADATA = "metadata";
+	/** Output header option constant. Use for retrieving arguments and/or flags */
+	public static final String OPTION_OUTPUT_HEADER = "output_header";
 	/** Reduction algorithm option constant. Use for retrieving arguments and/or flags */
 	public static final String OPTION_REDUCTION = "reduction";
 	/** Wavelet algorithm option constant. Use for retrieving arguments and/or flags */
@@ -31,17 +31,23 @@ public class JypecCLI {
 	public static final String OPTION_SHAVE = "shave";
 	/** Show compressions stats. Use for retrieving arguments and/or flags  */
 	public static final String OPTION_SHOW_COMPRESSION_STATS = "compression_stats";
+	/** Flag to compress the header. Use for retrieving arguments and/or flags  */
+	public static final String OPTION_COMPRESS_HEADER = "compression_stats";
+	/** Flag to not output the header. Use for retrieving arguments and/or flags  */
+	public static final String OPTION_NO_HEADER_OUTPUT = "no_header_output";
 	
 	/* Options for jypec */
 	private static Options jypecOptions;
 	/* Only one instance */
 	static {
 		/* flags */
-		Option help			= new Option("h", OPTION_HELP, false, "print this message");
-		Option compress		= new Option("c", OPTION_COMPRESS, false, "compress the input image");
-		Option decompress	= new Option("d", OPTION_DECOMPRESS, false, "decompress the input image");
-		Option embed		= new Option("e", OPTION_EMBED, false, "embed the metadata into the output image");
+		Option help				= new Option("h", OPTION_HELP, false, "print this message");
+		Option compress			= new Option("c", OPTION_COMPRESS, false, "compress the input image");
+		Option decompress		= new Option("d", OPTION_DECOMPRESS, false, "decompress the input image");
 		Option compressionStats = new Option(null, OPTION_SHOW_COMPRESSION_STATS, false, "show compression stats");
+		Option compressHeader 	= new Option(null, OPTION_COMPRESS_HEADER, false, "compress the header");
+		Option noHeaderOutput 	= new Option(null, OPTION_NO_HEADER_OUTPUT, false, "do not output the header");
+		
 		
 		/* input output files */
 		Option input = Option
@@ -53,12 +59,12 @@ public class JypecCLI {
 				.required()
 				.build();
 		
-		Option metadata = Option
-				.builder("m")
+		Option inputHeader = Option
+				.builder()
 				.argName("file")
-				.desc("metadata file")
+				.desc("input file header location")
 				.hasArg()
-				.longOpt(OPTION_METADATA)
+				.longOpt(OPTION_INPUT_HEADER)
 				.build();
 		
 		Option output = 	Option
@@ -68,6 +74,14 @@ public class JypecCLI {
 				.hasArg()
 				.longOpt(OPTION_OUTPUT)
 				.required()
+				.build();
+		
+		Option outputHeader = Option
+				.builder()
+				.argName("file")
+				.desc("output file header location")
+				.hasArg()
+				.longOpt(OPTION_OUTPUT_HEADER)
 				.build();
 		
 		/* algorithm options (only if compressing) */
@@ -102,13 +116,15 @@ public class JypecCLI {
 		jypecOptions.addOption(wavelet);
 		jypecOptions.addOption(reduction);
 		jypecOptions.addOption(output);
-		jypecOptions.addOption(metadata);
 		jypecOptions.addOption(input);
 		jypecOptions.addOption(compress);
 		jypecOptions.addOption(decompress);
 		jypecOptions.addOption(help);
-		jypecOptions.addOption(embed);
 		jypecOptions.addOption(compressionStats);
+		jypecOptions.addOption(inputHeader);
+		jypecOptions.addOption(outputHeader);
+		jypecOptions.addOption(compressHeader);
+		jypecOptions.addOption(noHeaderOutput);
 	}
 	
 	

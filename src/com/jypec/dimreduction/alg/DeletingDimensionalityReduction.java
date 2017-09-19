@@ -3,7 +3,8 @@ package com.jypec.dimreduction.alg;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.io.headerio.HeaderConstants;
 import com.jypec.util.io.headerio.ImageHeaderData;
 
@@ -53,7 +54,7 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public void doLoadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd) {
+	public void doLoadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) {
 		this.numComponents = (int) ihd.getData(HeaderConstants.HEADER_BANDS);
 	}
 
@@ -78,7 +79,7 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public void doSaveTo(BitStreamDataReaderWriter bw) {
+	public void doSaveTo(BitOutputStream bw) {
 		//nothing to do, saved already in the header metadata
 	}
 

@@ -1,6 +1,9 @@
 package com.jypec.util.io.headerio;
 
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import java.io.IOException;
+
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.io.headerio.primitives.ValueCompressorDecompressor;
 
 /**
@@ -46,17 +49,17 @@ public class ParameterReaderWriter {
 	 * @param argument
 	 * @param brw
 	 * @return the number of bits of the compressed data
+	 * @throws IOException 
 	 */
-	public final int compress(BitStreamDataReaderWriter brw) {
-		int res = 0;
-		res += this.compressParameterType(brw);
-		res += this.compressData(brw);
-		return res;
+	public final int compress(BitOutputStream brw) throws IOException {
+		int cbits = brw.getBitsOutput();
+		this.compressParameterType(brw);
+		this.compressData(brw);
+		return brw.getBitsOutput() - cbits;
 	}
 	
-	private final int compressParameterType(BitStreamDataReaderWriter brw) {
+	private final void compressParameterType(BitOutputStream brw) throws IOException {
 		brw.writeByte(headerConstant.getCode());
-		return 8;
 	}
 	
 	/**
@@ -65,8 +68,9 @@ public class ParameterReaderWriter {
 	 * end of the reading
 	 * @param brw
 	 * @return the parameterReaderWriter for the next parameter, with the parameter read
+	 * @throws IOException 
 	 */
-	public static ParameterReaderWriter readNextCompressedParameter(BitStreamDataReaderWriter brw) {
+	public static ParameterReaderWriter readNextCompressedParameter(BitInputStream brw) throws IOException {
 		int type = brw.readByte();
 		if (type < 0 || type > HeaderConstants.values().length) {
 			throw new IllegalStateException("I do not recognize the parameter code");
@@ -88,10 +92,10 @@ public class ParameterReaderWriter {
 	 * Compresses the data parsed with {@link #parseData(String)}
 	 * @param argument
 	 * @param brw
-	 * @return the number of bits compressed
+	 * @throws IOException 
 	 */
-	private int compressData(BitStreamDataReaderWriter brw) {
-		return this.comDec.compress(brw);
+	private void compressData(BitOutputStream brw) throws IOException {
+		this.comDec.compress(brw);
 	}
 	
 	
@@ -100,8 +104,9 @@ public class ParameterReaderWriter {
 	 * {@link BitStreamDataReaderWriter} pointer is at. The parameter code should 
 	 * already be read
 	 * @param brw
+	 * @throws IOException 
 	 */
-	public void decompressData(BitStreamDataReaderWriter brw) {
+	public void decompressData(BitInputStream brw) throws IOException {
 		this.comDec.uncompress(brw);
 	}
 	

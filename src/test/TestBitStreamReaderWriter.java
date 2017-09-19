@@ -2,13 +2,15 @@ package test;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Random;
 
 import org.junit.Test;
 
-import com.jypec.util.bits.BitStream;
-import com.jypec.util.bits.BitStreamDataReaderWriter;
-import com.jypec.util.bits.FIFOBitStream;
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 
 /**
  * @author Daniel
@@ -21,9 +23,10 @@ public class TestBitStreamReaderWriter {
 	/** Test if doubles are written and read by BitStreamDataReaderWriter */
 	@Test
 	public void testDoubles() {
-		BitStream b = new FIFOBitStream();
-		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter(b);
-		
+		ByteArrayOutputStream bais = new ByteArrayOutputStream();
+		BitOutputStream output = new BitOutputStream(bais);
+		BitInputStream input;
+
 		Random r = new Random();
 		double[] data = new double[this.testSampleSize];
 		double[] defData = {0d, 1d, -1d, Double.MAX_VALUE, Double.MIN_VALUE, Double.NaN,
@@ -36,21 +39,31 @@ public class TestBitStreamReaderWriter {
 				data[i] = r.nextDouble();
 		}
 		
-		for (int i = 0; i < this.testSampleSize; i++) {
-			rw.writeDouble(data[i]);
-		}
-		
-		for (int i = 0; i < this.testSampleSize; i++) {
-			Double d = rw.readDouble();
-			assertTrue("Failed when recovering: " + data[i] + " " + d, Double.compare(d, data[i]) == 0);
-		}
+		try {
+			for (int i = 0; i < this.testSampleSize; i++) {
+				output.writeDouble(data[i]);
+			}
+			
+			input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
+			
+			for (int i = 0; i < this.testSampleSize; i++) {
+				Double d = input.readDouble();
+				assertTrue("Failed when recovering: " + data[i] + " " + d, Double.compare(d, data[i]) == 0);
+			}
+			output.close();
+			input.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
 	}
 	
 	/** Test if floats are written and read by BitStreamDataReaderWriter */
 	@Test
 	public void testFloats() {
-		BitStream b = new FIFOBitStream();
-		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter(b);
+		ByteArrayOutputStream bais = new ByteArrayOutputStream();
+		BitOutputStream output = new BitOutputStream(bais);
+		BitInputStream input;
 		
 		Random r = new Random();
 		float[] data = new float[this.testSampleSize];
@@ -64,13 +77,21 @@ public class TestBitStreamReaderWriter {
 				data[i] = r.nextFloat();
 		}
 		
-		for (int i = 0; i < this.testSampleSize; i++) {
-			rw.writeFloat(data[i]);
-		}
-		
-		for (int i = 0; i < this.testSampleSize; i++) {
-			Float f = rw.readFloat();
-			assertTrue("Failed when recovering: " + data[i] + " " + f, Float.compare(f, data[i]) == 0);
+		try {
+			for (int i = 0; i < this.testSampleSize; i++) {
+				output.writeFloat(data[i]);
+			}
+			
+			input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
+			
+			for (int i = 0; i < this.testSampleSize; i++) {
+				Float f = input.readFloat();
+				assertTrue("Failed when recovering: " + data[i] + " " + f, Float.compare(f, data[i]) == 0);
+			}
+			input.close();
+			output.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -78,8 +99,9 @@ public class TestBitStreamReaderWriter {
 	/** Test if integers are written and read by BitStreamDataReaderWriter */
 	@Test
 	public void testInts() {
-		BitStream b = new FIFOBitStream();
-		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter(b);
+		ByteArrayOutputStream bais = new ByteArrayOutputStream();
+		BitOutputStream output = new BitOutputStream(bais);
+		BitInputStream input;
 		
 		Random r = new Random();
 		int[] data = new int[this.testSampleSize];
@@ -92,12 +114,21 @@ public class TestBitStreamReaderWriter {
 				data[i] = r.nextInt();
 		}
 		
-		for (int i = 0; i < this.testSampleSize; i++) {
-			rw.writeInt(data[i]);
-		}
-		
-		for (int i = 0; i < this.testSampleSize; i++) {
-			assertTrue("Failed when recovering: " + data[i], rw.readInt() == data[i]);
+		try {
+			for (int i = 0; i < this.testSampleSize; i++) {
+				output.writeInt(data[i]);
+			}
+			
+			input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
+			
+			for (int i = 0; i < this.testSampleSize; i++) {
+				int rec = input.readInt();
+				assertTrue("Failed when recovering: " + data[i] + ", got: " + rec, rec == data[i]);
+			}
+			input.close();
+			output.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -106,12 +137,15 @@ public class TestBitStreamReaderWriter {
 	 */
 	@Test
 	public void testDifferentIntBitDepths() {
-		BitStream b = new FIFOBitStream();
-		BitStreamDataReaderWriter rw = new BitStreamDataReaderWriter(b);
+
 		
 		Random r = new Random();
 		
 		for (int depth = 1; depth <= 32; depth++) {
+			ByteArrayOutputStream bais = new ByteArrayOutputStream();
+			BitOutputStream output = new BitOutputStream(bais);
+			BitInputStream input;
+			
 			int[] data = new int[this.testSampleSize];
 			int[] defData = {0, 1, 0xffffffff >>> (32 - depth), depth > 1 ? 0xffffffff >>> (33 - depth) : 0, 0x1 << (depth - 1)};
 
@@ -122,12 +156,23 @@ public class TestBitStreamReaderWriter {
 					data[i] = r.nextInt() & (0xffffffff >>> (32 - depth));
 			}
 			
-			for (int i = 0; i < this.testSampleSize; i++) {
-				rw.writeNBitNumber(data[i], depth);
-			}
-			
-			for (int i = 0; i < this.testSampleSize; i++) {
-				assertTrue("Failed when recovering: " + data[i] + " at bit depth: " + depth, rw.readNBitNumber(depth) == data[i]);
+			try {
+				for (int i = 0; i < this.testSampleSize; i++) {
+					output.writeNBitNumber(data[i], depth);
+				}
+
+				output.paddingFlush();
+				input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
+				
+				for (int i = 0; i < this.testSampleSize; i++) {
+					int rec = input.readNBitNumber(depth);
+					assertTrue("Failed when recovering: " + data[i] + " at bit depth: " + depth + " got value: " + rec, rec == data[i]);
+				}
+				input.close();
+				output.close();
+			} catch (IOException e) {
+				assertTrue("Exception was thrown", false);
+				e.printStackTrace();
 			}
 		}
 		

@@ -1,5 +1,6 @@
 package com.jypec.dimreduction.alg;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,7 +17,8 @@ import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.util.MathOperations;
 import com.jypec.util.Pair;
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.io.headerio.ImageHeaderData;
 
 /**
@@ -289,7 +291,7 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 
 	
     @Override
-    public void doSaveTo(BitStreamDataReaderWriter bw) {
+    public void doSaveTo(BitOutputStream bw) throws IOException {
     	//write the number of dimensions in the original space
     	bw.writeInt(this.sampleSize);
     	//write the number of dimensions in the reduced space
@@ -301,7 +303,7 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
     }
     
     @Override
-    public void doLoadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd) {
+    public void doLoadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) throws IOException {
     	//read the number of dimensions in the original space
     	this.sampleSize = bw.readInt();
     	//read the number of dimensions in the reduced space

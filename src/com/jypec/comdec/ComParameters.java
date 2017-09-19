@@ -1,6 +1,9 @@
 package com.jypec.comdec;
 
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import java.io.IOException;
+
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 
 /**
  * Used for saving / loading parameters from a bitstream in an easy manner.
@@ -20,8 +23,9 @@ public class ComParameters {
 	/**
 	 * Saves this parameters to the given BitStreamDataReaderWriter
 	 * @param bw
+	 * @throws IOException 
 	 */
-	public void saveTo(BitStreamDataReaderWriter bw) {
+	public void saveTo(BitOutputStream bw) throws IOException {
 		bw.writeNBitNumber(this.wavePasses, ComDecConstants.WAVE_PASSES_BITS);
 		bw.writeNBitNumber(this.bitReduction, ComDecConstants.REDUCTION_BITS_BITS);
 	}
@@ -30,8 +34,9 @@ public class ComParameters {
 	/**
 	 * Loads this class from the given BitStreamDataReaderWriter, initializing all parameters
 	 * @param bw
+	 * @throws IOException 
 	 */
-	public void loadFrom(BitStreamDataReaderWriter bw) {
+	public void loadFrom(BitInputStream bw) throws IOException {
 		this.wavePasses = bw.readNBitNumber(ComDecConstants.WAVE_PASSES_BITS);
 		this.bitReduction = bw.readNBitNumber(ComDecConstants.REDUCTION_BITS_BITS);
 	}

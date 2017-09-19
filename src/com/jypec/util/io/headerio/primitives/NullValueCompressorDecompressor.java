@@ -1,6 +1,7 @@
 package com.jypec.util.io.headerio.primitives;
 
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 
 /**
  * Dummy class for storing things that are flags in the compressed stream
@@ -20,10 +21,10 @@ public class NullValueCompressorDecompressor extends ValueCompressorDecompressor
 	public void setObject(Object obj) {}
 
 	@Override
-	public int compress(BitStreamDataReaderWriter brw) { return 0; }
+	public void compress(BitOutputStream brw) {}
 
 	@Override
-	public void uncompress(BitStreamDataReaderWriter brw) {}
+	public void uncompress(BitInputStream brw) {}
 
 	@Override
 	public String unParse() {

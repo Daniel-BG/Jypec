@@ -1,6 +1,9 @@
 package com.jypec.util.io.headerio.primitives;
 
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import java.io.IOException;
+
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 
 /**
  * Compresses/uncompresses a byte (8 bit) value
@@ -12,7 +15,7 @@ public class ByteValueCompressorDecompressor extends SingleValueCompressorDecomp
 	private Byte value;
 
 	@Override
-	public void uncompress(BitStreamDataReaderWriter brw) {
+	public void uncompress(BitInputStream brw) throws IOException {
 		this.value = new Byte(brw.readByte());
 	}
 
@@ -27,8 +30,8 @@ public class ByteValueCompressorDecompressor extends SingleValueCompressorDecomp
 	}
 
 	@Override
-	public int compress(BitStreamDataReaderWriter brw) {
-		return brw.writeByte(this.value);
+	public void compress(BitOutputStream brw) throws IOException {
+		brw.writeByte(this.value);
 	}
 
 	@Override

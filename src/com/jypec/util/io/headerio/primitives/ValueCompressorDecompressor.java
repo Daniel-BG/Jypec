@@ -1,6 +1,9 @@
 package com.jypec.util.io.headerio.primitives;
 
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import java.io.IOException;
+
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 
 /**
  * Class to transform strings to values (uncompressed to compressed) <br>
@@ -32,9 +35,9 @@ public abstract class ValueCompressorDecompressor {
 	/**
 	 * Compress the inner object (see {@link #getObject()}) into the given stream
 	 * @param brw
-	 * @return the number of bits of the compressed object
+	 * @throws IOException 
 	 */
-	public abstract int compress(BitStreamDataReaderWriter brw);
+	public abstract void compress(BitOutputStream brw) throws IOException;
 	
 	/**
 	 * Does {@link #parse(Object)} followed by 
@@ -43,8 +46,9 @@ public abstract class ValueCompressorDecompressor {
 	 * @param obj the object to compressed
 	 * @param brw where to compress the object
 	 * @return the compressed object
+	 * @throws IOException 
 	 */
-	public Object parseCompressAndReturn(Object obj, BitStreamDataReaderWriter brw) {
+	public Object parseCompressAndReturn(Object obj, BitOutputStream brw) throws IOException{
 		this.parse(obj);
 		this.compress(brw);
 		return this.getObject();
@@ -53,16 +57,18 @@ public abstract class ValueCompressorDecompressor {
 	/**
 	 * Read the value from the given stream and return the representing string
 	 * @param brw
+	 * @throws IOException 
 	 */
-	public abstract void uncompress(BitStreamDataReaderWriter brw);
+	public abstract void uncompress(BitInputStream brw) throws IOException;
 	
 	/**
 	 * Does {@link #uncompress(BitStreamDataReaderWriter)} followed by
 	 * {@link #getObject()}
 	 * @param brw
 	 * @return the uncompressed object
+	 * @throws IOException 
 	 */
-	public Object uncompressAndReturn(BitStreamDataReaderWriter brw) {
+	public Object uncompressAndReturn(BitInputStream brw) throws IOException {
 		this.uncompress(brw);
 		return this.getObject();
 	}

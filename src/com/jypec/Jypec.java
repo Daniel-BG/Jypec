@@ -5,21 +5,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
 import com.jypec.comdec.Compressor;
-import com.jypec.comdec.Decompressor;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
-import com.jypec.util.bits.BitStream;
-import com.jypec.util.bits.BitStreamDataReaderWriter;
-import com.jypec.util.bits.FIFOBitStream;
+import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.io.HyperspectralImageReader;
-import com.jypec.util.io.HyperspectralImageWriter;
 import com.jypec.util.io.headerio.HeaderConstants;
 import com.jypec.util.io.headerio.ImageHeaderData;
 
@@ -32,13 +25,14 @@ public class Jypec {
 	/**
 	 * Compresses whatever the args tell it to
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void compress(InputArguments args) {
+	public static void compress(InputArguments args) throws IOException {
 		//select header source
 		FileInputStream fis;
 		try {
-			if (args.metadata != null) { //read metadata from outside
-				fis = new FileInputStream(args.metadata);
+			if (args.inputHeader != null) { //read metadata from outside
+				fis = new FileInputStream(args.inputHeader);
 			} else { //unless we do not have outside, then read from input
 				fis = new FileInputStream(args.input);
 			}
@@ -47,7 +41,7 @@ public class Jypec {
 			return;
 		}
 		
-		//reade header
+		//read header
 		int headerOffset = 0;
 		ImageHeaderData ihd = new ImageHeaderData();
 		try {
@@ -78,38 +72,38 @@ public class Jypec {
 		HyperspectralImage hi = new HyperspectralImage(null, type, bands, lines, samples);
 		HyperspectralImageReader.readImage(args.input, headerOffset, hi);
 
-		BitStream output = new FIFOBitStream();
-
-		ihd.saveToCompressedStream(new BitStreamDataReaderWriter(output));
+		//output header		
+		BitOutputStream output;
+		if (args.outputHeader != null){
+			output = new BitOutputStream(new FileOutputStream(new File(args.outputHeader)));
+		} else {
+			output = new BitOutputStream(new FileOutputStream(new File(args.output)));
+		}
+		//save header wherever it goes
+		if (!args.dontOutputHeader) {
+			if (args.compressHeader) {
+				ihd.saveToCompressedStream(output);
+			} else {
+				ihd.saveToUncompressedStream(output);
+			}
+		}
+		//if header goes separate, save and restart
+		if (args.outputHeader != null) {
+			output.paddingFlush();
+			output.close();
+			output = new BitOutputStream(new FileOutputStream(new File(args.output)));
+		}
+		
+		//now dump the image data
 		c.compress(hi, output, dr);
 		
 		if (args.showCompressionStats) {
 			int orsize = bands * lines * samples * type.getBitDepth();
-			int redsize = output.getNumberOfBits();
+			int redsize = output.getBitsOutput();
 			System.out.println("Original size is: " + orsize);
 			System.out.println("Compressed size is: " + redsize);
 			System.out.println("Compression rate: " + (double) orsize / (double) redsize);
 			System.out.println("Bpppb: " + redsize / (double) (bands * lines * samples));
-		}
-		
-
-		
-		BitStreamDataReaderWriter brw = new BitStreamDataReaderWriter(output);
-		byte[] bytes = brw.readByteArray(output.getNumberOfBits() >> 3);
-		
-		
-		File f = new File(args.output);
-		FileOutputStream fos;
-		try {
-			fos = new FileOutputStream(f);
-			fos.write(bytes);
-			if (output.getNumberOfBits() > 0) {
-				throw new IllegalStateException("Padding was not added properly");
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -133,16 +127,7 @@ public class Jypec {
 		
 		
 		//read image data (potentially header as well but we don't know that yet
-		BitStream bs = new FIFOBitStream();
-		BitStreamDataReaderWriter brw = new BitStreamDataReaderWriter(bs);
-		byte[] data;
-		try {
-			data = Files.readAllBytes(Paths.get(args.input));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			return;
-		}
-		brw.writeByteArray(data, data.length);
+		/*BitInputStream bs = new BitInputStream(new FileInputStream(args.input));
 		
 		//read header and data
 		ImageHeaderData ihd = new ImageHeaderData();
@@ -171,7 +156,7 @@ public class Jypec {
 		
 		if (args.showCompressionStats) {
 			System.out.println("Image decompressed succesfully with: " + bs.getNumberOfBits() + " bits remaining (should be zero)");
-		}
+		}*/
 		
 	}
 	

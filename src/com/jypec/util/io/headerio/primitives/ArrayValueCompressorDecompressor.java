@@ -1,6 +1,9 @@
 package com.jypec.util.io.headerio.primitives;
 
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import java.io.IOException;
+
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 
 /**
  * Compress/Decompress arrays of data. Assumes a "{data1, data2, ...}" format. <br>
@@ -21,7 +24,7 @@ public class ArrayValueCompressorDecompressor extends ValueCompressorDecompresso
 	}
 
 	@Override
-	public void uncompress(BitStreamDataReaderWriter brw) {
+	public void uncompress(BitInputStream brw) throws IOException {
 		int len = brw.readInt();
 		this.values = new Object[len];
 		for (int i = 0; i < len; i++) {
@@ -50,14 +53,12 @@ public class ArrayValueCompressorDecompressor extends ValueCompressorDecompresso
 	}
 
 	@Override
-	public int compress(BitStreamDataReaderWriter brw) {
-		int acc = 0;
-		acc += brw.writeInt(this.values.length);
+	public void compress(BitOutputStream brw) throws IOException {
+		brw.writeInt(this.values.length);
 		for (int i = 0; i < this.values.length; i++) {
 			childComDec.setObject(this.values[i]);
-			acc += childComDec.compress(brw);
+			childComDec.compress(brw);
 		}
-		return acc;
 	}
 
 	@Override

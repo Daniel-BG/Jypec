@@ -13,20 +13,24 @@ public class InputArguments {
 	public boolean compress = false;
 	/** True if decompression was requested */
 	public boolean decompress = false;
-	/** True if the result shall be embedded */
-	public boolean embed = false;
 	/** True if help was requested */
 	public boolean help = false;
 	/** True if stats are to be shown after compression */
-	public boolean showCompressionStats;
+	public boolean showCompressionStats = false;
+	/** True if header is not wanted to be outputted */
+	public boolean dontOutputHeader = false;
+	/** True if the header is to be compressed */
+	public boolean compressHeader = false;
 	
 	//files
 	/** Input file path. Null if not set */
 	public String input = null;
-	/** Metadata file path. Null if not set */
-	public String metadata = null;
+	/** Input file header. Null if not set */
+	public String inputHeader = null;
 	/** Output file path. Null if not set */
 	public String output = null;
+	/** Output file header. Null if not set */
+	public String outputHeader = null;
 	
 	//compression config
 	/** True if dimensionality reduction was requested */
@@ -52,12 +56,15 @@ public class InputArguments {
 
 		args.compress = line.hasOption(JypecCLI.OPTION_COMPRESS);
 		args.decompress = line.hasOption(JypecCLI.OPTION_DECOMPRESS);
-		args.embed = line.hasOption(JypecCLI.OPTION_EMBED);
 		args.showCompressionStats = line.hasOption(JypecCLI.OPTION_SHOW_COMPRESSION_STATS);
 		args.help = line.hasOption(JypecCLI.OPTION_HELP);
 		args.input = line.getOptionValue(JypecCLI.OPTION_INPUT);
 		args.output = line.getOptionValue(JypecCLI.OPTION_OUTPUT);
-		args.metadata = line.getOptionValue(JypecCLI.OPTION_METADATA);
+		args.inputHeader = line.getOptionValue(JypecCLI.OPTION_INPUT_HEADER);
+		args.outputHeader = line.getOptionValue(JypecCLI.OPTION_OUTPUT_HEADER);
+		args.compressHeader = line.hasOption(JypecCLI.OPTION_COMPRESS_HEADER);
+		args.dontOutputHeader = line.hasOption(JypecCLI.OPTION_NO_HEADER_OUTPUT);
+		
 		if (args.requestReduction = line.hasOption(JypecCLI.OPTION_REDUCTION)) {
 			args.reductionArgs = line.getOptionValues(JypecCLI.OPTION_REDUCTION);
 		}

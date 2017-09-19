@@ -1,6 +1,9 @@
 package com.jypec.util.io.headerio.primitives;
 
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import java.io.IOException;
+
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 
 /**
  * Com/Dec for Strings
@@ -12,7 +15,7 @@ public class StringValueCompressorDecompressor extends SingleValueCompressorDeco
 	private String value;
 
 	@Override
-	public void uncompress(BitStreamDataReaderWriter brw) {
+	public void uncompress(BitInputStream brw) throws IOException {
 		int len = brw.readInt();
 		value =  brw.readString(len);
 	}
@@ -28,11 +31,9 @@ public class StringValueCompressorDecompressor extends SingleValueCompressorDeco
 	}
 
 	@Override
-	public int compress(BitStreamDataReaderWriter brw) {
-		int res = 0;
-		res += brw.writeInt(value.length());
-		res += brw.writeString(value);
-		return res;
+	public void compress(BitOutputStream brw) throws IOException {
+		brw.writeInt(value.length());
+		brw.writeString(value);
 	}
 
 	@Override

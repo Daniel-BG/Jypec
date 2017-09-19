@@ -1,5 +1,7 @@
 package com.jypec.comdec;
 
+import java.io.IOException;
+
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.data.CodingBlock;
@@ -7,8 +9,7 @@ import com.jypec.img.HyperspectralBand;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
 import com.jypec.quantization.MatrixQuantizer;
-import com.jypec.util.bits.BitStream;
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.io.headerio.HeaderConstants;
 import com.jypec.util.io.headerio.ImageHeaderData;
 import com.jypec.wavelet.BidimensionalWavelet;
@@ -27,11 +28,9 @@ public class Decompressor {
 	 * @param ihd the image header metadata, for now reading the appropiate number of bits
 	 * @param input
 	 * @return the resulting image from decompressing the given stream
+	 * @throws IOException 
 	 */
-	public HyperspectralImage decompress(ImageHeaderData ihd, BitStream input) {
-		/** Create a wrapper for the stream to easily read/write it */
-		BitStreamDataReaderWriter bw = new BitStreamDataReaderWriter(input);
-		
+	public HyperspectralImage decompress(ImageHeaderData ihd, BitInputStream input) throws IOException {
 		/** Need to know the image dimensions and some other values */
 		int lines = (int) ihd.getData(HeaderConstants.HEADER_LINES);
 		int bands = (int) ihd.getData(HeaderConstants.HEADER_BANDS);
@@ -39,10 +38,10 @@ public class Decompressor {
 		ImageDataType idt = ImageDataType.fromHeaderCode((byte) ihd.getData(HeaderConstants.HEADER_DATA_TYPE));
 		
 		ComParameters cp = new ComParameters();
-		cp.loadFrom(bw);
+		cp.loadFrom(input);
 		
 		/** Recover dr setup */
-		DimensionalityReduction dr = DimensionalityReduction.loadFrom(bw, cp, ihd);
+		DimensionalityReduction dr = DimensionalityReduction.loadFrom(input, cp, ihd);
 		
 		/** Uncompress the data stream */
 		//ImageDataType redDT = ImageDataType.findBest(cp.newMinVal, cp.newMaxVal);//new ImageDataType(cp.redBitDepth, true);
@@ -54,8 +53,8 @@ public class Decompressor {
 		/** Proceed to uncompress the reduced image band by band */
 		for (int i = 0; i < dr.getNumComponents(); i++) {
 			/** Get this band's max and min values, and use that to create the quantizer */
-			double bandMin = bw.readDouble();
-			double bandMax = bw.readDouble();
+			double bandMin = input.readDouble();
+			double bandMax = input.readDouble();
 			ImageDataType targetType = ImageDataType.findBest(bandMin, bandMax, 0);
 			targetType.mutatePrecision(-cp.bitReduction);
 			HyperspectralBand hb = HyperspectralBand.generateRogueBand(targetType, lines, samples);

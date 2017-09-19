@@ -1,11 +1,14 @@
 package com.jypec.dimreduction;
 
+import java.io.IOException;
+
 import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.img.HyperspectralImage;
-import com.jypec.util.bits.BitStreamDataReaderWriter;
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.io.headerio.ImageHeaderData;
 
 /**
@@ -69,8 +72,9 @@ public abstract class DimensionalityReduction {
 	 * Saves the necessary information into the given bistream so as to later
 	 * reconstruct this Object from a call to {@link #loadFrom(BitStreamDataReaderWriter)}
 	 * @param bw The BitStream handler that encapsulates the BitStream
+	 * @throws IOException 
 	 */
-	public final void saveTo(BitStreamDataReaderWriter bw) {
+	public final void saveTo(BitOutputStream bw) throws IOException {
 		bw.writeByte((byte) this.dra.ordinal());
 		this.doSaveTo(bw);
 	}
@@ -79,8 +83,9 @@ public abstract class DimensionalityReduction {
 	/**
 	 * Save the information specific to each algorithm
 	 * @param bw
+	 * @throws IOException 
 	 */
-	public abstract void doSaveTo(BitStreamDataReaderWriter bw);
+	public abstract void doSaveTo(BitOutputStream bw) throws IOException;
 	
 	
 	/**
@@ -91,8 +96,9 @@ public abstract class DimensionalityReduction {
 	 * @param cp Compressor Parameters in case it needs global info to restore
 	 * @param ihd Image parameters in case it needs information
 	 * @return the proper dimensionality reduction algorithm
+	 * @throws IOException 
 	 */
-	public static final DimensionalityReduction loadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd) {
+	public static final DimensionalityReduction loadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) throws IOException {
 		DimensionalityReduction dr;
 		byte type = bw.readByte();
 		
@@ -123,8 +129,9 @@ public abstract class DimensionalityReduction {
 	 * @param bw
 	 * @param cp
 	 * @param ihd
+	 * @throws IOException 
 	 */
-	public abstract void doLoadFrom(BitStreamDataReaderWriter bw, ComParameters cp, ImageHeaderData ihd);
+	public abstract void doLoadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) throws IOException;
 	
 	
 	/**

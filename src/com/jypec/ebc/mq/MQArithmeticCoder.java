@@ -1,9 +1,11 @@
 package com.jypec.ebc.mq;
 
+import java.io.IOException;
 import java.util.EnumMap;
 
 import com.jypec.util.bits.Bit;
-import com.jypec.util.bits.BitStream;
+import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamConstants;
 import com.jypec.util.bits.BitTwiddling;
 
 /**
@@ -62,8 +64,9 @@ public class MQArithmeticCoder {
 	/**
 	 * Dump the extra bits that did not overflow the accumulators
 	 * @param output
+	 * @throws IOException 
 	 */
-	public void dumpRemainingBits(BitStream output) {
+	public void dumpRemainingBits(BitOutputStream output) throws IOException {
 		int nbits = MQConstants.COUNTDOWN_INIT - this.countdownTimer;
 		this.normalizedLowerBound <<= this.countdownTimer;
 		while (nbits > 0) {
@@ -77,10 +80,11 @@ public class MQArithmeticCoder {
 	/**
 	 * adds bits marking the end of stream to the given bitstream
 	 * @param output 
+	 * @throws IOException 
 	 */
-	public void markEndOfStream(BitStream output) {
-		output.putBits(MQConstants.BYTE_MARKER, 8, BitStream.BitStreamConstants.ORDERING_LEFTMOST_FIRST);
-		output.putBits(MQConstants.BYTE_END_OF_MQ_CODER, 8, BitStream.BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+	public void markEndOfStream(BitOutputStream output) throws IOException {
+		output.putBits(MQConstants.BYTE_MARKER, 8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+		output.putBits(MQConstants.BYTE_END_OF_MQ_CODER, 8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 	}
 	
 	/**
@@ -89,8 +93,9 @@ public class MQArithmeticCoder {
 	 * @param bitsToCode number of bits to be coded (taken from the LSBs and coded from MSB to LSB)
 	 * @param context
 	 * @param output
+	 * @throws IOException 
 	 */
-	public void codeNumberWithContext(int number, int bitsToCode, ContextLabel context, BitStream output) {
+	public void codeNumberWithContext(int number, int bitsToCode, ContextLabel context, BitOutputStream output) throws IOException {
 		for (int i = 0x1 << (bitsToCode - 1); i > 0; i>>=1) {
 			this.codeSymbol(Bit.fromInteger(number & i), context, output);
 		}
@@ -102,8 +107,9 @@ public class MQArithmeticCoder {
 	 * @param symbol
 	 * @param context
 	 * @param output 
+	 * @throws IOException 
 	 */
-	public void codeSymbol(Bit symbol, ContextLabel context, BitStream output) {
+	public void codeSymbol(Bit symbol, ContextLabel context, BitOutputStream output) throws IOException {
 		//get the table associated to this context
 		MQProbabilityTable table = this.contextStates.get(context);
 		//get the elements needed from said table
@@ -157,8 +163,9 @@ public class MQArithmeticCoder {
 	/**
 	 * The buffer is full and a byte needs to be moved out to make room
 	 * for the next
+	 * @throws IOException 
 	 */
-	private void transferByte(BitStream output) {
+	private void transferByte(BitOutputStream output) throws IOException {
 		//this is because jpeg uses the 0xff as a marker.
 		//probably not necessary since we will use custom compression most likely
 		if (this.tempByteBuffer == 0xff) {
@@ -190,10 +197,11 @@ public class MQArithmeticCoder {
 	
 	/**
 	 * Output and log the current byte buffer
+	 * @throws IOException 
 	 */
-	private void putByte(BitStream output) {
+	private void putByte(BitOutputStream output) throws IOException {
 		if (this.codeBytesGenerated >= 0) {
-			output.putBits(this.tempByteBuffer, 8, BitStream.BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+			output.putBits(this.tempByteBuffer, 8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 		}
 		this.codeBytesGenerated++;
 	}	

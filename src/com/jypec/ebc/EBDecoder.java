@@ -1,5 +1,7 @@
 package com.jypec.ebc;
 
+import java.io.IOException;
+
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.ebc.data.CodingPlane;
 import com.jypec.ebc.mq.ContextLabel;
@@ -7,8 +9,8 @@ import com.jypec.ebc.mq.MQArithmeticDecoder;
 import com.jypec.ebc.mq.MQConstants;
 import com.jypec.util.Pair;
 import com.jypec.util.bits.Bit;
-import com.jypec.util.bits.BitStream;
-import com.jypec.util.bits.BitStream.BitStreamConstants;
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.bits.BitStreamConstants;
 
 /**
  * MQDecoder dual to the MQcoder
@@ -27,8 +29,9 @@ public class EBDecoder {
 	 * Initialize the decoder, make it ready to rumble
 	 * @param width
 	 * @param height
+	 * @throws IOException 
 	 */
-	private void initialize(BitStream input, CodingBlock output) {
+	private void initialize(BitInputStream input, CodingBlock output) throws IOException {
 		//decoder = new MQArithmeticDecoder(input);
 		if (decoder == null) {
 			decoder = new MQArithmeticDecoder(input);
@@ -45,8 +48,9 @@ public class EBDecoder {
 	 * assumed to be pointing directly at the beggining of the coded data.
 	 * @param input
 	 * @param output
+	 * @throws IOException 
 	 */
-	public void decode(BitStream input, CodingBlock output) {
+	public void decode(BitInputStream input, CodingBlock output) throws IOException {
 		this.initialize(input, output);
 		int numberOfBitPlanes = output.getMagnitudeBitPlaneNumber();
 		
@@ -64,7 +68,7 @@ public class EBDecoder {
 	}
 	
 
-	private void decodeCleanup(BitStream input, CodingPlane plane) {
+	private void decodeCleanup(BitInputStream input, CodingPlane plane) throws IOException {
 		//code full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -76,7 +80,6 @@ public class EBDecoder {
 					Bit runLengthBit = this.decoder.decodeSymbol(input, ContextLabel.RUN_LENGTH);
 					//this means we were on run-length mode and can decode all as zeroes
 					if (runLengthBit == Bit.BIT_ZERO) {
-						//TODO decode full column as zeroes
 						for (j = 0; j < 4; j++) {
 							plane.setSymbolAt(s*4 + j, i, Bit.BIT_ZERO);
 						}
@@ -114,8 +117,9 @@ public class EBDecoder {
 	 * @param plane
 	 * @param row
 	 * @param column
+	 * @throws IOException 
 	 */
-	private void decodeRefinementBit(BitStream input, CodingPlane plane, int row, int column) {
+	private void decodeRefinementBit(BitInputStream input, CodingPlane plane, int row, int column) throws IOException {
 		ContextLabel ctx = this.sigTable.getMagnitudeRefinementContextAt(row, column);
 		Bit symbol = this.decoder.decodeSymbol(input, ctx);
 		
@@ -127,8 +131,9 @@ public class EBDecoder {
 	 * Decode a refinement pass from the input into the given plane
 	 * @param input
 	 * @param plane
+	 * @throws IOException 
 	 */
-	private void decodeRefinement(BitStream input, CodingPlane plane) {
+	private void decodeRefinement(BitInputStream input, CodingPlane plane) throws IOException {
 		//decode full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -157,8 +162,9 @@ public class EBDecoder {
 	 * @param row
 	 * @param column
 	 * @param onlySign if true, assume the magnitude was already decoded, and decode only the sign
+	 * @throws IOException 
 	 */
-	private void decodeSignificanceBit(BitStream input, CodingPlane plane, int row, int column, boolean onlySign) {
+	private void decodeSignificanceBit(BitInputStream input, CodingPlane plane, int row, int column, boolean onlySign) throws IOException {
 		//decode the magnitude
 		Bit magnitude = null;
 		if (!onlySign) {
@@ -185,8 +191,9 @@ public class EBDecoder {
 	 * Decode a full significance pass from the input into the given plane
 	 * @param input
 	 * @param plane
+	 * @throws IOException 
 	 */
-	private void decodeSignificance(BitStream input, CodingPlane plane) {
+	private void decodeSignificance(BitInputStream input, CodingPlane plane) throws IOException {
 		//decode full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -210,8 +217,9 @@ public class EBDecoder {
 	
 	/**
 	 * Remove the last bits of the stream which mark the end of the block, if present
+	 * @throws IOException 
 	 */
-	private void removeMarkEndOfStream(BitStream input) {
+	private void removeMarkEndOfStream(BitInputStream input) throws IOException {
 		//the stream might end with extra bytes. Remove those if present
 		while ((input.getLastReadBits() & MQConstants.CODE_MASK) != MQConstants.CODE_END_OF_BLOCK) {
 			input.getBits(8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
