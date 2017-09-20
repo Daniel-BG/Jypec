@@ -23,6 +23,8 @@ public class JypecCLI {
 	public static final String OPTION_OUTPUT = "output";
 	/** Output header option constant. Use for retrieving arguments and/or flags */
 	public static final String OPTION_OUTPUT_HEADER = "output_header";
+	/** Output header option constant. Use for retrieving arguments and/or flags */
+	public static final String OPTION_OUTPUT_ESSENTIAL_HEADER = "essential_header";
 	/** Reduction algorithm option constant. Use for retrieving arguments and/or flags */
 	public static final String OPTION_REDUCTION = "reduction";
 	/** Wavelet algorithm option constant. Use for retrieving arguments and/or flags */
@@ -47,6 +49,7 @@ public class JypecCLI {
 		Option compare			= new Option("k", OPTION_COMPARE, false, "compare the input and output images"); //k for kompare
 		Option compressionStats = new Option(null, OPTION_SHOW_COMPRESSION_STATS, false, "show compression stats");
 		Option noHeaderOutput 	= new Option(null, OPTION_NO_HEADER_OUTPUT, false, "do not output the header");
+		Option essentialHeader 	= new Option(null, OPTION_OUTPUT_ESSENTIAL_HEADER, false, "output only essential information, cut all extra");
 		
 		
 		/* input output files */
@@ -125,6 +128,7 @@ public class JypecCLI {
 		jypecOptions.addOption(outputHeader);
 		jypecOptions.addOption(noHeaderOutput);
 		jypecOptions.addOption(compare);
+		jypecOptions.addOption(essentialHeader);
 	}
 	
 	

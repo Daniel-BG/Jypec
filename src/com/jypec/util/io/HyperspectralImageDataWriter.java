@@ -28,7 +28,7 @@ public class HyperspectralImageDataWriter {
 	 * @param imageOrdering bsq, bip, bil
 	 * @param byteOrdering lil endian or big endian
 	 */
-	public static void writeBSQ(HyperspectralImageData hi, int offset, String fileName, BandOrdering imageOrdering, ByteOrdering byteOrdering) {
+	public static void writeImageData(HyperspectralImageData hi, int offset, String fileName, BandOrdering imageOrdering, ByteOrdering byteOrdering) {
 		RandomAccessFile out = null;
 		try {
 			out = new RandomAccessFile(fileName, "rw"); //need rw for the file.map function to work

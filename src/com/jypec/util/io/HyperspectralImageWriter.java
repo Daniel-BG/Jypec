@@ -34,14 +34,14 @@ public class HyperspectralImageWriter {
 			} else {
 				bos = new BitOutputStream(new FileOutputStream(args.output));
 			}
-			ImageHeaderReaderWriter.saveToUncompressedStream(hi.getHeader(), bos);
+			ImageHeaderReaderWriter.saveToUncompressedStream(hi.getHeader(), bos, args.essentialHeader);
 			//if header is separate, byteoffset is too
 			if (args.outputHeader != null) {
 				byteOffset = 0;
 			}
 		}
 		
-		HyperspectralImageDataWriter.writeBSQ(hi.getData(), byteOffset, args.output, 
+		HyperspectralImageDataWriter.writeImageData(hi.getData(), byteOffset, args.output, 
 				(BandOrdering) hi.getHeader().get(HeaderConstants.HEADER_INTERLEAVE), 
 				(ByteOrdering) hi.getHeader().get(HeaderConstants.HEADER_BYTE_ORDER));		
 	}

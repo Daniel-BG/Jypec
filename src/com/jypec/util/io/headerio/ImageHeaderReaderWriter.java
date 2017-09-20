@@ -121,16 +121,17 @@ public class ImageHeaderReaderWriter {
 	 * save inner information into a compressed stream
 	 * @param ihd 
 	 * @param brw
+	 * @param essential if true only the essential information to read the image is output, everything else discarded
 	 * @return the number of BYTES written to the stream
 	 * @throws IOException 
 	 */
-	public static int saveToCompressedStream(ImageHeaderData ihd, BitOutputStream brw) throws IOException {
+	public static int saveToCompressedStream(ImageHeaderData ihd, BitOutputStream brw, boolean essential) throws IOException {
 		int bits = brw.getBitsOutput();
 		brw.writeByte(CODE_JYPEC_HEADER);
 		for (Entry<HeaderConstants, Object> e: ihd.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			prw.setData(e.getValue());
-			if (prw.getHeaderConstant() != HeaderConstants.HEADER_OFFSET) { //do not save the header offset as it is different
+			if (prw.getHeaderConstant() != HeaderConstants.HEADER_OFFSET && (!essential || prw.getHeaderConstant().isEssential())) { //do not save the header offset as it is different
 				prw.compress(brw);
 			}
 		}
@@ -148,16 +149,21 @@ public class ImageHeaderReaderWriter {
 	 * Save inner information into an uncompressed stream
 	 * @param ihd 
 	 * @param brw where to save it
+	 * @param essential if true only the essential information to read the image is output, everything else discarded
 	 * @return the number of BYTES written
 	 * @throws IOException 
 	 */
-	public static int saveToUncompressedStream(ImageHeaderData ihd, OutputStream brw) throws IOException {
+	public static int saveToUncompressedStream(ImageHeaderData ihd, OutputStream brw, boolean essential) throws IOException {
 		ArrayList<Byte> list = new ArrayList<Byte>();
 		byte[] lineSeparator = "\n".getBytes(StandardCharsets.UTF_8);
 		Utilities.addAllBytes(list, "ENVI\n".getBytes(StandardCharsets.UTF_8));
 
 		for (Entry<HeaderConstants, Object> e: ihd.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
+			if (essential && !prw.getHeaderConstant().isEssential()) {
+				continue;
+			}
+			
 			prw.setData(e.getValue());
 			//add the parameter
 			Utilities.addAllBytes(list, prw.toString().getBytes(StandardCharsets.UTF_8));

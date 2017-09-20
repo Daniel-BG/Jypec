@@ -50,7 +50,7 @@ public class Jypec {
 		
 		/** Create the output stream and save the compressed result */
 		BitOutputStream output = new BitOutputStream(new FileOutputStream(new File(args.output)));
-		ImageHeaderReaderWriter.saveToCompressedStream(hi.getHeader(), output);
+		ImageHeaderReaderWriter.saveToCompressedStream(hi.getHeader(), output, args.essentialHeader);
 		c.compress(hi.getData(), output, dr);
 		
 		/** Show some stats */
@@ -96,10 +96,20 @@ public class Jypec {
 	 * @throws IOException 
 	 */
 	public static void compare(InputArguments iArgs) throws IOException {
+		//read both images
 		HyperspectralImage first = HyperspectralImageReader.read(iArgs.input, iArgs.inputHeader);
 		HyperspectralImage second = HyperspectralImageReader.read(iArgs.output, iArgs.outputHeader);
 		
+		//check that they are the same size and stuff
+		if (first.getData().getNumberOfBands() != second.getData().getNumberOfBands()
+				|| first.getData().getNumberOfLines() != second.getData().getNumberOfLines()
+				|| first.getData().getNumberOfSamples() != second.getData().getNumberOfSamples()
+				|| first.getData().getDataType().equals(second.getData().getDataType())) {
+			System.out.println("Images are of different sizes and/or data types. Cannot compare");
+			return;
+		}
 		
+		//output metrics
 		System.out.println("RAW PSNR is: " + ImageComparisons.rawPSNR(first.getData(), second.getData()));
 		System.out.println("Normalized PSNR is: " + ImageComparisons.normalizedPSNR(first.getData(), second.getData()));
 		System.out.println("SNR is: " + ImageComparisons.SNR(first.getData(), second.getData()));

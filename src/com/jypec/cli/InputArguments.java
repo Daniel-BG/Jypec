@@ -21,6 +21,8 @@ public class InputArguments {
 	public boolean dontOutputHeader = false;
 	/** True if comparing two images */
 	public boolean compare = false;
+	/** True if we only want to output essential header info */
+	public boolean essentialHeader = false;
 	
 	//files
 	/** Input file path. Null if not set */
@@ -64,6 +66,7 @@ public class InputArguments {
 		args.outputHeader = line.getOptionValue(JypecCLI.OPTION_OUTPUT_HEADER);
 		args.dontOutputHeader = line.hasOption(JypecCLI.OPTION_NO_HEADER_OUTPUT);
 		args.compare = line.hasOption(JypecCLI.OPTION_COMPARE);
+		args.essentialHeader = line.hasOption(JypecCLI.OPTION_OUTPUT_ESSENTIAL_HEADER);
 		
 		if (args.requestReduction = line.hasOption(JypecCLI.OPTION_REDUCTION)) {
 			args.reductionArgs = line.getOptionValues(JypecCLI.OPTION_REDUCTION);

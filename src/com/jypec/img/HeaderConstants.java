@@ -375,6 +375,70 @@ public enum HeaderConstants {
 		}
 		
 	}
+	
+	/**
+	 * @return true if this data is essential to be able to read the image. <br>
+	 * e.g: Bands, lines and samples are essential, sensor type is not
+	 */
+	public boolean isEssential() {
+		switch(this) {
+		case HEADER_ACQ_TIME:
+		case HEADER_BAND_NAMES:
+		case HEADER_BBL:
+		case HEADER_CLASSES:
+		case HEADER_CLASS_LOOKUP:
+		case HEADER_CLASS_NAMES:
+		case HEADER_CLOUD_COVER:
+		case HEADER_COMPLEX_FUNC:
+		case HEADER_COORD_SYS_STR:
+		case HEADER_DATA_GAIN_VALUES:
+		case HEADER_DATA_IGNORE_VAL:
+		case HEADER_DATA_OFFSET_VALUES:
+		case HEADER_DATA_REF_GAIN_VALUES:
+		case HEADER_DATA_REF_OFF_VALUES:
+		case HEADER_DEFAULT_BANDS:
+		case HEADER_DEFAULT_STRETCH:
+		case HEADER_DEM_BAND:
+		case HEADER_DEM_FILE:
+		case HEADER_DESCRIPTION:
+		case HEADER_FILE_TYPE:
+		case HEADER_FWHM:
+		case HEADER_GEO_POINTS:
+		case HEADER_MAP_INFO:
+		case HEADER_PIXEL_SIZE:
+		case HEADER_PROJECTION_INFO:
+		case HEADER_READ_PROCEDURES:
+		case HEADER_REFL_SCALE_FACTOR:
+		case HEADER_RPC_INFO:
+		case HEADER_SECURITY_TAG:
+		case HEADER_SENSOR_TYPE:
+		case HEADER_SOLAR_IRRADIANCE:
+		case HEADER_SPECTRA_NAMES:
+		case HEADER_SUN_AZIMUTH:
+		case HEADER_SUN_ELEVATION:
+		case HEADER_TERMINATION:
+		case HEADER_WAVELENGTH:
+		case HEADER_WAVELENGTH_UNITS:
+		case HEADER_X_START:
+		case HEADER_Y_START:
+		case HEADER_Z_PLOT_AVG:
+		case HEADER_Z_PLOT_RANGE:
+		case HEADER_Z_PLOT_TITLES:
+			return false;
+		/** Even though some are only needed for the uncompressed version, we need them 
+		 * in the compressed one to be able to recover the original */
+		case HEADER_BANDS:
+		case HEADER_BYTE_ORDER:		//needed for uncompressed
+		case HEADER_DATA_TYPE:		//needed for uncompressed
+		case HEADER_INTERLEAVE:		//needed for uncompressed
+		case HEADER_LINES:
+		case HEADER_OFFSET:			//needed for embedded headers
+		case HEADER_SAMPLES:
+			return true;
+		default:
+			throw new UnsupportedOperationException();
+		}
+	}
 
 
 }
