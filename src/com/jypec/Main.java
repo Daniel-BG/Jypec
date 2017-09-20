@@ -1,5 +1,7 @@
 package com.jypec;
 
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -37,6 +39,9 @@ public class Main {
 	    catch( ParseException exp ) {
 	        System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
 	        printHelp();
+	    }
+	    catch( IOException ioe) {
+	    	System.err.println( "Failed when reading/writing.  Reason: " + ioe.getMessage() );
 	    }
 	}
 	

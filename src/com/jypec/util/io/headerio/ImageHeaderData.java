@@ -21,6 +21,9 @@ import com.jypec.util.bits.BitOutputStream;
  * @author Daniel
  */
 public class ImageHeaderData {
+	private static final byte CODE_ENVI_HEADER = (byte) 'E';
+	private static final byte CODE_JYPEC_HEADER = (byte) 0xff;
+	
 	
 	private Map<HeaderConstants, Object> data;
 	private static final String DATA_PATTERN = "^([^=\\n\\r]+?)\\s+=\\s+([^\\{].*?|\\{.*?\\})$";
@@ -51,6 +54,26 @@ public class ImageHeaderData {
 	 */
 	public Object getData(HeaderConstants field) {
 		return this.data.get(field);
+	}
+	
+	/**
+	 * Checks whether the data is compressed or uncompressed then 
+	 * loads it into this object
+	 * @param bis
+	 * @throws IOException 
+	 */
+	public void loadFromStream(BitInputStream bis) throws IOException {
+		byte fileCode = bis.readByte();
+		switch(fileCode) {
+		case CODE_ENVI_HEADER:
+			this.loadFromUncompressedStream(bis);
+			break;
+		case CODE_JYPEC_HEADER:
+			this.loadFromCompressedStream(bis);
+			break;
+		default:
+			throw new IOException("Header code was not recognized");
+		}
 	}
 	
 	/**
@@ -125,6 +148,7 @@ public class ImageHeaderData {
 	 */
 	public int saveToCompressedStream(BitOutputStream brw) throws IOException {
 		int bits = brw.getBitsOutput();
+		brw.writeByte(CODE_JYPEC_HEADER);
 		for (Entry<HeaderConstants, Object> e: this.data.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			prw.setData(e.getValue());
@@ -151,6 +175,7 @@ public class ImageHeaderData {
 	public int saveToUncompressedStream(OutputStream brw) throws IOException {
 		ArrayList<Byte> list = new ArrayList<Byte>();
 		byte[] lineSeparator = "\n".getBytes(StandardCharsets.UTF_8);
+		Utilities.addAllBytes(list, "ENVI\n".getBytes(StandardCharsets.UTF_8));
 
 		for (Entry<HeaderConstants, Object> e: this.data.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
@@ -181,6 +206,8 @@ public class ImageHeaderData {
 		
 		return result.length;
 	}
+
+
 	
 	
 }

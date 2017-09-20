@@ -30,9 +30,9 @@ public class JypecCLI {
 	/** JPEG2000 bitshave option constant. Use for retrieving arguments and/or flags */
 	public static final String OPTION_SHAVE = "shave";
 	/** Show compressions stats. Use for retrieving arguments and/or flags  */
-	public static final String OPTION_SHOW_COMPRESSION_STATS = "compression_stats";
+	public static final String OPTION_SHOW_COMPRESSION_STATS = "stats";
 	/** Flag to compress the header. Use for retrieving arguments and/or flags  */
-	public static final String OPTION_COMPRESS_HEADER = "compression_stats";
+	public static final String OPTION_COMPRESS_HEADER = "compress_header";
 	/** Flag to not output the header. Use for retrieving arguments and/or flags  */
 	public static final String OPTION_NO_HEADER_OUTPUT = "no_header_output";
 	

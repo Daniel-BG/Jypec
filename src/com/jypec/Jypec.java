@@ -8,11 +8,14 @@ import java.io.IOException;
 import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
 import com.jypec.comdec.Compressor;
+import com.jypec.comdec.Decompressor;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
+import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.io.HyperspectralImageReader;
+import com.jypec.util.io.HyperspectralImageWriter;
 import com.jypec.util.io.headerio.HeaderConstants;
 import com.jypec.util.io.headerio.ImageHeaderData;
 
@@ -110,53 +113,56 @@ public class Jypec {
 	/**
 	 * Decompresses whatever the args tell it to
 	 * @param args arguments in a readable form
+	 * @throws IOException 
 	 */
-	public static void decompress(InputArguments args) {
-		//select header source. can be embedded or not, compressed or not, so many things to check for
-		/*FileInputStream fis;
-		try {
-			if (args.metadata != null) { //read metadata from outside
-				fis = new FileInputStream(args.metadata);
-			} else { //unless we do not have outside, then read from input
-				fis = new FileInputStream(args.input);
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return;
-		}*/
-		
-		
+	public static void decompress(InputArguments args) throws IOException {
 		//read image data (potentially header as well but we don't know that yet
-		/*BitInputStream bs = new BitInputStream(new FileInputStream(args.input));
+		BitInputStream bis; 
+		if (args.inputHeader != null) {
+			bis = new BitInputStream(new FileInputStream(args.inputHeader));
+		} else {
+			bis = new BitInputStream(new FileInputStream(args.input));
+		}
 		
 		//read header and data
 		ImageHeaderData ihd = new ImageHeaderData();
-		try {
-			//if header is embedded read from same stream
-			if (args.embed) {
-				ihd.loadFromCompressedStream(brw);
-			} else { 
-				//assume header is uncompressed somewhere else
-				if (args.metadata != null) {
-					FileInputStream fis;
-					fis = new FileInputStream(args.metadata);
-					ihd.loadFromUncompressedStream(fis);
-				}
-			}		
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
+		ihd.loadFromStream(bis);
+		
+		//is the data in a separate file?
+		if (args.inputHeader != null) {
+			bis = new BitInputStream(new FileInputStream(args.input));
+		}
+
+		Decompressor d = new Decompressor();
+		HyperspectralImage res = d.decompress(ihd, bis);
+		
+		BitOutputStream bos;
+		int byteOffset = 0;
+		
+		if (!args.dontOutputHeader) {
+			//create the output
+			if (args.outputHeader != null) {
+				bos = new BitOutputStream(new FileOutputStream(args.outputHeader));
+			} else {
+				bos = new BitOutputStream(new FileOutputStream(args.output));
+			}
+			//save either compressed or not compressed
+			if (args.compressHeader) {
+				byteOffset = ihd.saveToCompressedStream(bos);
+			} else {
+				byteOffset = ihd.saveToUncompressedStream(bos);
+			}
+			//if header is separate, byteoffset is too
+			if (args.outputHeader != null) {
+				byteOffset = 0;
+			}
 		}
 		
-		
-		Decompressor d = new Decompressor();
-		HyperspectralImage res = d.decompress(ihd, bs);
-		
-		HyperspectralImageWriter.writeBSQ(res, args.output);
+		HyperspectralImageWriter.writeBSQ(res, byteOffset ,args.output);
 		
 		if (args.showCompressionStats) {
-			System.out.println("Image decompressed succesfully with: " + bs.getNumberOfBits() + " bits remaining (should be zero)");
-		}*/
+			System.out.println("Image decompressed succesfully with: " + bis.available() + " bits remaining (should be zero)");
+		}
 		
 	}
 	
