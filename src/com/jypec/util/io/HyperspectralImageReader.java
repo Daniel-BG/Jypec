@@ -11,6 +11,8 @@ import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.io.headerio.ImageHeaderReaderWriter;
+import com.jypec.util.io.headerio.enums.BandOrdering;
+import com.jypec.util.io.headerio.enums.ByteOrdering;
 
 /**
  * Class to read hyperspectral images (header + data)
@@ -62,7 +64,9 @@ public class HyperspectralImageReader {
 			int samples = (int) header.get(HeaderConstants.HEADER_SAMPLES);
 			ImageDataType type = ImageDataType.fromHeaderCode((byte) header.get(HeaderConstants.HEADER_DATA_TYPE));
 			data = new HyperspectralImageData(null, type, bands, lines, samples);
-			HyperspectralImageDataReader.readImageData(dataPath, offset, data);
+			HyperspectralImageDataReader.readImageData(dataPath, offset, data,
+					(BandOrdering) header.get(HeaderConstants.HEADER_INTERLEAVE), 
+					(ByteOrdering) header.get(HeaderConstants.HEADER_BYTE_ORDER));
 		}
 		
 		/** Return the hyperspectral image */

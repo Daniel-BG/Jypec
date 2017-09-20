@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.util.io.IOUtilities;
-import com.jypec.util.io.IODataTypes.ByteOrdering;
-import com.jypec.util.io.IODataTypes.ImageOrdering;
+import com.jypec.util.io.headerio.enums.BandOrdering;
+import com.jypec.util.io.headerio.enums.ByteOrdering;
 
 /**
  * Factory that gets you your desired ImageWriter object
@@ -20,7 +20,7 @@ public class ImageDataWriterFactory {
 	 * @param type 
 	 * @return the imageWriter of your liking
 	 */
-	public static ImageDataWriter getWriter(ImageOrdering imgOrdering, ByteOrdering byteOrdering, ImageDataType type) {
+	public static ImageDataWriter getWriter(BandOrdering imgOrdering, ByteOrdering byteOrdering, ImageDataType type) {
 		
 		switch(imgOrdering) {
 		case BIL:

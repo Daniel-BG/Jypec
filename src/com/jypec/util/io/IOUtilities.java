@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import com.jypec.util.io.IODataTypes.ByteOrdering;
+import com.jypec.util.io.headerio.enums.ByteOrdering;
 
 /**
  * Utilities for io that don't fit anywhere else

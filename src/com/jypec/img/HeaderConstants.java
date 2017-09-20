@@ -2,8 +2,11 @@ package com.jypec.img;
 
 import java.util.HashMap;
 
+import com.jypec.util.io.headerio.enums.BandOrdering;
+import com.jypec.util.io.headerio.enums.ByteOrdering;
 import com.jypec.util.io.headerio.primitives.ArrayValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.ByteValueCompressorDecompressor;
+import com.jypec.util.io.headerio.primitives.EnumValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.FloatValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.IntegerValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.NullValueCompressorDecompressor;
@@ -298,6 +301,11 @@ public enum HeaderConstants {
 	 */
 	public ValueCompressorDecompressor getValueComDec() {
 		switch(this) {
+		/* Enums */
+		case HEADER_INTERLEAVE:
+			return new EnumValueCompressorDecompressor<BandOrdering>(BandOrdering.class);
+		case HEADER_BYTE_ORDER:
+			return new EnumValueCompressorDecompressor<ByteOrdering>(ByteOrdering.class);
 		/* Integer values */
 		case HEADER_BANDS:
 		case HEADER_CLASSES:
@@ -316,7 +324,6 @@ public enum HeaderConstants {
 		case HEADER_Y_START:
 			return new FloatValueCompressorDecompressor();
 		/* Byte values */
-		case HEADER_BYTE_ORDER:
 		case HEADER_DATA_TYPE:
 			return new ByteValueCompressorDecompressor();
 		/* Array of integers */
@@ -352,7 +359,6 @@ public enum HeaderConstants {
 		case HEADER_DEM_FILE:
 		case HEADER_DESCRIPTION:
 		case HEADER_FILE_TYPE:
-		case HEADER_INTERLEAVE:		//can be enum'd
 		case HEADER_MAP_INFO:		//list of different types
 		case HEADER_PROJECTION_INFO:
 		case HEADER_READ_PROCEDURES:

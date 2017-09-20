@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import com.jypec.img.HyperspectralImageData;
-import com.jypec.util.io.IODataTypes.ByteOrdering;
-import com.jypec.util.io.IODataTypes.ImageOrdering;
+import com.jypec.util.io.headerio.enums.BandOrdering;
+import com.jypec.util.io.headerio.enums.ByteOrdering;
 import com.jypec.util.io.imagedatawriting.ImageDataWriterFactory;
 
 /**
@@ -25,8 +25,10 @@ public class HyperspectralImageDataWriter {
 	 * @param hi image to save
 	 * @param offset start writing at this position (useful if a header is present)
 	 * @param fileName name of file where to write image
+	 * @param imageOrdering bsq, bip, bil
+	 * @param byteOrdering lil endian or big endian
 	 */
-	public static void writeBSQ(HyperspectralImageData hi, int offset, String fileName) {
+	public static void writeBSQ(HyperspectralImageData hi, int offset, String fileName, BandOrdering imageOrdering, ByteOrdering byteOrdering) {
 		RandomAccessFile out = null;
 		try {
 			out = new RandomAccessFile(fileName, "rw"); //need rw for the file.map function to work
@@ -34,7 +36,7 @@ public class HyperspectralImageDataWriter {
 			int expectedBytes = hi.getNumberOfBands() * hi.getNumberOfLines() * hi.getNumberOfSamples() * 2;
 			
 			ByteBuffer buf = file.map(FileChannel.MapMode.READ_WRITE, offset, expectedBytes);
-			ImageDataWriterFactory.getWriter(ImageOrdering.BSQ, ByteOrdering.LITTLE_ENDIAN, hi.getDataType()).writeToBuffer(hi, buf);
+			ImageDataWriterFactory.getWriter(imageOrdering, byteOrdering, hi.getDataType()).writeToBuffer(hi, buf);
 
 			file.close();
 		} catch (IOException e) {
