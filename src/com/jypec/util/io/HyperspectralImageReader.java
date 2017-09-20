@@ -10,9 +10,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
+import com.jypec.img.ImageHeaderData;
 import com.jypec.util.io.IODataTypes.ByteOrdering;
 import com.jypec.util.io.IODataTypes.ImageOrdering;
-import com.jypec.util.io.headerio.ImageHeaderData;
 import com.jypec.util.io.imagereading.ImageReaderFactory;
 
 /**

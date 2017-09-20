@@ -10,15 +10,16 @@ import com.jypec.comdec.ComParameters;
 import com.jypec.comdec.Compressor;
 import com.jypec.comdec.Decompressor;
 import com.jypec.dimreduction.DimensionalityReduction;
+import com.jypec.img.HeaderConstants;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
+import com.jypec.img.ImageHeaderData;
 import com.jypec.util.JypecException;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.io.HyperspectralImageReader;
 import com.jypec.util.io.HyperspectralImageWriter;
-import com.jypec.util.io.headerio.HeaderConstants;
-import com.jypec.util.io.headerio.ImageHeaderData;
+import com.jypec.util.io.headerio.ImageHeaderReaderWriter;
 
 /**
  * Entry point for algorithms
@@ -51,17 +52,17 @@ public class Jypec {
 		ImageHeaderData ihd = new ImageHeaderData();
 		try {
 			//update header offset for later
-			headerOffset = ihd.loadFromUncompressedStream(fis);
+			ImageHeaderReaderWriter.loadFromUncompressedStream(fis, ihd);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
 		}
 		
 		//load image metadata from header
-		int bands = (int) ihd.getData(HeaderConstants.HEADER_BANDS);
-		int lines = (int) ihd.getData(HeaderConstants.HEADER_LINES);
-		int samples = (int) ihd.getData(HeaderConstants.HEADER_SAMPLES);
-		ImageDataType type = ImageDataType.fromHeaderCode((byte) ihd.getData(HeaderConstants.HEADER_DATA_TYPE));
+		int bands = (int) ihd.get(HeaderConstants.HEADER_BANDS);
+		int lines = (int) ihd.get(HeaderConstants.HEADER_LINES);
+		int samples = (int) ihd.get(HeaderConstants.HEADER_SAMPLES);
+		ImageDataType type = ImageDataType.fromHeaderCode((byte) ihd.get(HeaderConstants.HEADER_DATA_TYPE));
 		
 		//load compression parameters
 		ComParameters cp = new ComParameters();
@@ -87,7 +88,7 @@ public class Jypec {
 		BitOutputStream output = new BitOutputStream(new FileOutputStream(new File(args.output)));
 		
 		//save header
-		ihd.saveToCompressedStream(output);
+		ImageHeaderReaderWriter.saveToCompressedStream(ihd, output);
 		//now dump the image data
 		c.compress(hi, output, dr);
 		
@@ -117,7 +118,7 @@ public class Jypec {
 		
 		//read header and data
 		ImageHeaderData ihd = new ImageHeaderData();
-		ihd.loadFromStream(bis);
+		ImageHeaderReaderWriter.loadFromStream(bis, ihd);
 		Decompressor d = new Decompressor();
 		HyperspectralImage res = d.decompress(ihd, bis);
 		
@@ -131,7 +132,7 @@ public class Jypec {
 			} else {
 				bos = new BitOutputStream(new FileOutputStream(args.output));
 			}
-			ihd.saveToUncompressedStream(bos);
+			ImageHeaderReaderWriter.saveToUncompressedStream(ihd, bos);
 			//if header is separate, byteoffset is too
 			if (args.outputHeader != null) {
 				byteOffset = 0;
@@ -151,6 +152,8 @@ public class Jypec {
 	 * @param iArgs
 	 */
 	public static void compare(InputArguments iArgs) {
+		
+		
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Not yet implemented");
 	}

@@ -5,13 +5,13 @@ import java.io.IOException;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.data.CodingBlock;
+import com.jypec.img.HeaderConstants;
 import com.jypec.img.HyperspectralBand;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
+import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.io.headerio.HeaderConstants;
-import com.jypec.util.io.headerio.ImageHeaderData;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
@@ -32,10 +32,10 @@ public class Decompressor {
 	 */
 	public HyperspectralImage decompress(ImageHeaderData ihd, BitInputStream input) throws IOException {
 		/** Need to know the image dimensions and some other values */
-		int lines = (int) ihd.getData(HeaderConstants.HEADER_LINES);
-		int bands = (int) ihd.getData(HeaderConstants.HEADER_BANDS);
-		int samples = (int) ihd.getData(HeaderConstants.HEADER_SAMPLES);
-		ImageDataType idt = ImageDataType.fromHeaderCode((byte) ihd.getData(HeaderConstants.HEADER_DATA_TYPE));
+		int lines = (int) ihd.get(HeaderConstants.HEADER_LINES);
+		int bands = (int) ihd.get(HeaderConstants.HEADER_BANDS);
+		int samples = (int) ihd.get(HeaderConstants.HEADER_SAMPLES);
+		ImageDataType idt = ImageDataType.fromHeaderCode((byte) ihd.get(HeaderConstants.HEADER_DATA_TYPE));
 		
 		ComParameters cp = new ComParameters();
 		cp.loadFrom(input);

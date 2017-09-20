@@ -7,9 +7,9 @@ import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.img.HyperspectralImage;
+import com.jypec.img.ImageHeaderData;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
-import com.jypec.util.io.headerio.ImageHeaderData;
 
 /**
  * @author Daniel

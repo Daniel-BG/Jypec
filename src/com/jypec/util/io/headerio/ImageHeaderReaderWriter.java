@@ -5,72 +5,45 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.jypec.img.HeaderConstants;
+import com.jypec.img.ImageHeaderData;
 import com.jypec.util.Utilities;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 
 /**
- * Stores image header data
+ * Read/Write image headers
  * @author Daniel
+ *
  */
-public class ImageHeaderData {
+public class ImageHeaderReaderWriter {
+	
 	private static final byte CODE_ENVI_HEADER = (byte) 'E';
 	private static final byte CODE_JYPEC_HEADER = (byte) 0xff;
 	
-	
-	private Map<HeaderConstants, Object> data;
+
 	private static final String DATA_PATTERN = "^([^=\\n\\r]+?)\\s+=\\s+([^\\{].*?|\\{.*?\\})$";
-	
-	/**
-	 * Create a new header data
-	 */
-	public ImageHeaderData() {
-		 this.reset();	
-	}
-	
-	private void reset() {
-		this.data = new EnumMap<HeaderConstants, Object>(HeaderConstants.class);	
-	}
-	
-	/**
-	 * Sets the given value for the given field
-	 * @param field
-	 * @param value
-	 */
-	public void setData(HeaderConstants field, Object value) {
-		this.data.put(field, value);
-	}
-	
-	/** 
-	 * @param field
-	 * @return the data for the given field
-	 */
-	public Object getData(HeaderConstants field) {
-		return this.data.get(field);
-	}
-	
+
 	/**
 	 * Checks whether the data is compressed or uncompressed then 
 	 * loads it into this object
 	 * @param bis
+	 * @param ihd 
+	 * @return the number of bytes which the data occupied in the bit input stream
 	 * @throws IOException 
 	 */
-	public void loadFromStream(BitInputStream bis) throws IOException {
+	public static int loadFromStream(BitInputStream bis, ImageHeaderData ihd) throws IOException {
 		byte fileCode = bis.readByte();
 		switch(fileCode) {
 		case CODE_ENVI_HEADER:
-			this.loadFromUncompressedStream(bis);
-			break;
+			return ImageHeaderReaderWriter.loadFromUncompressedStream(bis, ihd);
 		case CODE_JYPEC_HEADER:
-			this.loadFromCompressedStream(bis);
-			break;
+			return ImageHeaderReaderWriter.loadFromCompressedStream(bis, ihd);
 		default:
 			throw new IOException("Header code was not recognized");
 		}
@@ -78,13 +51,14 @@ public class ImageHeaderData {
 	
 	/**
 	 * @param stream Stream where to load from
+	 * @param ihd 
 	 * @throws IOException if something fails when reading
 	 * @return if the data is embbeded in the input stream, the number of BYTES at which it is offset
 	 * counting from where the pointer was when this function was called. Note that the pointer for
 	 * stream might have gone past the data starting point!. If the data is not embedded, then return 0
 	 */
-	public int loadFromUncompressedStream(InputStream stream) throws IOException {
-		this.reset();
+	public static int loadFromUncompressedStream(InputStream stream, ImageHeaderData ihd) throws IOException {
+		ihd.clear();
 		Scanner scn = new Scanner(stream);
 		int horizon = 0; //for now no limit. If we find the "header offset" keyword, set the horizon to it
 		while (true) {
@@ -108,7 +82,7 @@ public class ImageHeaderData {
 				 */
 				horizon = (int) prw.getData();
 			} else { //otherwise save it. Do not save the offset since it'll probably change
-				this.data.put(prw.getHeaderConstant(), prw.getData());
+				ihd.put(prw.getHeaderConstant(), prw.getData());
 			}
 		}
 		scn.close();
@@ -118,18 +92,19 @@ public class ImageHeaderData {
 	/**
 	 * Load the header from the given compressed stream
 	 * @param brw
+	 * @param ihd 
 	 * @return the number of BYTES read
 	 * @throws IOException 
 	 */
-	public int loadFromCompressedStream(BitInputStream brw) throws IOException {
+	public static int loadFromCompressedStream(BitInputStream brw, ImageHeaderData ihd) throws IOException {
 		int bits = brw.getBitsInput();
-		this.reset();
+		ihd.clear();
 		while (brw.available() > 0) {
 			ParameterReaderWriter prw = ParameterReaderWriter.readNextCompressedParameter(brw);
 			if (prw.getHeaderConstant() == HeaderConstants.HEADER_TERMINATION) {
 				break;
 			}
-			this.setData(prw.getHeaderConstant(), prw.getData());
+			ihd.put(prw.getHeaderConstant(), prw.getData());
 		}
 		bits = brw.getBitsInput() - bits;
 		if (bits % 8 == 0) {
@@ -142,14 +117,15 @@ public class ImageHeaderData {
 	
 	/**
 	 * save inner information into a compressed stream
+	 * @param ihd 
 	 * @param brw
 	 * @return the number of BYTES written to the stream
 	 * @throws IOException 
 	 */
-	public int saveToCompressedStream(BitOutputStream brw) throws IOException {
+	public static int saveToCompressedStream(ImageHeaderData ihd, BitOutputStream brw) throws IOException {
 		int bits = brw.getBitsOutput();
 		brw.writeByte(CODE_JYPEC_HEADER);
-		for (Entry<HeaderConstants, Object> e: this.data.entrySet()) {
+		for (Entry<HeaderConstants, Object> e: ihd.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			prw.setData(e.getValue());
 			if (prw.getHeaderConstant() != HeaderConstants.HEADER_OFFSET) { //do not save the header offset as it is different
@@ -168,16 +144,17 @@ public class ImageHeaderData {
 	
 	/**
 	 * Save inner information into an uncompressed stream
+	 * @param ihd 
 	 * @param brw where to save it
 	 * @return the number of BYTES written
 	 * @throws IOException 
 	 */
-	public int saveToUncompressedStream(OutputStream brw) throws IOException {
+	public static int saveToUncompressedStream(ImageHeaderData ihd, OutputStream brw) throws IOException {
 		ArrayList<Byte> list = new ArrayList<Byte>();
 		byte[] lineSeparator = "\n".getBytes(StandardCharsets.UTF_8);
 		Utilities.addAllBytes(list, "ENVI\n".getBytes(StandardCharsets.UTF_8));
 
-		for (Entry<HeaderConstants, Object> e: this.data.entrySet()) {
+		for (Entry<HeaderConstants, Object> e: ihd.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			prw.setData(e.getValue());
 			//add the parameter
@@ -206,8 +183,5 @@ public class ImageHeaderData {
 		
 		return result.length;
 	}
-
-
-	
 	
 }

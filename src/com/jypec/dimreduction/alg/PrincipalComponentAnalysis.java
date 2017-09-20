@@ -15,11 +15,11 @@ import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
+import com.jypec.img.ImageHeaderData;
 import com.jypec.util.MathOperations;
 import com.jypec.util.Pair;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
-import com.jypec.util.io.headerio.ImageHeaderData;
 
 /**
  * <p>

@@ -2,6 +2,7 @@ package com.jypec.util.io.headerio;
 
 import java.io.IOException;
 
+import com.jypec.img.HeaderConstants;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.io.headerio.primitives.ValueCompressorDecompressor;

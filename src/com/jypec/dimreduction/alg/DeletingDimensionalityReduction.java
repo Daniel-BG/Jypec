@@ -2,11 +2,11 @@ package com.jypec.dimreduction.alg;
 
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
+import com.jypec.img.HeaderConstants;
 import com.jypec.img.HyperspectralImage;
+import com.jypec.img.ImageHeaderData;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
-import com.jypec.util.io.headerio.HeaderConstants;
-import com.jypec.util.io.headerio.ImageHeaderData;
 
 /**
  * @author Daniel
@@ -55,7 +55,7 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 
 	@Override
 	public void doLoadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) {
-		this.numComponents = (int) ihd.getData(HeaderConstants.HEADER_BANDS);
+		this.numComponents = (int) ihd.get(HeaderConstants.HEADER_BANDS);
 	}
 
 	@Override
