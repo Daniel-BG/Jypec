@@ -9,6 +9,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.jypec.cli.InputArguments;
 import com.jypec.cli.JypecCLI;
+import com.jypec.util.JypecException;
 
 /**
  * Entry point
@@ -30,6 +31,8 @@ public class Main {
 	        	Jypec.compress(iArgs);
 	        } else if (iArgs.decompress) {
 	        	Jypec.decompress(iArgs);
+	        } else if (iArgs.compare) {
+	        	Jypec.compare(iArgs);
 	        } else if (iArgs.help){
 	        	printHelp();
 	        } else {
@@ -42,7 +45,9 @@ public class Main {
 	    }
 	    catch( IOException ioe) {
 	    	System.err.println( "Failed when reading/writing.  Reason: " + ioe.getMessage() );
-	    }
+	    } catch (JypecException je) {
+	    	System.err.println( "Jypec raised an exception.  Reason: " + je.getMessage() );
+		}
 	}
 	
 	

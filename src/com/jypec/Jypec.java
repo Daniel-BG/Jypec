@@ -12,6 +12,7 @@ import com.jypec.comdec.Decompressor;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.img.ImageDataType;
+import com.jypec.util.JypecException;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.io.HyperspectralImageReader;
@@ -29,8 +30,9 @@ public class Jypec {
 	 * Compresses whatever the args tell it to
 	 * @param args
 	 * @throws IOException 
+	 * @throws JypecException 
 	 */
-	public static void compress(InputArguments args) throws IOException {
+	public static void compress(InputArguments args) throws IOException, JypecException {
 		//select header source
 		FileInputStream fis;
 		try {
@@ -75,28 +77,17 @@ public class Jypec {
 		HyperspectralImage hi = new HyperspectralImage(null, type, bands, lines, samples);
 		HyperspectralImageReader.readImage(args.input, headerOffset, hi);
 
-		//output header		
-		BitOutputStream output;
-		if (args.outputHeader != null){
-			output = new BitOutputStream(new FileOutputStream(new File(args.outputHeader)));
-		} else {
-			output = new BitOutputStream(new FileOutputStream(new File(args.output)));
-		}
-		//save header wherever it goes
-		if (!args.dontOutputHeader) {
-			if (args.compressHeader) {
-				ihd.saveToCompressedStream(output);
-			} else {
-				ihd.saveToUncompressedStream(output);
-			}
-		}
-		//if header goes separate, save and restart
+		//check for coherent args
 		if (args.outputHeader != null) {
-			output.paddingFlush();
-			output.close();
-			output = new BitOutputStream(new FileOutputStream(new File(args.output)));
+			throw new JypecException("The compressed header must be packed with the data. You specified a route for the output header");
 		}
+		if (args.dontOutputHeader) {
+			throw new JypecException("The header must be packed with the data. You specified the option for no header output");
+		}
+		BitOutputStream output = new BitOutputStream(new FileOutputStream(new File(args.output)));
 		
+		//save header
+		ihd.saveToCompressedStream(output);
 		//now dump the image data
 		c.compress(hi, output, dr);
 		
@@ -114,25 +105,19 @@ public class Jypec {
 	 * Decompresses whatever the args tell it to
 	 * @param args arguments in a readable form
 	 * @throws IOException 
+	 * @throws JypecException 
 	 */
-	public static void decompress(InputArguments args) throws IOException {
-		//read image data (potentially header as well but we don't know that yet
-		BitInputStream bis; 
+	public static void decompress(InputArguments args) throws IOException, JypecException {
 		if (args.inputHeader != null) {
-			bis = new BitInputStream(new FileInputStream(args.inputHeader));
-		} else {
-			bis = new BitInputStream(new FileInputStream(args.input));
+			throw new JypecException("The compressed header must be packed with the data. You specified a route for the input header");
 		}
+		
+		//create input stream
+		BitInputStream bis = new BitInputStream(new FileInputStream(args.input));
 		
 		//read header and data
 		ImageHeaderData ihd = new ImageHeaderData();
 		ihd.loadFromStream(bis);
-		
-		//is the data in a separate file?
-		if (args.inputHeader != null) {
-			bis = new BitInputStream(new FileInputStream(args.input));
-		}
-
 		Decompressor d = new Decompressor();
 		HyperspectralImage res = d.decompress(ihd, bis);
 		
@@ -146,12 +131,7 @@ public class Jypec {
 			} else {
 				bos = new BitOutputStream(new FileOutputStream(args.output));
 			}
-			//save either compressed or not compressed
-			if (args.compressHeader) {
-				byteOffset = ihd.saveToCompressedStream(bos);
-			} else {
-				byteOffset = ihd.saveToUncompressedStream(bos);
-			}
+			ihd.saveToUncompressedStream(bos);
 			//if header is separate, byteoffset is too
 			if (args.outputHeader != null) {
 				byteOffset = 0;
@@ -164,6 +144,15 @@ public class Jypec {
 			System.out.println("Image decompressed succesfully with: " + bis.available() + " bits remaining (should be zero)");
 		}
 		
+	}
+
+	/**
+	 * Compares two images, one given in the input arguments and the other in the output arguments
+	 * @param iArgs
+	 */
+	public static void compare(InputArguments iArgs) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Not yet implemented");
 	}
 	
 }

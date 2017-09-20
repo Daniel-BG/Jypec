@@ -19,8 +19,8 @@ public class InputArguments {
 	public boolean showCompressionStats = false;
 	/** True if header is not wanted to be outputted */
 	public boolean dontOutputHeader = false;
-	/** True if the header is to be compressed */
-	public boolean compressHeader = false;
+	/** True if comparing two images */
+	public boolean compare = false;
 	
 	//files
 	/** Input file path. Null if not set */
@@ -62,8 +62,8 @@ public class InputArguments {
 		args.output = line.getOptionValue(JypecCLI.OPTION_OUTPUT);
 		args.inputHeader = line.getOptionValue(JypecCLI.OPTION_INPUT_HEADER);
 		args.outputHeader = line.getOptionValue(JypecCLI.OPTION_OUTPUT_HEADER);
-		args.compressHeader = line.hasOption(JypecCLI.OPTION_COMPRESS_HEADER);
 		args.dontOutputHeader = line.hasOption(JypecCLI.OPTION_NO_HEADER_OUTPUT);
+		args.compare = line.hasOption(JypecCLI.OPTION_COMPARE);
 		
 		if (args.requestReduction = line.hasOption(JypecCLI.OPTION_REDUCTION)) {
 			args.reductionArgs = line.getOptionValues(JypecCLI.OPTION_REDUCTION);

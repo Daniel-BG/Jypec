@@ -31,10 +31,10 @@ public class JypecCLI {
 	public static final String OPTION_SHAVE = "shave";
 	/** Show compressions stats. Use for retrieving arguments and/or flags  */
 	public static final String OPTION_SHOW_COMPRESSION_STATS = "stats";
-	/** Flag to compress the header. Use for retrieving arguments and/or flags  */
-	public static final String OPTION_COMPRESS_HEADER = "compress_header";
 	/** Flag to not output the header. Use for retrieving arguments and/or flags  */
 	public static final String OPTION_NO_HEADER_OUTPUT = "no_header_output";
+	/** Flag to not output the header. Use for retrieving arguments and/or flags  */
+	public static final String OPTION_COMPARE = "compare";
 	
 	/* Options for jypec */
 	private static Options jypecOptions;
@@ -44,8 +44,8 @@ public class JypecCLI {
 		Option help				= new Option("h", OPTION_HELP, false, "print this message");
 		Option compress			= new Option("c", OPTION_COMPRESS, false, "compress the input image");
 		Option decompress		= new Option("d", OPTION_DECOMPRESS, false, "decompress the input image");
+		Option compare			= new Option("k", OPTION_COMPARE, false, "compare the input and output images"); //k for kompare
 		Option compressionStats = new Option(null, OPTION_SHOW_COMPRESSION_STATS, false, "show compression stats");
-		Option compressHeader 	= new Option(null, OPTION_COMPRESS_HEADER, false, "compress the header");
 		Option noHeaderOutput 	= new Option(null, OPTION_NO_HEADER_OUTPUT, false, "do not output the header");
 		
 		
@@ -123,8 +123,8 @@ public class JypecCLI {
 		jypecOptions.addOption(compressionStats);
 		jypecOptions.addOption(inputHeader);
 		jypecOptions.addOption(outputHeader);
-		jypecOptions.addOption(compressHeader);
 		jypecOptions.addOption(noHeaderOutput);
+		jypecOptions.addOption(compare);
 	}
 	
 	
