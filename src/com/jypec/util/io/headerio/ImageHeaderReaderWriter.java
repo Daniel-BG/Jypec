@@ -43,7 +43,9 @@ public class ImageHeaderReaderWriter {
 		case CODE_ENVI_HEADER:
 			return ImageHeaderReaderWriter.loadFromUncompressedStream(bis, ihd);
 		case CODE_JYPEC_HEADER:
-			return ImageHeaderReaderWriter.loadFromCompressedStream(bis, ihd);
+			int res = ImageHeaderReaderWriter.loadFromCompressedStream(bis, ihd);
+			ihd.setWasCompressed(true);
+			return res;
 		default:
 			throw new IOException("Header code was not recognized");
 		}
@@ -57,7 +59,7 @@ public class ImageHeaderReaderWriter {
 	 * counting from where the pointer was when this function was called. Note that the pointer for
 	 * stream might have gone past the data starting point!. If the data is not embedded, then return 0
 	 */
-	public static int loadFromUncompressedStream(InputStream stream, ImageHeaderData ihd) throws IOException {
+	private static int loadFromUncompressedStream(InputStream stream, ImageHeaderData ihd) throws IOException {
 		ihd.clear();
 		Scanner scn = new Scanner(stream);
 		int horizon = 0; //for now no limit. If we find the "header offset" keyword, set the horizon to it
@@ -96,7 +98,7 @@ public class ImageHeaderReaderWriter {
 	 * @return the number of BYTES read
 	 * @throws IOException 
 	 */
-	public static int loadFromCompressedStream(BitInputStream brw, ImageHeaderData ihd) throws IOException {
+	private static int loadFromCompressedStream(BitInputStream brw, ImageHeaderData ihd) throws IOException {
 		int bits = brw.getBitsInput();
 		ihd.clear();
 		while (brw.available() > 0) {

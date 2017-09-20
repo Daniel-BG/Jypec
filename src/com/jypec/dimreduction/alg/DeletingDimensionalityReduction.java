@@ -3,7 +3,7 @@ package com.jypec.dimreduction.alg;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HeaderConstants;
-import com.jypec.img.HyperspectralImage;
+import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
@@ -23,14 +23,14 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	private int numComponents = -1;
 
 	@Override
-	public void train(HyperspectralImage source) {
+	public void train(HyperspectralImageData source) {
 		//no training needed. If unset just preserve dimension
 		if (numComponents == -1)
 			this.numComponents = source.getNumberOfBands();
 	}
 
 	@Override
-	public double[][][] reduce(HyperspectralImage src) {
+	public double[][][] reduce(HyperspectralImageData src) {
 		double [][][] res = new double[this.numComponents][src.getNumberOfLines()][src.getNumberOfSamples()];
 		for (int i = 0; i < this.numComponents; i++) {
 			for (int j = 0; j < src.getNumberOfLines(); j++) {
@@ -43,7 +43,7 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public void boost(double[][][] src, HyperspectralImage dst) {
+	public void boost(double[][][] src, HyperspectralImageData dst) {
 		for (int i = 0; i < this.numComponents; i++) {
 			for (int j = 0; j < dst.getNumberOfLines(); j++) {
 				for (int k = 0; k < dst.getNumberOfSamples(); k++) {
@@ -64,12 +64,12 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public double getMaxValue(HyperspectralImage img) {
+	public double getMaxValue(HyperspectralImageData img) {
 		return img.getDataType().getMaxValue();
 	}
 
 	@Override
-	public double getMinValue(HyperspectralImage img) {
+	public double getMinValue(HyperspectralImageData img) {
 		return img.getDataType().getMinValue();
 	}
 

@@ -14,7 +14,7 @@ import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
-import com.jypec.img.HyperspectralImage;
+import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.util.MathOperations;
 import com.jypec.util.Pair;
@@ -317,7 +317,7 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
     }
 
 	@Override
-	public double[][][] reduce(HyperspectralImage src) {
+	public double[][][] reduce(HyperspectralImageData src) {
 		double[][][] res = new double[this.numComponents][src.getNumberOfLines()][src.getNumberOfSamples()];
 		for (int i = 0; i < src.getNumberOfLines(); i++) {
 			for (int j = 0; j < src.getNumberOfSamples(); j++) {
@@ -331,7 +331,7 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 	}
 
 	@Override
-	public void boost(double[][][] src, HyperspectralImage dst) {
+	public void boost(double[][][] src, HyperspectralImageData dst) {
 		double[] pixel = new double[this.numComponents];
 		for (int i = 0; i < dst.getNumberOfLines(); i++) {
 			for (int j = 0; j < dst.getNumberOfSamples(); j++) {
@@ -344,7 +344,7 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 	}
 
 	@Override
-	public void train(HyperspectralImage source) {
+	public void train(HyperspectralImageData source) {
 		if (this.numComponents <= 0) {
 			throw new IllegalStateException("Please first set the number of components for this dimensionality reduction algorithm");
 		}
@@ -368,12 +368,12 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 
 
 	@Override
-	public double getMaxValue(HyperspectralImage img) {
+	public double getMaxValue(HyperspectralImageData img) {
 		return MathOperations.getMaximumDistance(img.getDataType().getMagnitudeAbsoluteRange(), img.getNumberOfBands());
 	}
 
 	@Override
-	public double getMinValue(HyperspectralImage img) {
+	public double getMinValue(HyperspectralImageData img) {
 		return -MathOperations.getMaximumDistance(img.getDataType().getMagnitudeAbsoluteRange(), img.getNumberOfBands());
 	}
 

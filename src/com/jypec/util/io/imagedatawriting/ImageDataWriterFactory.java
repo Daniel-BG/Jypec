@@ -1,7 +1,7 @@
-package com.jypec.util.io.imagewriting;
+package com.jypec.util.io.imagedatawriting;
 
 import java.nio.ByteBuffer;
-import com.jypec.img.HyperspectralImage;
+import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.util.io.IOUtilities;
 import com.jypec.util.io.IODataTypes.ByteOrdering;
@@ -12,7 +12,7 @@ import com.jypec.util.io.IODataTypes.ImageOrdering;
  * @author Daniel
  *
  */
-public class ImageWriterFactory {	
+public class ImageDataWriterFactory {	
 	
 	/**
 	 * @param imgOrdering 
@@ -20,7 +20,7 @@ public class ImageWriterFactory {
 	 * @param type 
 	 * @return the imageWriter of your liking
 	 */
-	public static ImageWriter getWriter(ImageOrdering imgOrdering, ByteOrdering byteOrdering, ImageDataType type) {
+	public static ImageDataWriter getWriter(ImageOrdering imgOrdering, ByteOrdering byteOrdering, ImageDataType type) {
 		
 		switch(imgOrdering) {
 		case BIL:
@@ -51,7 +51,7 @@ public class ImageWriterFactory {
 	 * @author Daniel
 	 *  * @see {@link BitImageWriter}
 	 */
-	private static abstract class ByteImageWriter implements ImageWriter {
+	private static abstract class ByteImageWriter implements ImageDataWriter {
 		protected ByteOrdering byteOrdering;
 		protected int dataBytes;
 		
@@ -67,7 +67,7 @@ public class ImageWriterFactory {
 		}
 		
 		@Override
-		public void writeToBuffer(HyperspectralImage hi, ByteBuffer bb) {
+		public void writeToBuffer(HyperspectralImageData hi, ByteBuffer bb) {
 			for (int j = 0; j < hi.getNumberOfLines(); j++) {
 				for (int k = 0; k < hi.getNumberOfSamples(); k++) {
 					for (int i = 0; i < hi.getNumberOfBands(); i++) {
@@ -84,7 +84,7 @@ public class ImageWriterFactory {
 		}
 		
 		@Override
-		public void writeToBuffer(HyperspectralImage hi, ByteBuffer bb) {
+		public void writeToBuffer(HyperspectralImageData hi, ByteBuffer bb) {
 			for (int j = 0; j < hi.getNumberOfLines(); j++) {
 				for (int i = 0; i < hi.getNumberOfBands(); i++) {
 					for (int k = 0; k < hi.getNumberOfSamples(); k++) {
@@ -101,7 +101,7 @@ public class ImageWriterFactory {
 		}
 		
 		@Override
-		public void writeToBuffer(HyperspectralImage hi, ByteBuffer bb) {
+		public void writeToBuffer(HyperspectralImageData hi, ByteBuffer bb) {
 			for (int i = 0; i < hi.getNumberOfBands(); i++) {
 				for (int j = 0; j < hi.getNumberOfLines(); j++) {
 					for (int k = 0; k < hi.getNumberOfSamples(); k++) {
@@ -118,7 +118,7 @@ public class ImageWriterFactory {
 	 * @author Daniel
 	 * @see {@link ByteImageWriter}
 	 */
-	private static abstract class BitImageWriter implements ImageWriter {
+	private static abstract class BitImageWriter implements ImageDataWriter {
 		
 		protected int dataBits;
 		protected int dataMask;
@@ -140,7 +140,7 @@ public class ImageWriterFactory {
 		}
 		
 		@Override
-		public void writeToBuffer(HyperspectralImage hi, ByteBuffer bb) {
+		public void writeToBuffer(HyperspectralImageData hi, ByteBuffer bb) {
 			for (int j = 0; j < hi.getNumberOfLines(); j++) {
 				for (int k = 0; k < hi.getNumberOfSamples(); k++) {
 					for (int i = 0; i < hi.getNumberOfBands(); i++) {
@@ -159,7 +159,7 @@ public class ImageWriterFactory {
 		}
 		
 		@Override
-		public void writeToBuffer(HyperspectralImage hi, ByteBuffer bb) {
+		public void writeToBuffer(HyperspectralImageData hi, ByteBuffer bb) {
 			for (int j = 0; j < hi.getNumberOfLines(); j++) {
 				for (int i = 0; i < hi.getNumberOfBands(); i++) {
 					for (int k = 0; k < hi.getNumberOfSamples(); k++) {
@@ -178,7 +178,7 @@ public class ImageWriterFactory {
 		}
 		
 		@Override
-		public void writeToBuffer(HyperspectralImage hi, ByteBuffer bb) {
+		public void writeToBuffer(HyperspectralImageData hi, ByteBuffer bb) {
 			for (int i = 0; i < hi.getNumberOfBands(); i++) {
 				for (int j = 0; j < hi.getNumberOfLines(); j++) {
 					for (int k = 0; k < hi.getNumberOfSamples(); k++) {

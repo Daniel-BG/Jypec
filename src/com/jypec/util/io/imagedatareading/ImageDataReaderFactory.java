@@ -1,8 +1,8 @@
-package com.jypec.util.io.imagereading;
+package com.jypec.util.io.imagedatareading;
 
 import java.nio.ByteBuffer;
 
-import com.jypec.img.HyperspectralImage;
+import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.util.io.IOUtilities;
 import com.jypec.util.io.IODataTypes.ByteOrdering;
@@ -12,7 +12,7 @@ import com.jypec.util.io.IODataTypes.ImageOrdering;
  * Hyperspectral image reading (only raw data, not headers)
  * @author Daniel
  */
-public class ImageReaderFactory {
+public class ImageDataReaderFactory {
 
 	
 	/**
@@ -21,7 +21,7 @@ public class ImageReaderFactory {
 	 * @param type 
 	 * @return the imageWriter of your liking
 	 */
-	public static ImageReader getReader(ImageOrdering imgOrdering, ByteOrdering byteOrdering, ImageDataType type) {
+	public static ImageDataReader getReader(ImageOrdering imgOrdering, ByteOrdering byteOrdering, ImageDataType type) {
 		
 		switch(imgOrdering) {
 		case BIL:
@@ -53,7 +53,7 @@ public class ImageReaderFactory {
 	 * @author Daniel
 	 *  * @see {@link BitImageReader}
 	 */
-	private static abstract class ByteImageReader implements ImageReader {
+	private static abstract class ByteImageReader implements ImageDataReader {
 		protected ByteOrdering byteOrdering;
 		protected int dataBytes;
 		
@@ -69,7 +69,7 @@ public class ImageReaderFactory {
 		}
 
 		@Override
-		public void readFromBuffer(ByteBuffer bb, HyperspectralImage hi) {
+		public void readFromBuffer(ByteBuffer bb, HyperspectralImageData hi) {
 			for (int j = 0; j < hi.getNumberOfLines(); j++) {
 				for (int k = 0; k < hi.getNumberOfSamples(); k++) {
 					for (int i = 0; i < hi.getNumberOfBands(); i++) {
@@ -86,7 +86,7 @@ public class ImageReaderFactory {
 		}
 
 		@Override
-		public void readFromBuffer(ByteBuffer bb, HyperspectralImage hi) {
+		public void readFromBuffer(ByteBuffer bb, HyperspectralImageData hi) {
 			for (int j = 0; j < hi.getNumberOfLines(); j++) {
 				for (int i = 0; i < hi.getNumberOfBands(); i++) {
 					for (int k = 0; k < hi.getNumberOfSamples(); k++) {
@@ -103,7 +103,7 @@ public class ImageReaderFactory {
 		}
 
 		@Override
-		public void readFromBuffer(ByteBuffer bb, HyperspectralImage hi) {
+		public void readFromBuffer(ByteBuffer bb, HyperspectralImageData hi) {
 			for (int i = 0; i < hi.getNumberOfBands(); i++) {
 				for (int j = 0; j < hi.getNumberOfLines(); j++) {
 					for (int k = 0; k < hi.getNumberOfSamples(); k++) {
@@ -121,7 +121,7 @@ public class ImageReaderFactory {
 	 * @author Daniel
 	 * @see {@link ByteImageReader}
 	 */
-	private static abstract class BitImageReader implements ImageReader {
+	private static abstract class BitImageReader implements ImageDataReader {
 		
 		protected int dataBits;
 		protected int dataMask;
@@ -144,7 +144,7 @@ public class ImageReaderFactory {
 		}
 		
 		@Override
-		public void readFromBuffer(ByteBuffer bb, HyperspectralImage hi) {
+		public void readFromBuffer(ByteBuffer bb, HyperspectralImageData hi) {
 			for (int j = 0; j < hi.getNumberOfLines(); j++) {
 				for (int k = 0; k < hi.getNumberOfSamples(); k++) {
 					for (int i = 0; i < hi.getNumberOfBands(); i++) {
@@ -161,7 +161,7 @@ public class ImageReaderFactory {
 		}
 		
 		@Override
-		public void readFromBuffer(ByteBuffer bb, HyperspectralImage hi) {
+		public void readFromBuffer(ByteBuffer bb, HyperspectralImageData hi) {
 			for (int j = 0; j < hi.getNumberOfLines(); j++) {
 				for (int i = 0; i < hi.getNumberOfBands(); i++) {
 					for (int k = 0; k < hi.getNumberOfSamples(); k++) {
@@ -178,7 +178,7 @@ public class ImageReaderFactory {
 		}
 		
 		@Override
-		public void readFromBuffer(ByteBuffer bb, HyperspectralImage hi) {
+		public void readFromBuffer(ByteBuffer bb, HyperspectralImageData hi) {
 			for (int i = 0; i < hi.getNumberOfBands(); i++) {
 				for (int j = 0; j < hi.getNumberOfLines(); j++) {
 					for (int k = 0; k < hi.getNumberOfSamples(); k++) {

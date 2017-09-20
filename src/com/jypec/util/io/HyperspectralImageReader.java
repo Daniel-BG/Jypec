@@ -1,115 +1,72 @@
 package com.jypec.util.io;
 
-import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
+
+import com.jypec.comdec.Decompressor;
+import com.jypec.img.HeaderConstants;
 import com.jypec.img.HyperspectralImage;
+import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
-import com.jypec.util.io.IODataTypes.ByteOrdering;
-import com.jypec.util.io.IODataTypes.ImageOrdering;
-import com.jypec.util.io.imagereading.ImageReaderFactory;
+import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.io.headerio.ImageHeaderReaderWriter;
 
 /**
- * Generic reader for hyperspectral image data
+ * Class to read hyperspectral images (header + data)
+ * Either compressed or uncompressed
  * @author Daniel
- *
  */
 public class HyperspectralImageReader {
-
+	
 	
 	/**
-	 * Reads an image from the specified file. If headers are present, the offset must
-	 * be indicated via the parameter. It can be found with 
-	 * {@link ImageHeaderData#loadFromUncompressedStream(InputStream)}
-	 * @param fileName name of the file
-	 * @param offset where the image data starts within the file
-	 * @param image where the data is sent to
+	 * @param path the path where the header metadata 
+	 * + image data is stored
+	 * @return the read image, containing both header and data
+	 * @throws IOException 
 	 */
-	public static void readImage(String fileName, int offset, HyperspectralImage image) {
-		FileInputStream in = null;
-		try {
-			File f = new File(fileName);
-			in = new FileInputStream(f); 
-			FileChannel file = in.getChannel();
-			ByteBuffer buf = file.map(FileChannel.MapMode.READ_ONLY, offset, f.length());
-			
-			ImageReaderFactory.getReader(ImageOrdering.BSQ, ByteOrdering.LITTLE_ENDIAN, image.getDataType()).readFromBuffer(buf, image);
-
-			file.close();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			IOUtilities.safeClose(in);
-		}	
+	public static HyperspectralImage read(String path) throws IOException {
+		return HyperspectralImageReader.read(path, null);
 	}
-	
-	/**
-	 * Same as {@link #readImage(String, int, HyperspectralImage)} with an offset of zero
-	 * @param fileName
-	 * @param image
-	 */
-	public static void readImage(String fileName, HyperspectralImage image) {
-		readImage(fileName, 0, image);
-	}
-	
 
 	
-
-	
-	
 	/**
-	 * @param file
-	 * @param bands bands in file
-	 * @param lines lines in file
-	 * @param samples samples in file
-	 * @param reqB bands to read
-	 * @param reqL lines to read
-	 * @param reqS samples to read
-	 * @param format format of the samples 
-	 * @param isLittleEndian if the format is lil endian
-	 * @return the image
-	 * @throws FileNotFoundException
+	 * @param dataPath where the image data is stored
+	 * @param headerPath where the image metadata is stored
+	 * @return the read image
+	 * @throws IOException 
 	 */
-	public static final HyperspectralImage readSkippingBIP(String file, int bands, int lines, int samples, int reqB, int reqL, int reqS, ImageDataType format, boolean isLittleEndian) throws FileNotFoundException {
-		HyperspectralImage hi = new HyperspectralImage(null, format, reqB, reqL, reqS);
-		InputStream is = new FileInputStream(new File(file));	//read a file
-		is = new BufferedInputStream(is);						//buffer it
-		if (isLittleEndian) {
-			is = new EndiannessChangerReader(is, format.getByteDepth());
+	public static HyperspectralImage read(String dataPath, String headerPath) throws IOException {
+		/** Load header */
+		ImageHeaderData header = new ImageHeaderData();
+		BitInputStream bis;
+		if (headerPath != null) {
+			bis = new BitInputStream(new FileInputStream(headerPath));
+		} else {
+			bis = new BitInputStream(new FileInputStream(dataPath));
+		}
+		int offset = ImageHeaderReaderWriter.loadFromStream(bis, header);
+		if (headerPath != null) {
+			offset = 0;
 		}
 		
-		IntegerReader bdr = new IntegerReader(is, format.getBitDepth());
-		
-		
-		for (int j = 0; j < lines; j++) {
-			for (int k = 0; k < samples; k++) {
-				for (int i = 0; i < bands; i++) {
-					try {
-						int data = bdr.read();
-						if (i < reqB && j < reqL && k < reqS) {
-							hi.setDataAt(data, i, j, k);
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-						System.exit(0);
-					}
-				}
-			}
+		/** Load image data */
+		HyperspectralImageData data;
+		if (header.wasCompressed()) {	//load compressed
+			Decompressor d = new Decompressor();
+			data = d.decompress(header, bis);
+		} else {						//load uncompressed
+			int bands = (int) header.get(HeaderConstants.HEADER_BANDS);
+			int lines = (int) header.get(HeaderConstants.HEADER_LINES);
+			int samples = (int) header.get(HeaderConstants.HEADER_SAMPLES);
+			ImageDataType type = ImageDataType.fromHeaderCode((byte) header.get(HeaderConstants.HEADER_DATA_TYPE));
+			data = new HyperspectralImageData(null, type, bands, lines, samples);
+			HyperspectralImageDataReader.readImageData(dataPath, offset, data);
 		}
 		
-		try {
-			bdr.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		return hi;
+		/** Return the hyperspectral image */
+		return new HyperspectralImage(data, header);
 	}
 	
 }

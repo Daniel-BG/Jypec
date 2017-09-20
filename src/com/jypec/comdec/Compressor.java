@@ -5,8 +5,8 @@ import java.io.IOException;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.data.CodingBlock;
-import com.jypec.img.HyperspectralBand;
-import com.jypec.img.HyperspectralImage;
+import com.jypec.img.HyperspectralBandData;
+import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
@@ -40,7 +40,7 @@ public class Compressor {
 	 * @param dr dimensionality reduction algorithm that is to be applied
 	 * @throws IOException 
 	 */
-	public void compress(HyperspectralImage srcImg, BitOutputStream output, DimensionalityReduction dr) throws IOException {
+	public void compress(HyperspectralImageData srcImg, BitOutputStream output, DimensionalityReduction dr) throws IOException {
 		/** Project all image values onto the reduced space */
 		dr.train(srcImg);
 		double[][][] reduced = dr.reduce(srcImg);
@@ -71,7 +71,7 @@ public class Compressor {
 			
 			
 			/** quantize the transform and save the quantization over the current band */
-			HyperspectralBand hb = HyperspectralBand.generateRogueBand(targetType, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
+			HyperspectralBandData hb = HyperspectralBandData.generateRogueBand(targetType, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
 			mq.quantize(waveForm, hb, 0, 0, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
 			
 			/** Now divide into blocks and encode it*/

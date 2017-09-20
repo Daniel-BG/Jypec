@@ -6,8 +6,8 @@ import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HeaderConstants;
-import com.jypec.img.HyperspectralBand;
-import com.jypec.img.HyperspectralImage;
+import com.jypec.img.HyperspectralBandData;
+import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
@@ -30,7 +30,7 @@ public class Decompressor {
 	 * @return the resulting image from decompressing the given stream
 	 * @throws IOException 
 	 */
-	public HyperspectralImage decompress(ImageHeaderData ihd, BitInputStream input) throws IOException {
+	public HyperspectralImageData decompress(ImageHeaderData ihd, BitInputStream input) throws IOException {
 		/** Need to know the image dimensions and some other values */
 		int lines = (int) ihd.get(HeaderConstants.HEADER_LINES);
 		int bands = (int) ihd.get(HeaderConstants.HEADER_BANDS);
@@ -57,7 +57,7 @@ public class Decompressor {
 			double bandMax = input.readDouble();
 			ImageDataType targetType = ImageDataType.findBest(bandMin, bandMax, 0);
 			targetType.mutatePrecision(-cp.bitReduction);
-			HyperspectralBand hb = HyperspectralBand.generateRogueBand(targetType, lines, samples);
+			HyperspectralBandData hb = HyperspectralBandData.generateRogueBand(targetType, lines, samples);
 			/** Now divide into blocks and decode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
 			for (CodingBlock block: blocker) {			
@@ -78,7 +78,7 @@ public class Decompressor {
 		
 		/** Undo PCA dimensionality reduction */
 		ImageDataType srcDT = new ImageDataType(idt.getBitDepth(), idt.isSigned());
-		HyperspectralImage srcImg = new HyperspectralImage(null, srcDT, bands, lines, samples);
+		HyperspectralImageData srcImg = new HyperspectralImageData(null, srcDT, bands, lines, samples);
 		
 		dr.boost(reduced, srcImg);
 		

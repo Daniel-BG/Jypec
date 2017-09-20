@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
-import com.jypec.img.HyperspectralBand;
+import com.jypec.img.HyperspectralBandData;
 import com.jypec.util.Stepper;
 import com.jypec.util.bits.BitTwiddling;
 
@@ -36,7 +36,7 @@ public class Blocker extends ArrayList<CodingBlock> {
 	 * @param expectedBlockDim maximum block size (in samples) (has to be a power of 2)
 	 * @param maxBlockDim maximum block dimensions (in samples) (has to be >= than expectedBlockDim)
 	 */
-	public Blocker(HyperspectralBand hb, int waveletSteps, int expectedBlockDim, int maxBlockDim) {
+	public Blocker(HyperspectralBandData hb, int waveletSteps, int expectedBlockDim, int maxBlockDim) {
 		this.waveletSteps = waveletSteps;
 		this.expectedBlockDim = expectedBlockDim;
 		this.maxBlockSize = this.expectedBlockDim * this.expectedBlockDim;
@@ -53,7 +53,7 @@ public class Blocker extends ArrayList<CodingBlock> {
 	 * Block the given band into the given list. The order of the blocks is deterministic so that
 	 * the same method can be used when coding and decoding
 	 */
-	private void block(HyperspectralBand hb) {
+	private void block(HyperspectralBandData hb) {
 		int col = 0, row = 0;
 		int[] cols = Stepper.getStepSizes(hb.getColumns(), this.waveletSteps);
 		int[] rows = Stepper.getStepSizes(hb.getRows(), this.waveletSteps);
@@ -79,7 +79,7 @@ public class Blocker extends ArrayList<CodingBlock> {
 	 * @param rows
 	 * @param cols
 	 */
-	private void blockSameSubBandRegion(HyperspectralBand hb, SubBand sb, int strow, int stcol, int rows, int cols) {
+	private void blockSameSubBandRegion(HyperspectralBandData hb, SubBand sb, int strow, int stcol, int rows, int cols) {
 		//corner case: regions are of zero size
 		if (rows == 0 || cols == 0) {
 			return;

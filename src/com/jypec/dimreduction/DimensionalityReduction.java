@@ -6,7 +6,7 @@ import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
-import com.jypec.img.HyperspectralImage;
+import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
@@ -40,13 +40,13 @@ public abstract class DimensionalityReduction {
 	
 	/**
 	 * Train this dimensionality reduction with the given image, to analize and then
-	 * be able to {@link #reduce(HyperspectralImage, HyperspectralImage)} it (or others)
+	 * be able to {@link #reduce(HyperspectralImageData, HyperspectralImageData)} it (or others)
 	 * to a lower dimension space
 	 * @param source the source image. Pixels will be analyzed (in the spectral dimension) and
 	 * based on similarities, will later be reduced without the loss of significant information,
-	 * with calls to {@link #reduce(HyperspectralImage, HyperspectralImage)}
+	 * with calls to {@link #reduce(HyperspectralImageData, HyperspectralImageData)}
 	 */
-	public abstract void train(HyperspectralImage source);
+	public abstract void train(HyperspectralImageData source);
 	
 	
 	/**
@@ -55,7 +55,7 @@ public abstract class DimensionalityReduction {
 	 * @param source the source image
 	 * @return the source image projected into the smaller dimension space
 	 */
-	public abstract double[][][] reduce(HyperspectralImage source);
+	public abstract double[][][] reduce(HyperspectralImageData source);
 	
 	
 	
@@ -65,7 +65,7 @@ public abstract class DimensionalityReduction {
 	 * @param source the source image (in the reduced dimension space)
 	 * @param dst will hold the result: the original image in the original space
 	 */
-	public abstract void boost(double[][][] source, HyperspectralImage dst);
+	public abstract void boost(double[][][] source, HyperspectralImageData dst);
 	
 	
 	/**
@@ -89,7 +89,7 @@ public abstract class DimensionalityReduction {
 	
 	
 	/**
-	 * Loads the necessary data from the BitStream so as to be able to {@link #boost(HyperspectralImage)}
+	 * Loads the necessary data from the BitStream so as to be able to {@link #boost(HyperspectralImageData)}
 	 * an image into its original space. The given BitStream must've been filled with 
 	 * {@link #saveTo(BitStreamDataReaderWriter)}
 	 * @param bw The BitStream handler that encapsulates the BitStream
@@ -149,13 +149,13 @@ public abstract class DimensionalityReduction {
 	 * @param img where to get the max value from
 	 * @return the maximum value that the reduced image can have on its samples
 	 */
-	public abstract double getMaxValue(HyperspectralImage img);
+	public abstract double getMaxValue(HyperspectralImageData img);
 	
 	/**
 	 * @param img where to get the min value from
 	 * @return the minimum value that the reduced image can have on its samples
 	 */
-	public abstract double getMinValue(HyperspectralImage img);
+	public abstract double getMinValue(HyperspectralImageData img);
 
 	/**
 	 * Load the proper dimensionality reduction algorithm selected in the input arguments

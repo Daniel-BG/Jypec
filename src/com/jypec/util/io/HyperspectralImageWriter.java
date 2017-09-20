@@ -1,49 +1,44 @@
 package com.jypec.util.io;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 
+import com.jypec.cli.InputArguments;
 import com.jypec.img.HyperspectralImage;
-import com.jypec.util.io.IODataTypes.ByteOrdering;
-import com.jypec.util.io.IODataTypes.ImageOrdering;
-import com.jypec.util.io.imagewriting.ImageWriterFactory;
+import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.io.headerio.ImageHeaderReaderWriter;
 
 /**
- * Class for storing data matrices (mostly hyperspectral images)
- * 
+ * Write hyperspectral images to files
  * @author Daniel
  *
  */
 public class HyperspectralImageWriter {
 
 	/**
-	 * From
-	 * https://stackoverflow.com/questions/4358875/fastest-way-to-write-an-array-of-integers-to-a-file-in-java
-	 * 
-	 * @param hi image to save
-	 * @param offset start writing at this position (useful if a header is present)
-	 * @param fileName name of file where to write image
+	 * @param hi the image to write
+	 * @param args the arguments with which to write it (output location and such)
+	 * @throws IOException
 	 */
-	public static void writeBSQ(HyperspectralImage hi, int offset, String fileName) {
-		RandomAccessFile out = null;
-		try {
-			out = new RandomAccessFile(fileName, "rw"); //need rw for the file.map function to work
-			FileChannel file = out.getChannel();
-			int expectedBytes = hi.getNumberOfBands() * hi.getNumberOfLines() * hi.getNumberOfSamples() * 2;
-			
-			ByteBuffer buf = file.map(FileChannel.MapMode.READ_WRITE, offset, expectedBytes);
-			ImageWriterFactory.getWriter(ImageOrdering.BSQ, ByteOrdering.LITTLE_ENDIAN, hi.getDataType()).writeToBuffer(hi, buf);
-
-			file.close();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			IOUtilities.safeClose(out);
+	public static void write(HyperspectralImage hi, InputArguments args) throws IOException {
+		BitOutputStream bos;
+		int byteOffset = 0;
+		
+		if (!args.dontOutputHeader) {
+			//create the output
+			if (args.outputHeader != null) {
+				bos = new BitOutputStream(new FileOutputStream(args.outputHeader));
+			} else {
+				bos = new BitOutputStream(new FileOutputStream(args.output));
+			}
+			ImageHeaderReaderWriter.saveToUncompressedStream(hi.getHeader(), bos);
+			//if header is separate, byteoffset is too
+			if (args.outputHeader != null) {
+				byteOffset = 0;
+			}
 		}
+		
+		HyperspectralImageDataWriter.writeBSQ(hi.getData(), byteOffset ,args.output);		
 	}
-
-
 
 }

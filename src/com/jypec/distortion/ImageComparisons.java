@@ -1,7 +1,7 @@
 package com.jypec.distortion;
 
-import com.jypec.img.HyperspectralBand;
-import com.jypec.img.HyperspectralImage;
+import com.jypec.img.HyperspectralBandData;
+import com.jypec.img.HyperspectralImageData;
 
 /**
  * @author Daniel
@@ -16,7 +16,7 @@ public class ImageComparisons {
 	 * @param h2
 	 * @return the PSNR between both images
 	 */
-	public static double rawPSNR (HyperspectralImage h1, HyperspectralImage h2) {
+	public static double rawPSNR (HyperspectralImageData h1, HyperspectralImageData h2) {
 		double mse = MSE(h1, h2);
 		double maxVal = h1.getDataType().getMagnitudeAbsoluteRange();
 		
@@ -29,7 +29,7 @@ public class ImageComparisons {
 	 * @param h2
 	 * @return the PSNR between both bands
 	 */
-	public static double rawPSNR (HyperspectralBand h1, HyperspectralBand h2) {
+	public static double rawPSNR (HyperspectralBandData h1, HyperspectralBandData h2) {
 		double mse = MSE(h1, h2);
 		double maxVal = h1.getDataType().getMagnitudeAbsoluteRange();
 		
@@ -42,7 +42,7 @@ public class ImageComparisons {
 	 * @return the normalized PSNR, calculated using the dynamic range of the image instead of
 	 * the fixed maximum value range that pixels can have
 	 */
-	public static double normalizedPSNR(HyperspectralImage h1, HyperspectralImage h2) {
+	public static double normalizedPSNR(HyperspectralImageData h1, HyperspectralImageData h2) {
 		double mse = MSE(h1, h2);
 		int[] minMax = ImageOperations.minMaxVal(h1);
 		double maxVal = minMax[1] - minMax[0];
@@ -56,7 +56,7 @@ public class ImageComparisons {
 	 * @return the normalized PSNR, calculated using the dynamic range of the image instead of
 	 * the fixed maximum value range that pixels can have
 	 */
-	public static double normalizedPSNR(HyperspectralBand h1, HyperspectralBand h2) {
+	public static double normalizedPSNR(HyperspectralBandData h1, HyperspectralBandData h2) {
 		double mse = MSE(h1, h2);
 		int[] minMax = ImageOperations.minMaxVal(h1);
 		double maxVal = minMax[1] - minMax[0];
@@ -70,7 +70,7 @@ public class ImageComparisons {
 	 * @param h2
 	 * @return the signal noise ratio between the given images
 	 */
-	public static double SNR(HyperspectralImage h1, HyperspectralImage h2) {
+	public static double SNR(HyperspectralImageData h1, HyperspectralImageData h2) {
 		double var = ImageOperations.variance(h1);
 		double mse = MSE(h1, h2);
 		return 10 * Math.log10(var / mse);
@@ -82,7 +82,7 @@ public class ImageComparisons {
 	 * @param h2
 	 * @return the signal noise ratio between the given images
 	 */
-	public static double SNR(HyperspectralBand h1, HyperspectralBand h2) {
+	public static double SNR(HyperspectralBandData h1, HyperspectralBandData h2) {
 		double var = ImageOperations.variance(h1);
 		double mse = MSE(h1, h2);
 		return 10 * Math.log10(var / mse);
@@ -103,7 +103,7 @@ public class ImageComparisons {
 	 * @param h2
 	 * @return the Mean Squared Error (mean of all "differences between pixels squared")
 	 */
-	public static double MSE (HyperspectralImage h1, HyperspectralImage h2) {
+	public static double MSE (HyperspectralImageData h1, HyperspectralImageData h2) {
 		if (!h1.sizeAndTypeEquals(h2)) {
 			throw new IllegalArgumentException("Image sizes do not match!");
 		}
@@ -127,7 +127,7 @@ public class ImageComparisons {
 	 * @param h2
 	 * @return the Mean Squared Error (mean of all "differences between pixels squared")
 	 */
-	public static double MSE (HyperspectralBand h1, HyperspectralBand h2) {
+	public static double MSE (HyperspectralBandData h1, HyperspectralBandData h2) {
 		if (!h1.sizeAndTypeEquals(h2)) {
 			throw new IllegalArgumentException("Image sizes do not match!");
 		}
@@ -150,7 +150,7 @@ public class ImageComparisons {
 	 * @param h2
 	 * @return the maximum squared error (difference between samples squared)
 	 */
-	public static double maxSE (HyperspectralImage h1, HyperspectralImage h2) {
+	public static double maxSE (HyperspectralImageData h1, HyperspectralImageData h2) {
 		if (!h1.sizeAndTypeEquals(h2)) {
 			throw new IllegalArgumentException("Image sizes do not match!");
 		}
@@ -175,7 +175,7 @@ public class ImageComparisons {
 	 * @param h2
 	 * @return the maximum squared error (difference between samples squared)
 	 */
-	public static double maxSE (HyperspectralBand h1, HyperspectralBand h2) {
+	public static double maxSE (HyperspectralBandData h1, HyperspectralBandData h2) {
 		if (!h1.sizeAndTypeEquals(h2)) {
 			throw new IllegalArgumentException("Image sizes do not match!");
 		}

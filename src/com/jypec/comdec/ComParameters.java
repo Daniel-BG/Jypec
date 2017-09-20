@@ -2,6 +2,7 @@ package com.jypec.comdec;
 
 import java.io.IOException;
 
+import com.jypec.cli.InputArguments;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 
@@ -19,6 +20,21 @@ public class ComParameters {
 	public int wavePasses = DEFAULT_WAVE_PASSES;
 	/** Number of bits eliminated from each bitplane */
 	public int bitReduction = DEFAULT_BIT_REDUCTION;
+
+	/**
+	 * @param args read the compression parameters from the input arguments 
+	 */
+	public ComParameters(InputArguments args) {
+		if (args.requestWavelet) {
+			this.wavePasses = args.passes;
+		}
+		if (args.requestShave) {
+			this.bitReduction = args.shave;
+		}
+	}
+	
+	/** Create empty parameters to be loaded from {@link #loadFrom(BitInputStream)}*/
+	public ComParameters() {}
 
 	/**
 	 * Saves this parameters to the given BitStreamDataReaderWriter

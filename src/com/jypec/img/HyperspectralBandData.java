@@ -9,9 +9,9 @@ import com.jypec.util.data.IntegerMatrix;
  * @author Daniel
  *
  */
-public class HyperspectralBand implements IntegerMatrix {
+public class HyperspectralBandData implements IntegerMatrix {
 
-	private HyperspectralImage hyimg;
+	private HyperspectralImageData hyimg;
 	private int band;
 	private int depth;
 	private int lines;
@@ -26,7 +26,7 @@ public class HyperspectralBand implements IntegerMatrix {
 	 * @param lines 
 	 * @param samples
 	 */
-	public HyperspectralBand (HyperspectralImage hi, int band, int depth, int lines, int samples) {
+	public HyperspectralBandData (HyperspectralImageData hi, int band, int depth, int lines, int samples) {
 		this.hyimg = hi;
 		this.band = band;
 		this.depth = depth;
@@ -41,8 +41,8 @@ public class HyperspectralBand implements IntegerMatrix {
 	 * @param samples
 	 * @return a band with no image attached
 	 */
-	public static HyperspectralBand generateRogueBand (ImageDataType type, int lines, int samples) {
-		return new HyperspectralImage(null, type, 1, lines, samples).getBand(0);
+	public static HyperspectralBandData generateRogueBand (ImageDataType type, int lines, int samples) {
+		return new HyperspectralImageData(null, type, 1, lines, samples).getBand(0);
 	}
 	
 	@Override
@@ -66,7 +66,7 @@ public class HyperspectralBand implements IntegerMatrix {
 	
 	/**
 	 * sets the given value at the given position
-	 * @see HyperspectralImage
+	 * @see HyperspectralImageData
 	 * @param value value to set
 	 * @param line
 	 * @param sample
@@ -147,7 +147,7 @@ public class HyperspectralBand implements IntegerMatrix {
 	/**
 	 * Fill this image with the values from the double matrix. They are converted
 	 * to the data type of the encompassing image and then set into the inner array
-	 * @see HyperspectralImage
+	 * @see HyperspectralImageData
 	 * @param waveForm from where to take the data
 	 * @param lineOffset starting line for filling the data in
 	 * @param sampleOffset starting sample for filling the data in
@@ -173,7 +173,7 @@ public class HyperspectralBand implements IntegerMatrix {
 	 * @param other
 	 * @return true if this image's size and type is equal to other's size and type
 	 */
-	public boolean sizeAndTypeEquals(HyperspectralBand other) {
+	public boolean sizeAndTypeEquals(HyperspectralBandData other) {
 		return this.getNumberOfLines() == other.getNumberOfLines() 
 				&& this.getNumberOfSamples() == other.getNumberOfSamples()
 				&& this.getDataType().equals(other.getDataType());
