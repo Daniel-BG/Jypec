@@ -82,6 +82,20 @@ public class CodingBlock {
 	public int getHeight() {
 		return this.rows;
 	}
+	
+	/**
+	 * @return the row offset from the top-left position of the band it codes
+	 */
+	public int getRowOffset() {
+		return this.rowOffset;
+	}
+	
+	/**
+	 * @return the column offset from the top-left position of the band it codes
+	 */
+	public int getColumnOffset() {
+		return this.columnOffset;
+	}
 
 	/**
 	 * @return the number of bitplanes that this block has (excluding the sign bitplane)

@@ -47,6 +47,8 @@ public class InputArguments {
 	public boolean requestWavelet = false;
 	/** Number of passes of the wavelet transform, or -1 if not set */
 	public int passes = -1;
+	/** If we want the inner classes to be verbose */
+	public boolean verbose;
 	
 	
 	/**
@@ -67,6 +69,7 @@ public class InputArguments {
 		args.dontOutputHeader = line.hasOption(JypecCLI.OPTION_NO_HEADER_OUTPUT);
 		args.compare = line.hasOption(JypecCLI.OPTION_COMPARE);
 		args.essentialHeader = line.hasOption(JypecCLI.OPTION_OUTPUT_ESSENTIAL_HEADER);
+		args.verbose = line.hasOption(JypecCLI.OPTION_VERBOSE);
 		
 		if (args.requestReduction = line.hasOption(JypecCLI.OPTION_REDUCTION)) {
 			args.reductionArgs = line.getOptionValues(JypecCLI.OPTION_REDUCTION);

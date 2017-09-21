@@ -41,12 +41,13 @@ public class Jypec {
 		checkCompressArguments(args);
 		
 		/** load the image, and compression parameters */
-		HyperspectralImage hi = HyperspectralImageReader.read(args.input, args.inputHeader);
+		HyperspectralImage hi = HyperspectralImageReader.read(args.input, args.inputHeader, args.verbose);
 		ComParameters cp = new ComParameters(args);
 		DimensionalityReduction dr = DimensionalityReduction.loadFrom(args);
 		
 		/** create the compressor */
 		Compressor c = new Compressor(cp);
+		c.setVerbose(args.verbose);
 		
 		/** Create the output stream and save the compressed result */
 		BitOutputStream output = new BitOutputStream(new FileOutputStream(new File(args.output)));
@@ -82,7 +83,7 @@ public class Jypec {
 		checkDecompressArguments(args);
 		
 		/** Read input image, decompressing if compressed format is found */
-		HyperspectralImage hi = HyperspectralImageReader.read(args.input);
+		HyperspectralImage hi = HyperspectralImageReader.read(args.input, args.verbose);
 		
 		/** Save the result */
 		HyperspectralImageWriter.write(hi, args);
@@ -92,19 +93,19 @@ public class Jypec {
 
 	/**
 	 * Compares two images, one given in the input arguments and the other in the output arguments
-	 * @param iArgs
+	 * @param args
 	 * @throws IOException 
 	 */
-	public static void compare(InputArguments iArgs) throws IOException {
+	public static void compare(InputArguments args) throws IOException {
 		//read both images
-		HyperspectralImage first = HyperspectralImageReader.read(iArgs.input, iArgs.inputHeader);
-		HyperspectralImage second = HyperspectralImageReader.read(iArgs.output, iArgs.outputHeader);
+		HyperspectralImage first = HyperspectralImageReader.read(args.input, args.inputHeader, args.verbose);
+		HyperspectralImage second = HyperspectralImageReader.read(args.output, args.outputHeader, args.verbose);
 		
 		//check that they are the same size and stuff
 		if (first.getData().getNumberOfBands() != second.getData().getNumberOfBands()
 				|| first.getData().getNumberOfLines() != second.getData().getNumberOfLines()
 				|| first.getData().getNumberOfSamples() != second.getData().getNumberOfSamples()
-				|| first.getData().getDataType().equals(second.getData().getDataType())) {
+				|| !first.getData().getDataType().equals(second.getData().getDataType())) {
 			System.out.println("Images are of different sizes and/or data types. Cannot compare");
 			return;
 		}

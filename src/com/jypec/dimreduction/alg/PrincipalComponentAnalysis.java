@@ -318,6 +318,7 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 
 	@Override
 	public double[][][] reduce(HyperspectralImageData src) {
+		this.sayLn("Projecting samples into reduced space...");
 		double[][][] res = new double[this.numComponents][src.getNumberOfLines()][src.getNumberOfSamples()];
 		for (int i = 0; i < src.getNumberOfLines(); i++) {
 			for (int j = 0; j < src.getNumberOfSamples(); j++) {
@@ -332,6 +333,7 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 
 	@Override
 	public void boost(double[][][] src, HyperspectralImageData dst) {
+		this.sayLn("Boosting samples from reduced space to the original...");
 		double[] pixel = new double[this.numComponents];
 		for (int i = 0; i < dst.getNumberOfLines(); i++) {
 			for (int j = 0; j < dst.getNumberOfSamples(); j++) {
@@ -351,12 +353,14 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 		int nc = this.numComponents;
 		this.setup(source.getNumberOfLines() * source.getNumberOfSamples(), source.getNumberOfBands());
 		
+		this.sayLn("Adding samples to train...");
 		for (int i = 0; i < source.getNumberOfLines(); i++) {
 			for (int j = 0; j < source.getNumberOfSamples(); j++) {
 				this.addSample(source.getPixel(i, j));
 			}
 		}
 		
+		this.sayLn("Computing basis");
 		this.computeBasis(nc);
 	}
 	

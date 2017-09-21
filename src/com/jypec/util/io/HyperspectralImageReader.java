@@ -25,21 +25,23 @@ public class HyperspectralImageReader {
 	/**
 	 * @param path the path where the header metadata 
 	 * + image data is stored
+	 * @param verbose if info is to be output when decompressing
 	 * @return the read image, containing both header and data
 	 * @throws IOException 
 	 */
-	public static HyperspectralImage read(String path) throws IOException {
-		return HyperspectralImageReader.read(path, null);
+	public static HyperspectralImage read(String path, boolean verbose) throws IOException {
+		return HyperspectralImageReader.read(path, null, verbose);
 	}
 
 	
 	/**
 	 * @param dataPath where the image data is stored
 	 * @param headerPath where the image metadata is stored
+	 * @param verbose if info is to be output when decompressing
 	 * @return the read image
 	 * @throws IOException 
 	 */
-	public static HyperspectralImage read(String dataPath, String headerPath) throws IOException {
+	public static HyperspectralImage read(String dataPath, String headerPath, boolean verbose) throws IOException {
 		/** Load header */
 		ImageHeaderData header = new ImageHeaderData();
 		BitInputStream bis;
@@ -57,6 +59,7 @@ public class HyperspectralImageReader {
 		HyperspectralImageData data;
 		if (header.wasCompressed()) {	//load compressed
 			Decompressor d = new Decompressor();
+			d.setVerbose(verbose);
 			data = d.decompress(header, bis);
 		} else {						//load uncompressed
 			int bands = (int) header.get(HeaderConstants.HEADER_BANDS);

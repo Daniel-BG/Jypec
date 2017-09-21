@@ -8,6 +8,7 @@ import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageHeaderData;
+import com.jypec.util.DefaultVerboseable;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 
@@ -15,8 +16,8 @@ import com.jypec.util.bits.BitOutputStream;
  * @author Daniel
  * Base interface for implementing various dimensionality reduction algorithms
  */
-public abstract class DimensionalityReduction {
-	
+public abstract class DimensionalityReduction extends DefaultVerboseable {
+
 	/**
 	 * @author Daniel
 	 * enums all subclasses so that save and loads methods can use codes to reload them
@@ -37,6 +38,16 @@ public abstract class DimensionalityReduction {
 		this.dra = dra;
 	}
 	
+	
+	/**
+	 * Wrapper to call {@link #train(HyperspectralImageData)} then {@link #reduce(HyperspectralImageData)}
+	 * @param source
+	 * @return the reduced image after training with source
+	 */
+	public double[][][] trainReduce(HyperspectralImageData source) {
+		this.train(source);
+		return this.reduce(source);
+	}
 	
 	/**
 	 * Train this dimensionality reduction with the given image, to analize and then

@@ -37,6 +37,8 @@ public class JypecCLI {
 	public static final String OPTION_NO_HEADER_OUTPUT = "no_header_output";
 	/** Flag to not output the header. Use for retrieving arguments and/or flags  */
 	public static final String OPTION_COMPARE = "compare";
+	/** Flag to be verbose. Use for retrieving arguments and/or flags  */
+	public static final String OPTION_VERBOSE = "verbose";
 	
 	/* Options for jypec */
 	private static Options jypecOptions;
@@ -47,6 +49,7 @@ public class JypecCLI {
 		Option compress			= new Option("c", OPTION_COMPRESS, false, "compress the input image");
 		Option decompress		= new Option("d", OPTION_DECOMPRESS, false, "decompress the input image");
 		Option compare			= new Option("k", OPTION_COMPARE, false, "compare the input and output images"); //k for kompare
+		Option verbose			= new Option("v", OPTION_VERBOSE, false, "be verbose when processing"); //k for kompare
 		Option compressionStats = new Option(null, OPTION_SHOW_COMPRESSION_STATS, false, "show compression stats");
 		Option noHeaderOutput 	= new Option(null, OPTION_NO_HEADER_OUTPUT, false, "do not output the header");
 		Option essentialHeader 	= new Option(null, OPTION_OUTPUT_ESSENTIAL_HEADER, false, "output only essential information, cut all extra");
@@ -129,6 +132,7 @@ public class JypecCLI {
 		jypecOptions.addOption(noHeaderOutput);
 		jypecOptions.addOption(compare);
 		jypecOptions.addOption(essentialHeader);
+		jypecOptions.addOption(verbose);
 	}
 	
 	
