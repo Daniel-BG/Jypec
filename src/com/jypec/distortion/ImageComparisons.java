@@ -192,4 +192,65 @@ public class ImageComparisons {
 		return acc;
 	}
 	
+	
+	
+	/**
+	 * @param h1
+	 * @param h2
+	 * @return the mean to noise standard deviation ratio
+	 */
+	public static double MSR (HyperspectralImageData h1, HyperspectralImageData h2) {
+		if (!h1.sizeAndTypeEquals(h2)) {
+			throw new IllegalArgumentException("Image sizes do not match!");
+		}
+		//add up all squared differences
+		double mean = 0;
+		double std = 0;
+		for (int i = 0; i < h1.getNumberOfBands(); i++) {
+			for (int j = 0; j < h1.getNumberOfLines(); j++) {
+				for (int k = 0; k < h1.getNumberOfSamples(); k++) {
+					double v1 = h1.getValueAt(i, j, k);
+					double v2 = h2.getValueAt(i, j, k);
+					mean += v1;
+					std += (v1 - v2) * (v1 - v2);
+				}
+			}
+		}
+		mean /= h1.getTotalNumberOfSamples();
+		std /= h1.getTotalNumberOfSamples();
+		std = Math.sqrt(std);
+		
+		return mean / std;
+	}
+	
+	
+	/**
+	 * @param h1
+	 * @param h2
+	 * @return the mean to noise standard deviation ratio
+	 */
+	public static double MSR (HyperspectralBandData h1, HyperspectralBandData h2) {
+		if (!h1.sizeAndTypeEquals(h2)) {
+			throw new IllegalArgumentException("Image sizes do not match!");
+		}
+		//add up all squared differences
+		double mean = 0;
+		double std = 0;
+		for (int j = 0; j < h1.getNumberOfLines(); j++) {
+			for (int k = 0; k < h1.getNumberOfSamples(); k++) {
+				double v1 = h1.getValueAt(j, k);
+				double v2 = h2.getValueAt(j, k);
+				mean += v1;
+				std += (v1 - v2) * (v1 - v2);
+			}
+		}
+		mean /= h1.getTotalNumberOfSamples();
+		std /= h1.getTotalNumberOfSamples();
+		std = Math.sqrt(std);
+		
+		return mean / std;
+	}
+	
+		
+	
 }

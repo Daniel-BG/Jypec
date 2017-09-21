@@ -102,10 +102,7 @@ public class Jypec {
 		HyperspectralImage second = HyperspectralImageReader.read(args.output, args.outputHeader, args.verbose);
 		
 		//check that they are the same size and stuff
-		if (first.getData().getNumberOfBands() != second.getData().getNumberOfBands()
-				|| first.getData().getNumberOfLines() != second.getData().getNumberOfLines()
-				|| first.getData().getNumberOfSamples() != second.getData().getNumberOfSamples()
-				|| !first.getData().getDataType().equals(second.getData().getDataType())) {
+		if (!first.getData().sizeAndTypeEquals(second.getData())) {
 			System.out.println("Images are of different sizes and/or data types. Cannot compare");
 			return;
 		}
@@ -116,6 +113,7 @@ public class Jypec {
 		System.out.println("SNR is: " + ImageComparisons.SNR(first.getData(), second.getData()));
 		System.out.println("MSE is: " + ImageComparisons.MSE(first.getData(), second.getData()));
 		System.out.println("maxSE is: " + ImageComparisons.maxSE(first.getData(), second.getData()));
+		System.out.println("MSR is: " + ImageComparisons.MSR(first.getData(), second.getData()));
 	}
 	
 }

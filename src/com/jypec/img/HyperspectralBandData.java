@@ -179,5 +179,12 @@ public class HyperspectralBandData implements IntegerMatrix {
 				&& this.getDataType().equals(other.getDataType());
 	}
 
+	/**
+	 * @return the total number of data samples within the band
+	 */
+	public double getTotalNumberOfSamples() {
+		return this.getNumberOfLines() * this.getNumberOfSamples();
+	}
+
 
 }

@@ -128,4 +128,21 @@ public class ImageOperations {
 		int dim = h1.getNumberOfLines() * h1.getNumberOfSamples();
 		return acc / (double) dim;
 	}
+	
+	
+	/**
+	 * @param h1
+	 * @return the std of the samples of the given image
+	 */
+	public static double std(HyperspectralImageData h1) {
+		return Math.sqrt(variance(h1));
+	}
+	
+	/**
+	 * @param h1
+	 * @return the std of the samples of the given image
+	 */
+	public static double std(HyperspectralBandData h1) {
+		return Math.sqrt(variance(h1));
+	}
 }
