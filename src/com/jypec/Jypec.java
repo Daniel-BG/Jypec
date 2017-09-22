@@ -114,6 +114,7 @@ public class Jypec {
 		System.out.println("MSE is: " + ImageComparisons.MSE(first.getData(), second.getData()));
 		System.out.println("maxSE is: " + ImageComparisons.maxSE(first.getData(), second.getData()));
 		System.out.println("MSR is: " + ImageComparisons.MSR(first.getData(), second.getData()));
+		System.out.println("SSIM is: " + ImageComparisons.SSIM(first.getData(), second.getData()));
 	}
 	
 }

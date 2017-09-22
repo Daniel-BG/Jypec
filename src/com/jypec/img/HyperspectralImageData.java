@@ -184,7 +184,7 @@ public class HyperspectralImageData {
 	 * @return the total number of samples within the image, that is:<br>
 	 * bands * lines * samples
 	 */
-	public double getTotalNumberOfSamples() {
+	public int getTotalNumberOfSamples() {
 		return bands * lines * samples;
 	}
 }

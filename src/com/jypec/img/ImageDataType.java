@@ -151,7 +151,7 @@ public class ImageDataType {
 	/**
 	 * @return the number of different values this image data type can have
 	 */
-	public int getMagnitudeAbsoluteRange() {
+	public int getDynamicRange() {
 		if (this.signed) {
 			return this.magnitudeLimit * 2 + 1;
 		} else {

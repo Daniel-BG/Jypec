@@ -18,7 +18,7 @@ public class ImageComparisons {
 	 */
 	public static double rawPSNR (HyperspectralImageData h1, HyperspectralImageData h2) {
 		double mse = MSE(h1, h2);
-		double maxVal = h1.getDataType().getMagnitudeAbsoluteRange();
+		double maxVal = h1.getDataType().getDynamicRange();
 		
 		return PSNR(mse, maxVal);
 	}
@@ -31,7 +31,7 @@ public class ImageComparisons {
 	 */
 	public static double rawPSNR (HyperspectralBandData h1, HyperspectralBandData h2) {
 		double mse = MSE(h1, h2);
-		double maxVal = h1.getDataType().getMagnitudeAbsoluteRange();
+		double maxVal = h1.getDataType().getDynamicRange();
 		
 		return PSNR(mse, maxVal);
 	}
@@ -250,6 +250,67 @@ public class ImageComparisons {
 		
 		return mean / std;
 	}
+	
+	
+	/**
+	 * @param h1
+	 * @param h2
+	 * @return the mean to noise standard deviation ratio
+	 */
+	public static double SSIM (HyperspectralImageData h1, HyperspectralImageData h2) {
+		if (!h1.sizeAndTypeEquals(h2)) {
+			throw new IllegalArgumentException("Image sizes do not match!");
+		}
+		//add up all squared differences
+		double mu1 = ImageOperations.averageValue(h1);
+		double mu2 = ImageOperations.averageValue(h2);
+		double v1 = ImageOperations.variance(h1);
+		double v2 = ImageOperations.variance(h2);
+		double sigma = ImageOperations.covariance(h1, h2);
+		double L = h1.getDataType().getDynamicRange();
+		
+		final double k1 = 0.01;
+		final double k2 = 0.03;
+		
+		double c1 = k1*k1*L*L;
+		double c2 = k2*k2*L*L;
+		
+		return 
+				((2*mu1*mu2 + c1) * (2*sigma + c2)) 
+				/ //-------------------------------- Beautiful formatting
+				((mu1*mu1 + mu2*mu2 + c1) * (v1 + v2 + c2));
+	}
+	
+	
+	/**
+	 * @param h1
+	 * @param h2
+	 * @return the mean to noise standard deviation ratio
+	 */
+	public static double SSIM (HyperspectralBandData h1, HyperspectralBandData h2) {
+		if (!h1.sizeAndTypeEquals(h2)) {
+			throw new IllegalArgumentException("Image sizes do not match!");
+		}
+		//add up all squared differences
+		double mu1 = ImageOperations.averageValue(h1);
+		double mu2 = ImageOperations.averageValue(h2);
+		double v1 = ImageOperations.variance(h1);
+		double v2 = ImageOperations.variance(h2);
+		double sigma = ImageOperations.covariance(h1, h2);
+		double L = h1.getDataType().getDynamicRange();
+		
+		final double k1 = 0.01;
+		final double k2 = 0.03;
+		
+		double c1 = k1*k1*L*L;
+		double c2 = k2*k2*L*L;
+		
+		return 
+				((2*mu1*mu2 + c1) * (2*sigma + c2)) 
+				/ //-------------------------------- Beautiful formatting
+				((mu1*mu1 + mu2*mu2 + c1) * (v1*v1 + v2*v2 + c2));
+	}
+	
 	
 		
 	

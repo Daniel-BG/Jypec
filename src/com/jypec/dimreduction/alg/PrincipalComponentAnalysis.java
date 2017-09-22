@@ -373,12 +373,12 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 
 	@Override
 	public double getMaxValue(HyperspectralImageData img) {
-		return MathOperations.getMaximumDistance(img.getDataType().getMagnitudeAbsoluteRange(), img.getNumberOfBands());
+		return MathOperations.getMaximumDistance(img.getDataType().getDynamicRange(), img.getNumberOfBands());
 	}
 
 	@Override
 	public double getMinValue(HyperspectralImageData img) {
-		return -MathOperations.getMaximumDistance(img.getDataType().getMagnitudeAbsoluteRange(), img.getNumberOfBands());
+		return -MathOperations.getMaximumDistance(img.getDataType().getDynamicRange(), img.getNumberOfBands());
 	}
 
 

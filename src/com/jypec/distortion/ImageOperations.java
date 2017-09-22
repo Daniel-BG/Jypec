@@ -129,6 +129,48 @@ public class ImageOperations {
 		return acc / (double) dim;
 	}
 	
+	/**
+	 * @param h1
+	 * @param h2 
+	 * @return the covariance of both images
+	 */
+	public static double covariance(HyperspectralImageData h1, HyperspectralImageData h2) {
+		double avg1 = averageValue(h1);
+		double avg2 = averageValue(h2);
+		double acc = 0;
+		for (int i = 0; i < h1.getNumberOfBands(); i++) {
+			for (int j = 0; j < h1.getNumberOfLines(); j++) {
+				for (int k = 0; k < h1.getNumberOfSamples(); k++) {
+					double v1 = (double) h1.getValueAt(i, j, k);
+					double v2 = (double) h2.getValueAt(i, j, k);
+					acc += (v1 - avg1) * (v2 - avg2);
+				}
+			}
+		}
+		int dim = h1.getTotalNumberOfSamples();
+		return acc / (double) dim ;
+	}
+	
+	/**
+	 * @param h1
+	 * @param h2 
+	 * @return the covariance of both images
+	 */
+	public static double covariance(HyperspectralBandData h1, HyperspectralBandData h2) {
+		double avg1 = averageValue(h1);
+		double avg2 = averageValue(h2);
+		double acc = 0;
+		for (int j = 0; j < h1.getNumberOfLines(); j++) {
+			for (int k = 0; k < h1.getNumberOfSamples(); k++) {
+				double v1 = (double) h1.getValueAt(j, k);
+				double v2 = (double) h2.getValueAt(j, k);
+				acc += (v1 - avg1) * (v2 - avg2);
+			}
+		}
+		int dim = h1.getNumberOfLines() * h2.getNumberOfSamples();
+		return acc / (double) dim ;
+	}
+	
 	
 	/**
 	 * @param h1
