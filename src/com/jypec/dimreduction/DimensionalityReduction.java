@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
+import com.jypec.dimreduction.alg.MinimumNoiseFraction;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageHeaderData;
@@ -26,7 +27,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 		/** {@link PrincipalComponentAnalysis}*/
 		DRA_PCA, 
 		/** {@link DeletingDimensionalityReduction} */
-		DRA_DELETING_DIMENSIONALITY_REDUCTION
+		DRA_DELETING_DIMENSIONALITY_REDUCTION, 
+		/** {@link MinimumNoiseFraction} */
+		DRA_MNF
 	}
 	
 	private DimensionalityReductionAlgorithm dra;
