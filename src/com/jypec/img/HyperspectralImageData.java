@@ -211,7 +211,7 @@ public class HyperspectralImageData {
 		for (int i = 0; i < bands; i++) {
 			for (int j = 0; j < lines; j++) {
 				for (int k = 0; k < samples; k++) {
-					res.set(i, j*samples + k, this.data[i][j][k]);
+					res.set(i, j*samples + k, this.getValueAt(i, j, k));
 				}
 			}
 		}
