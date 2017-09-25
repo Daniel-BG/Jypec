@@ -2,6 +2,8 @@ package com.jypec.comdec;
 
 import java.io.IOException;
 
+import org.ejml.data.DMatrixRMaj;
+
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.data.CodingBlock;
@@ -12,6 +14,7 @@ import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.DefaultVerboseable;
 import com.jypec.util.arrays.MatrixOperations;
+import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.bits.BitOutputStream;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
@@ -45,7 +48,7 @@ public class Compressor extends DefaultVerboseable {
 		/** Project all image values onto the reduced space */
 		this.sayLn("Applying dimensionality reduction");
 		dr.setParentVerboseable(this);
-		double[][][] reduced = dr.trainReduce(srcImg);
+		DMatrixRMaj reduced = dr.trainReduce(srcImg);
 		
 		/** create the wavelet transform, and coder we'll be using, which won't change over the bands */
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
@@ -64,7 +67,7 @@ public class Compressor extends DefaultVerboseable {
 			
 			/** Apply the wavelet transform */
 			this.sayLn("\tApplying wavelet... ");
-			double[][] waveForm = reduced[i];
+			double[][] waveForm = MatrixTransforms.extractBand(reduced, i, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
 			bdw.forwardTransform(waveForm, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
 			double[] minMax = MatrixOperations.minMax(waveForm);
 			

@@ -84,7 +84,7 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
      */
     public void setup( int numSamples , int sampleSize ) {
         mean = new double[ sampleSize ];
-        A.reshape(numSamples,sampleSize,false);
+        A.reshape(sampleSize, numSamples,false);
         this.sampleSize = sampleSize;
         sampleIndex = 0;
         numComponents = -1;
@@ -99,11 +99,11 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
     public void addSample( double[] sampleData ) {
         if( this.sampleSize != sampleData.length )
             throw new IllegalArgumentException("Unexpected sample size");
-        if( sampleIndex >= A.getNumRows() )
+        if( sampleIndex >= A.getNumCols() )
             throw new IllegalArgumentException("Too many samples");
 
         for( int i = 0; i < sampleData.length; i++ ) {
-            A.set(sampleIndex,i,sampleData[i]);
+            A.set(i, sampleIndex,sampleData[i]);
         }
         sampleIndex++;
     }
@@ -119,32 +119,32 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
     public void computeBasis( int numComponents ) {
         if( numComponents > this.sampleSize )
             throw new IllegalArgumentException("More components requested that the data's length.");
-        if( sampleIndex != A.getNumRows() )
+        if( sampleIndex != A.getNumCols() )
             throw new IllegalArgumentException("Not all the data has been added");
         if( numComponents > sampleIndex )
             throw new IllegalArgumentException("More data needed to compute the desired number of components");
         
         this.numComponents = numComponents;
         
-        DMatrixRMaj ones = new DMatrixRMaj(A.getNumRows(), 1);
+        DMatrixRMaj ones = new DMatrixRMaj(A.getNumCols(), 1);
         for (int i = 0; i < ones.getNumElements(); i++) {
         	ones.set(i, 1);
         }
         DMatrixRMaj summ = new DMatrixRMaj(this.sampleSize, 1);
 
         //compute the summation of all the samples
-        CommonOps_DDRM.multTransA(A, ones, summ);
+        CommonOps_DDRM.mult(A, ones, summ);
         
         //compute the mean of all samples
         DMatrixRMaj meann = new DMatrixRMaj(this.sampleSize, 1);
         for( int j = 0; j < this.sampleSize; j++ ) {
-        	mean[j] = summ.get(j) / (double) A.getNumRows();
+        	mean[j] = summ.get(j) / (double) A.getNumCols();
         	meann.set(j, mean[j]);
         }
         
         //create covariance matrix
         DMatrixRMaj s = new DMatrixRMaj(this.sampleSize, this.sampleSize);
-        CommonOps_DDRM.multTransA(A, A, s);
+        CommonOps_DDRM.multTransB(A, A, s);
         DMatrixRMaj s2 = new DMatrixRMaj(this.sampleSize, this.sampleSize);
         CommonOps_DDRM.multTransB(meann, summ, s2);
         CommonOps_DDRM.subtract(s, s2, s);
@@ -268,32 +268,19 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
     }
 
 	@Override
-	public double[][][] reduce(HyperspectralImageData src) {
-		this.sayLn("Projecting samples into reduced space...");
-		double[][][] res = new double[this.numComponents][src.getNumberOfLines()][src.getNumberOfSamples()];
-		for (int i = 0; i < src.getNumberOfLines(); i++) {
-			for (int j = 0; j < src.getNumberOfSamples(); j++) {
-				double[] proj = this.sampleToEigenSpace(src.getPixel(i, j));
-				for (int k = 0; k < this.numComponents; k++) {
-					res[k][i][j] = proj[k];
-				}
-			}
-		}
+	public DMatrixRMaj reduce(HyperspectralImageData src) {
+		DMatrixRMaj img = src.toDoubleMatrix();
+		DMatrixRMaj res = new DMatrixRMaj(this.numComponents, img.getNumCols());
+		CommonOps_DDRM.mult(V_t, img, res);
 		return res;
 	}
 
 	@Override
-	public void boost(double[][][] src, HyperspectralImageData dst) {
+	public void boost(DMatrixRMaj src, HyperspectralImageData dst) {
 		this.sayLn("Boosting samples from reduced space to the original...");
-		double[] pixel = new double[this.numComponents];
-		for (int i = 0; i < dst.getNumberOfLines(); i++) {
-			for (int j = 0; j < dst.getNumberOfSamples(); j++) {
-				for (int k = 0; k < this.numComponents; k++) {
-					pixel[k] = src[k][i][j];
-				}
-				dst.setPixel(this.eigenToSampleSpace(pixel), i, j);
-			}
-		}
+		DMatrixRMaj res = new DMatrixRMaj(this.sampleSize, src.getNumCols());
+		CommonOps_DDRM.multTransA(V_t, src, res);
+		dst.copyDataFrom(res);
 	}
 
 	@Override

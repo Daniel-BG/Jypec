@@ -2,6 +2,8 @@ package com.jypec.dimreduction;
 
 import java.io.IOException;
 
+import org.ejml.data.DMatrixRMaj;
+
 import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
@@ -47,7 +49,7 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	 * @param source
 	 * @return the reduced image after training with source
 	 */
-	public double[][][] trainReduce(HyperspectralImageData source) {
+	public DMatrixRMaj trainReduce(HyperspectralImageData source) {
 		this.train(source);
 		return this.reduce(source);
 	}
@@ -69,7 +71,7 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	 * @param source the source image
 	 * @return the source image projected into the smaller dimension space
 	 */
-	public abstract double[][][] reduce(HyperspectralImageData source);
+	public abstract DMatrixRMaj reduce(HyperspectralImageData source);
 	
 	
 	
@@ -79,7 +81,7 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	 * @param source the source image (in the reduced dimension space)
 	 * @param dst will hold the result: the original image in the original space
 	 */
-	public abstract void boost(double[][][] source, HyperspectralImageData dst);
+	public abstract void boost(DMatrixRMaj source, HyperspectralImageData dst);
 	
 	
 	/**

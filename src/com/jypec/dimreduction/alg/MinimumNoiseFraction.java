@@ -33,6 +33,7 @@ import com.jypec.util.bits.BitOutputStream;
 public class MinimumNoiseFraction extends DimensionalityReduction {
 
 	private int numComponents;
+	private int sampleSize;
 	private DMatrixRMaj projectionMatrix;
     private double mean[];
 	
@@ -72,7 +73,7 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
 	@Override
 	public void train(HyperspectralImageData source) {
 		//initialize values
-		int sampleSize = source.getNumberOfBands();
+		sampleSize = source.getNumberOfBands();
 		int samples = source.getNumberOfLines() * source.getNumberOfSamples();
 		this.mean = new double[sampleSize];
 		//find out data and noise. The data is NOT zero-meaned,
@@ -146,19 +147,19 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
 	}
 
 	@Override
-	public double[][][] reduce(HyperspectralImageData source) {
-		//project using A
-		
-		// TODO Auto-generated method stub
-		return null;
+	public DMatrixRMaj reduce(HyperspectralImageData source) {
+		DMatrixRMaj img = source.toDoubleMatrix();
+		DMatrixRMaj res = new DMatrixRMaj(this.numComponents, img.getNumCols());
+		CommonOps_DDRM.multTransAB(img, this.projectionMatrix, res);
+		return res;
 	}
 
 	@Override
-	public void boost(double[][][] source, HyperspectralImageData dst) {
-		//unproject using A
-		
-		// TODO Auto-generated method stub
-		
+	public void boost(DMatrixRMaj source, HyperspectralImageData dst) {
+		this.sayLn("Boosting samples from reduced space to the original...");
+		DMatrixRMaj res = new DMatrixRMaj(this.sampleSize, source.getNumCols());
+		CommonOps_DDRM.multTransA(source, this.projectionMatrix, res);
+		dst.copyDataFrom(res);
 	}
 
 	@Override

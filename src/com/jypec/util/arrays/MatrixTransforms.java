@@ -1,5 +1,7 @@
 package com.jypec.util.arrays;
 
+import org.ejml.data.DMatrixRMaj;
+
 /**
  * @author Daniel
  * Useful matrix transforms are written here
@@ -71,5 +73,44 @@ public class MatrixTransforms {
 			}
 		}
 	}
+	
+	
+	/**
+	 * Extract the given band from the given image (as DMatrixRMaj)
+	 * @param source
+	 * @param band
+	 * @param lines
+	 * @param samples
+	 * @return the extracted band
+	 */
+	public static double[][] extractBand(DMatrixRMaj source, int band, int lines, int samples) {
+		double[][] res = new double[lines][samples];
+		for (int i = 0; i < lines; i++) {
+			for (int j = 0; j < samples; j++) {
+				res[i][j] = source.get(band, i*samples + j);
+			}
+		}
+		return res;
+	}
+	
+	/**
+	 * @param src source of the data
+	 * @param bands 
+	 * @param lines 
+	 * @param samples 
+	 * @return the parameter "src" as a DMatrixRMaj
+	 */
+	public static DMatrixRMaj getMatrix(double[][][] src, int bands, int lines, int samples) {
+		DMatrixRMaj res = new DMatrixRMaj(bands, lines*samples);
+		for (int i = 0; i < bands; i++) {
+			for (int j = 0; j < lines; j++) {
+				for (int k = 0; k < samples; k++) {
+					res.set(i, j*samples+k, src[i][j][k]);
+				}
+			}
+		}
+		return res;
+	}
+	
 	
 }

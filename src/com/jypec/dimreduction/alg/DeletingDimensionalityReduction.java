@@ -1,5 +1,7 @@
 package com.jypec.dimreduction.alg;
 
+import org.ejml.data.DMatrixRMaj;
+
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HeaderConstants;
@@ -30,12 +32,13 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public double[][][] reduce(HyperspectralImageData src) {
-		double [][][] res = new double[this.numComponents][src.getNumberOfLines()][src.getNumberOfSamples()];
+	public DMatrixRMaj reduce(HyperspectralImageData src) {
+		DMatrixRMaj res = new DMatrixRMaj(this.numComponents, src.getNumberOfLines()*src.getNumberOfSamples());
+		
 		for (int i = 0; i < this.numComponents; i++) {
 			for (int j = 0; j < src.getNumberOfLines(); j++) {
 				for (int k = 0; k < src.getNumberOfSamples(); k++) {
-					res[i][j][k] = src.getValueAt(i, j, k);
+					res.set(i, j*src.getNumberOfSamples() + k, src.getValueAt(i, j, k));
 				}
 			}
 		}
@@ -43,11 +46,11 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public void boost(double[][][] src, HyperspectralImageData dst) {
+	public void boost(DMatrixRMaj src, HyperspectralImageData dst) {
 		for (int i = 0; i < this.numComponents; i++) {
 			for (int j = 0; j < dst.getNumberOfLines(); j++) {
 				for (int k = 0; k < dst.getNumberOfSamples(); k++) {
-					dst.setValueAt(src[i][j][k], i, j, k);
+					dst.setValueAt(src.get(i, j*dst.getNumberOfSamples() + k), i, j, k);
 				}
 			}
 		}

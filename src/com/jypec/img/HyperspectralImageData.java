@@ -174,6 +174,19 @@ public class HyperspectralImageData {
 		
 		MatrixTransforms.copy(source.data, this.data, this.bands, this.lines, this.samples);
 	}
+	
+	/**
+	 * @param source where to copy data from
+	 */
+	public void copyDataFrom(DMatrixRMaj source) {
+		for (int i = 0; i < this.getNumberOfBands(); i++) {
+			for (int j = 0; j < this.getNumberOfLines(); j++) {
+				for (int k = 0; k < this.getNumberOfSamples(); k++) {
+					this.setValueAt(source.get(i, j*this.getNumberOfBands() + k), i, j, k);
+				}
+			}
+		}
+	}
 
 	/**
 	 * @return the size in bits of this data
@@ -194,14 +207,16 @@ public class HyperspectralImageData {
 	 * @return the hyperspectral image data as a double matrix for better numerical processing
 	 */
 	public DMatrixRMaj toDoubleMatrix() {
-		DMatrixRMaj res = new DMatrixRMaj(this.lines * this.samples, this.bands);
+		DMatrixRMaj res = new DMatrixRMaj(this.bands, this.lines * this.samples);
 		for (int i = 0; i < bands; i++) {
 			for (int j = 0; j < lines; j++) {
 				for (int k = 0; k < samples; k++) {
-					res.set(j*samples + k, i, this.data[i][j][k]);
+					res.set(i, j*samples + k, this.data[i][j][k]);
 				}
 			}
 		}
 		return res;
 	}
+
+
 }

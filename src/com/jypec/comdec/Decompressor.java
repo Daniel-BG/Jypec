@@ -12,6 +12,7 @@ import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.DefaultVerboseable;
+import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
@@ -88,7 +89,7 @@ public class Decompressor extends DefaultVerboseable {
 		ImageDataType srcDT = new ImageDataType(idt.getBitDepth(), idt.isSigned());
 		HyperspectralImageData srcImg = new HyperspectralImageData(null, srcDT, bands, lines, samples);
 		this.sayLn("Projecting back into original dimension...");
-		dr.boost(reduced, srcImg);
+		dr.boost(MatrixTransforms.getMatrix(reduced, dr.getNumComponents(), lines, samples), srcImg);
 		
 		
 		
