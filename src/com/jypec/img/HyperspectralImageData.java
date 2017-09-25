@@ -182,7 +182,7 @@ public class HyperspectralImageData {
 		for (int i = 0; i < this.getNumberOfBands(); i++) {
 			for (int j = 0; j < this.getNumberOfLines(); j++) {
 				for (int k = 0; k < this.getNumberOfSamples(); k++) {
-					this.setValueAt(source.get(i, j*this.getNumberOfBands() + k), i, j, k);
+					this.setValueAt(source.get(i, j*this.getNumberOfSamples() + k), i, j, k);
 				}
 			}
 		}

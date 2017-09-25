@@ -191,6 +191,19 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 
         return v.data;
     }
+    
+	@Override
+	public DMatrixRMaj reduce(HyperspectralImageData src) {
+		DMatrixRMaj img = src.toDoubleMatrix();
+		for (int i = 0; i < this.sampleSize; i++) {
+			for (int j = 0; j < img.getNumCols(); j++) {
+				img.minus(img.getIndex(i, j), this.mean[i]);
+			}
+		}
+		DMatrixRMaj res = new DMatrixRMaj(this.numComponents, img.getNumCols());
+		CommonOps_DDRM.mult(V_t, img, res);
+		return res;
+	}
 
     /**
      * Converts a vector from sample space into eigen space.
@@ -212,6 +225,19 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 
         return r.data;
     }
+    
+	@Override
+	public void boost(DMatrixRMaj src, HyperspectralImageData dst) {
+		this.sayLn("Boosting samples from reduced space to the original...");
+		DMatrixRMaj res = new DMatrixRMaj(this.sampleSize, src.getNumCols());
+		CommonOps_DDRM.multTransA(V_t, src, res);
+		for (int i = 0; i < this.sampleSize; i++) {
+			for (int j = 0; j < res.getNumCols(); j++) {
+				res.plus(res.getIndex(i, j), this.mean[i]);
+			}
+		}
+		dst.copyDataFrom(res);
+	}
 
     /**
      * Converts a vector from eigen space into sample space.
@@ -266,22 +292,6 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
     	V_t.setData(bw.readDoubleArray(this.sampleSize * this.numComponents));
     	V_t.reshape(numComponents,mean.length,true);
     }
-
-	@Override
-	public DMatrixRMaj reduce(HyperspectralImageData src) {
-		DMatrixRMaj img = src.toDoubleMatrix();
-		DMatrixRMaj res = new DMatrixRMaj(this.numComponents, img.getNumCols());
-		CommonOps_DDRM.mult(V_t, img, res);
-		return res;
-	}
-
-	@Override
-	public void boost(DMatrixRMaj src, HyperspectralImageData dst) {
-		this.sayLn("Boosting samples from reduced space to the original...");
-		DMatrixRMaj res = new DMatrixRMaj(this.sampleSize, src.getNumCols());
-		CommonOps_DDRM.multTransA(V_t, src, res);
-		dst.copyDataFrom(res);
-	}
 
 	@Override
 	public void train(HyperspectralImageData source) {
