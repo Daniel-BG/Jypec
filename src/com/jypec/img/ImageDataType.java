@@ -44,7 +44,7 @@ public class ImageDataType {
 	
 	private void setup(int bitDepth, boolean signed) {
 		if (bitDepth == 0 || bitDepth > 32) {
-			throw new IllegalArgumentException("Data type not valid. Bit depth is between 1 and 32 both inclusive");
+			throw new IllegalArgumentException("Data type not valid. Bit depth is between 1 and 32 both inclusive. (Tried with: " + bitDepth + ")");
 		}
 		this.bitDepth = bitDepth;
 		this.signed = signed;
@@ -212,8 +212,14 @@ public class ImageDataType {
 		
 		int absMax = Math.max(Math.abs(newMaxVal), Math.abs(newMinVal));
 		boolean signed = newMinVal < 0;
-		
-		return new ImageDataType(extra + (int) Math.ceil(MathOperations.logBase(absMax, 2d)), signed);
+		int bits = extra + (int) Math.ceil(MathOperations.logBase(absMax, 2d));
+		if (bits == 0) {
+			bits = 1;
+		}
+		if (bits == 1 & signed) {
+			bits = 2;
+		}
+		return new ImageDataType(bits, signed);
 	}
 	
 	/**

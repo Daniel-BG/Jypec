@@ -112,5 +112,25 @@ public class MatrixTransforms {
 		return res;
 	}
 	
+	/**
+	 * Does the inverse square root of all the elements in the diagonal. Use only with diagonal matrices
+	 * @param source
+	 */
+	public static void inverseSquareRoot(DMatrixRMaj source) {
+		if (source.getNumCols() != source.getNumRows()) {
+			throw new IllegalArgumentException("Only works on square matrices");
+		}
+		
+		for (int i = 0; i < source.getNumCols(); i++) {
+			double val = source.get(i, i);
+			if (Math.abs(val) < 0.1e-30) {
+				source.set(i, i, 0);
+			} else  {
+				source.set(i, i, 1.0 / Math.sqrt(val));
+			}
+		}
+		
+	}
+	
 	
 }

@@ -54,7 +54,7 @@ public class ComParameters {
 	 */
 	public void loadFrom(BitInputStream bw) throws IOException {
 		this.wavePasses = bw.readNBitNumber(ComDecConstants.WAVE_PASSES_BITS);
-		this.bitReduction = bw.readNBitNumber(ComDecConstants.REDUCTION_BITS_BITS);
+		this.bitReduction = (int) (byte) bw.readNBitNumber(ComDecConstants.REDUCTION_BITS_BITS);
 	}
 	
 	

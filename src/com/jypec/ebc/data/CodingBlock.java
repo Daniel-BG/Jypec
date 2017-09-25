@@ -56,7 +56,7 @@ public class CodingBlock {
 	private void setUp(IntegerMatrix data, int height, int width, int rowOffset, int columnOffset, int depth, SubBand band) {
 		//check validity of arguments
 		if (depth < 2 || depth > 32) {
-			throw new IllegalArgumentException("Number of bitplanes must be between 1 and 31 (both inclusive). You are trying with " + depth);
+			throw new IllegalArgumentException("Number of bitplanes must be between 2 and 31 (both inclusive). You are trying with " + depth);
 		}
 		
 		//assign internal variables

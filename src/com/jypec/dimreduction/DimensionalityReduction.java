@@ -131,6 +131,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 		case DRA_PCA:
 			dr = new PrincipalComponentAnalysis();
 			break;
+		case DRA_MNF:
+			dr = new MinimumNoiseFraction();
+			break;
 		default:
 			throw new IllegalArgumentException("Cannot load that kind of Dimensionality Reduction algorithm: " + type);
 		}
@@ -186,6 +189,11 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 				PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
 				pca.setNumComponents(dimensions);
 				return pca;
+			} else if (args.reductionArgs.length == 2 && args.reductionArgs[0].toLowerCase().equals("mnf")) {
+				int dimensions = Integer.parseInt(args.reductionArgs[1]);
+				MinimumNoiseFraction mnf = new MinimumNoiseFraction();
+				mnf.setNumComponents(dimensions);
+				return mnf;
 			}
 		}
 		//default to no reduction

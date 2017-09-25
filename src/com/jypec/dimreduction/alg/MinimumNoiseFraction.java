@@ -1,22 +1,15 @@
 package com.jypec.dimreduction.alg;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import org.ejml.data.Complex_F64;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
-import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
-
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageHeaderData;
-import com.jypec.util.Pair;
+import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 
@@ -70,6 +63,7 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
 		return res;
 	}
 
+	//https://www.researchgate.net/profile/Angelo_Palombo/publication/224354550_Experimental_Approach_to_the_Selection_of_the_Components_in_the_Minimum_Noise_Fraction/links/02bfe51064486871c4000000.pdf
 	@Override
 	public void train(HyperspectralImageData source) {
 		//initialize values
@@ -80,6 +74,7 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
 		//while the noise is assumed to be
 		DMatrixRMaj data = source.toDoubleMatrix();
 		DMatrixRMaj noise = extractNoise(data);
+		//CommonOps_DDRM.subtract(data, noise, data);
 		
 		/**Create data covariance matrix */
         //compute the summation of all the samples
@@ -88,94 +83,108 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
         	ones.set(i, 1);
         }
         DMatrixRMaj summ = new DMatrixRMaj(sampleSize, 1);
-        CommonOps_DDRM.multTransA(data, ones, summ);
+        CommonOps_DDRM.mult(data, ones, summ);
 		
 		//compute the mean of all samples
         DMatrixRMaj meann = new DMatrixRMaj(sampleSize, 1);
         for( int j = 0; j < sampleSize; j++ ) {
-        	mean[j] = summ.get(j) / (double) data.getNumRows();
+        	mean[j] = summ.get(j) / (double) data.getNumCols();
         	meann.set(j, mean[j]);
         }
         
         //create covariance matrix
-        DMatrixRMaj sData = new DMatrixRMaj(sampleSize, sampleSize);
-        CommonOps_DDRM.multTransA(data, data, sData);
+        DMatrixRMaj sigma = new DMatrixRMaj(sampleSize, sampleSize);
+        CommonOps_DDRM.multTransB(data, data, sigma);
         DMatrixRMaj sData2 = new DMatrixRMaj(sampleSize, sampleSize);
         CommonOps_DDRM.multTransB(meann, summ, sData2);
-        CommonOps_DDRM.subtract(sData, sData2, sData);
+        CommonOps_DDRM.subtract(sigma, sData2, sigma);
 		/*********************************/
         
         /**Create noise covariance matrix */
-        DMatrixRMaj sNoise = new DMatrixRMaj(sampleSize, sampleSize);
-        CommonOps_DDRM.multTransA(noise, noise, sNoise);
+        DMatrixRMaj sigmaNoise = new DMatrixRMaj(sampleSize, sampleSize);
+        CommonOps_DDRM.multTransB(noise, noise, sigmaNoise);
         /**********************************/
         
-        /**Solve the eigenvalue problem*/
-        CommonOps_DDRM.invert(sNoise);
-        DMatrixRMaj eigenMat = new DMatrixRMaj(sampleSize, sampleSize);
-        CommonOps_DDRM.mult(sNoise, sData, eigenMat);
-        EigenDecomposition_F64<DMatrixRMaj> dec = DecompositionFactory_DDRM.eig(sData.getNumElements(), true, true);
-        dec.decompose(eigenMat);
-        /*******************************/
+        //decompose sigma noise as noise = U*W*U^t
+        SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(sampleSize, sampleSize, true, false, false);
+        this.say("Decomposition yielded: " + svd.decompose(sigmaNoise));
+        DMatrixRMaj B = svd.getU(null, false);
+        DMatrixRMaj lambda = svd.getW(null);
         
-        
-        /**Extract the interesting eigenvectors*/
-        List<Pair<Double, DMatrixRMaj>> list = new ArrayList<Pair<Double, DMatrixRMaj>>();
-        for (int i = 0; i < sampleSize; i++) {
-        	Complex_F64 val = dec.getEigenvalue(i);
-        	DMatrixRMaj vec = dec.getEigenVector(i);
-        	list.add(new Pair<Double, DMatrixRMaj>(val.real, vec));
-        }
-        Collections.sort(list, new Comparator<Pair<Double, DMatrixRMaj>>() {
-			@Override
-			public int compare(Pair<Double, DMatrixRMaj> o1, Pair<Double, DMatrixRMaj> o2) {
-				return Double.compare(o2.first(), o1.first());
-			}
-        });
-        /***************************************/
+        DMatrixRMaj A = new DMatrixRMaj(sampleSize, sampleSize);
+        MatrixTransforms.inverseSquareRoot(lambda);
+        CommonOps_DDRM.mult(B, lambda, A);
 
-        /**Create projection matrix*/
-        projectionMatrix = new DMatrixRMaj(numComponents, sampleSize);
+        DMatrixRMaj sigmaTemp = new DMatrixRMaj(sampleSize, sampleSize);
+        DMatrixRMaj sigmaTransformed = new DMatrixRMaj(sampleSize, sampleSize);
+        CommonOps_DDRM.multTransA(A, sigma, sigmaTemp);
+        CommonOps_DDRM.mult(sigmaTemp, A, sigmaTransformed);
         
-        for (int i = 0; i < numComponents; i++) {
-        	DMatrixRMaj vec = list.get(i).second();
-        	for (int j = 0; j < sampleSize; j++) {
-        		projectionMatrix.set(i, j, vec.get(j));
-        	}
-        }
-        /************************^**/
+        //decompose sigma temp as noise = U*W*U^t
+        svd = DecompositionFactory_DDRM.svd(sampleSize, sampleSize, true, false, false);
+        this.say("Decomposition yielded: " + svd.decompose(sigmaTransformed));
+        DMatrixRMaj D = svd.getU(null, false);
+        
+        this.projectionMatrix = new DMatrixRMaj(sampleSize, sampleSize);
+        CommonOps_DDRM.mult(A, D, this.projectionMatrix);
+        
+        //CommonOps_DDRM.transpose(this.projectionMatrix);      
+        this.projectionMatrix.reshape(numComponents, sampleSize);
+        this.say("Finished");
+
 	}
 
+	
 	@Override
 	public DMatrixRMaj reduce(HyperspectralImageData source) {
 		DMatrixRMaj img = source.toDoubleMatrix();
+		for (int i = 0; i < this.sampleSize; i++) {
+			for (int j = 0; j < img.getNumCols(); j++) {
+				img.minus(img.getIndex(i, j), this.mean[i]);
+			}
+		}
 		DMatrixRMaj res = new DMatrixRMaj(this.numComponents, img.getNumCols());
-		CommonOps_DDRM.multTransAB(img, this.projectionMatrix, res);
+		CommonOps_DDRM.mult(projectionMatrix, img, res);
 		return res;
 	}
 
 	@Override
-	public void boost(DMatrixRMaj source, HyperspectralImageData dst) {
+	public void boost(DMatrixRMaj src, HyperspectralImageData dst) {
 		this.sayLn("Boosting samples from reduced space to the original...");
-		DMatrixRMaj res = new DMatrixRMaj(this.sampleSize, source.getNumCols());
-		CommonOps_DDRM.multTransA(source, this.projectionMatrix, res);
+		DMatrixRMaj res = new DMatrixRMaj(this.sampleSize, src.getNumCols());
+		CommonOps_DDRM.multTransA(projectionMatrix, src, res);
+		for (int i = 0; i < this.sampleSize; i++) {
+			for (int j = 0; j < res.getNumCols(); j++) {
+				res.plus(res.getIndex(i, j), this.mean[i]);
+			}
+		}
 		dst.copyDataFrom(res);
 	}
 
 	@Override
 	public void doSaveTo(BitOutputStream bw) throws IOException {
-		//save transform matrix
-		
-		// TODO Auto-generated method stub
-		
+    	//write the number of dimensions in the original space
+    	bw.writeInt(this.sampleSize);
+    	//write the number of dimensions in the reduced space
+    	bw.writeInt(numComponents);
+    	//write the mean
+    	bw.writeDoubleArray(mean, this.sampleSize);
+    	//write the matrix
+    	bw.writeDoubleArray(projectionMatrix.getData(), this.sampleSize * numComponents);
 	}
 
 	@Override
 	public void doLoadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) throws IOException {
-		//load transform matrix
-		
-		// TODO Auto-generated method stub
-		
+    	//read the number of dimensions in the original space
+    	this.sampleSize = bw.readInt();
+    	//read the number of dimensions in the reduced space
+    	this.numComponents = bw.readInt();
+    	//read the mean
+    	this.mean = bw.readDoubleArray(sampleSize);
+    	//read the projection matrix
+    	projectionMatrix = new DMatrixRMaj();
+    	projectionMatrix.setData(bw.readDoubleArray(this.sampleSize * this.numComponents));
+    	projectionMatrix.reshape(numComponents,mean.length,true);
 	}
 
 	@Override
