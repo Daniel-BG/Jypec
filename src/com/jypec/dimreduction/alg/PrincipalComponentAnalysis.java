@@ -9,7 +9,6 @@ import java.util.List;
 import org.ejml.data.Complex_F64;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.NormOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import com.jypec.comdec.ComParameters;
@@ -234,52 +233,6 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 
         return s.data;
     }
-
-    /**
-     * <p>
-     * The membership error for a sample.  If the error is less than a threshold then
-     * it can be considered a member.  The threshold's value depends on the data set.
-     * </p>
-     * <p>
-     * The error is computed by projecting the sample into eigenspace then projecting
-     * it back into sample space and
-     * </p>
-     * 
-     * @param sampleA The sample whose membership status is being considered.
-     * @return Its membership error.
-     */
-    public double errorMembership( double[] sampleA ) {
-        double[] eig = sampleToEigenSpace(sampleA);
-        double[] reproj = eigenToSampleSpace(eig);
-
-
-        double total = 0;
-        for( int i = 0; i < reproj.length; i++ ) {
-            double d = sampleA[i] - reproj[i];
-            total += d*d;
-        }
-
-        return Math.sqrt(total);
-    }
-
-    /**
-     * Computes the dot product of each basis vector against the sample.  Can be used as a measure
-     * for membership in the training sample set.  High values correspond to a better fit.
-     *
-     * @param sample Sample of original data.
-     * @return Higher value indicates it is more likely to be a member of input dataset.
-     */
-    public double response( double[] sample ) {
-        if( sample.length != this.sampleSize )
-            throw new IllegalArgumentException("Expected input vector to be in sample space");
-
-        DMatrixRMaj dots = new DMatrixRMaj(numComponents,1);
-        DMatrixRMaj s = DMatrixRMaj.wrap(this.sampleSize,1,sample);
-
-        CommonOps_DDRM.mult(V_t,s,dots);
-
-        return NormOps_DDRM.normF(dots);
-    }
 	
 	/**
 	 * @return the number of components that this PCA reduces to
@@ -287,8 +240,6 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 	public int getNumComponents() {
 		return this.numComponents;
 	}
-
-
 	
     @Override
     public void doSaveTo(BitOutputStream bw) throws IOException {

@@ -1,5 +1,7 @@
 package com.jypec.img;
 
+import org.ejml.data.DMatrixRMaj;
+
 import com.jypec.util.arrays.MatrixTransforms;
 
 /**
@@ -161,7 +163,7 @@ public class HyperspectralImageData {
 				&& this.getNumberOfSamples() == other.getNumberOfSamples()
 				&& this.getDataType().equals(other.getDataType());
 	}
-
+	
 	/**
 	 * @param source where to copy data from
 	 */
@@ -186,5 +188,20 @@ public class HyperspectralImageData {
 	 */
 	public int getTotalNumberOfSamples() {
 		return bands * lines * samples;
+	}
+	
+	/**
+	 * @return the hyperspectral image data as a double matrix for better numerical processing
+	 */
+	public DMatrixRMaj toDoubleMatrix() {
+		DMatrixRMaj res = new DMatrixRMaj(this.lines * this.samples, this.bands);
+		for (int i = 0; i < bands; i++) {
+			for (int j = 0; j < lines; j++) {
+				for (int k = 0; k < samples; k++) {
+					res.set(j*samples + k, i, this.data[i][j][k]);
+				}
+			}
+		}
+		return res;
 	}
 }
