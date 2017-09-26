@@ -213,23 +213,8 @@ public class ImageDataType {
 		int absMax = Math.max(Math.abs(newMaxVal), Math.abs(newMinVal));
 		boolean signed = newMinVal < 0;
 		int bits = extra + (int) Math.ceil(MathOperations.logBase(absMax, 2d));
-		if (bits == 0) {
-			bits = 1;
-		}
-		if (bits == 1 & signed) {
-			bits = 2;
-		}
+
 		return new ImageDataType(bits, signed);
-	}
-	
-	/**
-	 * @param newMinVal
-	 * @param newMaxVal
-	 * @param extra extra bits to add over the minimum detected
-	 * @return same as {@link #findBest(int, int)} but ceiling max and flooring min
-	 */
-	public static ImageDataType findBest(double newMinVal, double newMaxVal, int extra) {
-		return findBest((int) Math.floor(newMinVal), (int) Math.ceil(newMaxVal), extra);
 	}
 	
 	

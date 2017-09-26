@@ -1,6 +1,9 @@
 package com.jypec.cli;
 
+import java.util.HashMap;
+
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
 /**
  * Store input arguments in their parsed form for easier processing
@@ -40,22 +43,25 @@ public class InputArguments {
 	/** Arguments to create the dimensionality reduction */
 	public String[] reductionArgs = null;
 	/** True if bit shaving was requested */
-	public boolean requestShave = false;
-	/** Number of bits to be shaved, or -1 if not set */
-	public int shave = -1;
+	public boolean requestBits = false;
+	/** Number of bits to use when compressing */
+	public int bits = -1;
 	/** True if wavelet transform was requested */
 	public boolean requestWavelet = false;
 	/** Number of passes of the wavelet transform, or -1 if not set */
 	public int passes = -1;
 	/** If we want the inner classes to be verbose */
 	public boolean verbose;
+	/** Band shaves */
+	public HashMap<Integer, Integer> shaves;
 	
 	
 	/**
 	 * @param line line where to parse the commands from
 	 * @return an InputArguments object filled from the command line
+	 * @throws ParseException 
 	 */
-	public static InputArguments parseFrom(CommandLine line) {
+	public static InputArguments parseFrom(CommandLine line) throws ParseException {
 		InputArguments args = new InputArguments();
 
 		args.compress = line.hasOption(JypecCLI.OPTION_COMPRESS);
@@ -74,11 +80,23 @@ public class InputArguments {
 		if (args.requestReduction = line.hasOption(JypecCLI.OPTION_REDUCTION)) {
 			args.reductionArgs = line.getOptionValues(JypecCLI.OPTION_REDUCTION);
 		}
-		if (args.requestShave = line.hasOption(JypecCLI.OPTION_SHAVE)) {
-			args.shave = Integer.parseInt(line.getOptionValue(JypecCLI.OPTION_SHAVE));
+		if (args.requestBits = line.hasOption(JypecCLI.OPTION_BITS)) {
+			args.bits = Integer.parseInt(line.getOptionValue(JypecCLI.OPTION_BITS));
 		}
 		if (args.requestWavelet = line.hasOption(JypecCLI.OPTION_WAVELET)) {
 			args.passes = Integer.parseInt(line.getOptionValue(JypecCLI.OPTION_WAVELET));
+		}
+		args.shaves = new HashMap<Integer, Integer>();
+		if (line.hasOption(JypecCLI.OPTION_SHAVE)) {
+			String[] values = line.getOptionValues(JypecCLI.OPTION_SHAVE)[0].trim().split(" ");
+			if (values.length % 2 != 0) {
+				throw new ParseException("Values for shaving come in pairs");
+			}
+			for (int i = 0; i < values.length; i+=2) {
+				int band = Integer.parseInt(values[i]);
+				int shave = Integer.parseInt(values[i+1]);
+				args.shaves.put(band, shave);
+			}
 		}
 		
 		return args;

@@ -60,8 +60,11 @@ public class Decompressor extends DefaultVerboseable {
 			this.sayLn("\tLoading dequantizer...");
 			double bandMin = input.readDouble();
 			double bandMax = input.readDouble();
-			ImageDataType targetType = ImageDataType.findBest(bandMin, bandMax, 0);
-			targetType.mutatePrecision(-cp.bitReduction);
+			ImageDataType targetType = new ImageDataType(cp.bits, true);
+			if (cp.shaveMap.containsKey(i)) {
+				targetType.mutatePrecision(-cp.shaveMap.get(i));
+			}
+			
 			HyperspectralBandData hb = HyperspectralBandData.generateRogueBand(targetType, lines, samples);
 			/** Now divide into blocks and decode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);

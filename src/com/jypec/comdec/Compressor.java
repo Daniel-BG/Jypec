@@ -72,8 +72,12 @@ public class Compressor extends DefaultVerboseable {
 			double[] minMax = MatrixOperations.minMax(waveForm);
 			
 			/** get max and min from the resulting transform, and create the best data type possible */
-			ImageDataType targetType = ImageDataType.findBest(minMax[0], minMax[1], 0);
-			targetType.mutatePrecision(-cp.bitReduction);
+			ImageDataType targetType = new ImageDataType(cp.bits, true);
+			if (cp.shaveMap.containsKey(i)) {
+				targetType.mutatePrecision(-cp.shaveMap.get(i));
+			}
+			
+			//targetType.mutatePrecision(-cp.bitReduction);
 			this.sayLn("\tApplying quantization to type: " + targetType + "...");
 			
 			/** custom quantizer for this band */

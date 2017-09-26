@@ -29,6 +29,8 @@ public class JypecCLI {
 	public static final String OPTION_REDUCTION = "reduction";
 	/** Wavelet algorithm option constant. Use for retrieving arguments and/or flags */
 	public static final String OPTION_WAVELET = "wavelet";
+	/** JPEG2000 number of bits per bitplane. Use for retrieving arguments and/or flags */
+	public static final String OPTION_BITS = "bits";
 	/** JPEG2000 bitshave option constant. Use for retrieving arguments and/or flags */
 	public static final String OPTION_SHAVE = "shave";
 	/** Show compressions stats. Use for retrieving arguments and/or flags  */
@@ -108,17 +110,26 @@ public class JypecCLI {
 				.longOpt(OPTION_WAVELET)
 				.build();
 		
-		Option bitshave = Option
-				.builder("s")
-				.desc("Bits to shave from the encoded bitplanes")
+		Option bits = Option
+				.builder("b")
+				.desc("Number of bits with which to encode in JPEG2000")
 				.hasArg()
 				.argName("quantity")
+				.longOpt(OPTION_BITS)
+				.build();
+		
+		Option shave = Option
+				.builder("s")
+				.desc("Bits to shave in each compressed band. Specify as: -s b1 s1 b2 s2 ... where b is the band number, and s the bits to be shaved")
+				.hasArgs()
+				.argName("bandNumber bitShave")
 				.longOpt(OPTION_SHAVE)
 				.build();
 		
 		jypecOptions = new Options();
 		
-		jypecOptions.addOption(bitshave);
+		jypecOptions.addOption(bits);
+		jypecOptions.addOption(shave);
 		jypecOptions.addOption(wavelet);
 		jypecOptions.addOption(reduction);
 		jypecOptions.addOption(output);
