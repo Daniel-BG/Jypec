@@ -1,4 +1,4 @@
-package com.jypec.dimreduction.alg;
+package com.jypec.unstable;
 
 import java.io.IOException;
 import org.ejml.data.DMatrixRMaj;
@@ -21,6 +21,7 @@ import com.jypec.util.bits.BitOutputStream;
  * by Asgeir Bjorgan and Lise Lyngsnes Randeberg
  * <br>
  * (<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4367363/pdf/sensors-15-03362.pdf">Visited 2017-09-25</a>)
+ * <br><br>
  * @author Daniel
  */
 public class MinimumNoiseFraction extends DimensionalityReduction {
@@ -28,6 +29,7 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
 	private int numComponents;
 	private int sampleSize;
 	private DMatrixRMaj projectionMatrix;
+	private DMatrixRMaj unprojectionMatrix;
     private double mean[];
 	
 	
@@ -49,15 +51,15 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
 	private static DMatrixRMaj extractNoise(DMatrixRMaj data) {
 		//assume pushbroom sensor and only extract horizontal noise
 		DMatrixRMaj res = new DMatrixRMaj(data.getNumRows(), data.getNumCols());
-		for (int i = 0; i < data.getNumCols(); i++) {
-			for (int j = 0; j < data.getNumRows(); j++) {
-				double val = data.get(j, i);
-				if (j < data.getNumRows() - 1) {
-					val -= data.get(j+1, i);
+		for (int i = 0; i < data.getNumRows(); i++) {
+			for (int j = 0; j < data.getNumCols(); j++) {
+				double val = data.get(i, j);
+				if (j < data.getNumCols() - 1) {
+					val -= data.get(i, j+1);
 				} else {
-					val -= data.get(j-1, i);
+					val -= data.get(i, j-1);
 				}
-				res.set(j, i, val / 2.0);
+				res.set(i, j, val / 2.0);
 			}
 		}
 		return res;
@@ -95,9 +97,9 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
         //create covariance matrix
         DMatrixRMaj sigma = new DMatrixRMaj(sampleSize, sampleSize);
         CommonOps_DDRM.multTransB(data, data, sigma);
-        DMatrixRMaj sData2 = new DMatrixRMaj(sampleSize, sampleSize);
-        CommonOps_DDRM.multTransB(meann, summ, sData2);
-        CommonOps_DDRM.subtract(sigma, sData2, sigma);
+        DMatrixRMaj sigmaHelper = new DMatrixRMaj(sampleSize, sampleSize);
+        CommonOps_DDRM.multTransB(meann, summ, sigmaHelper);
+        CommonOps_DDRM.subtract(sigma, sigmaHelper, sigma);
 		/*********************************/
         
         /**Create noise covariance matrix */
@@ -114,31 +116,44 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
         DMatrixRMaj A = new DMatrixRMaj(sampleSize, sampleSize);
         MatrixTransforms.inverseSquareRoot(lambda);
         CommonOps_DDRM.mult(B, lambda, A);
-
+        
+        
+        /** Check if A^t*Sn*A = Identity (seems that way)
+        DMatrixRMaj tmp = new DMatrixRMaj(sampleSize, sampleSize);
+        DMatrixRMaj tmp2 = new DMatrixRMaj(sampleSize, sampleSize);
+        CommonOps_DDRM.multTransA(A, sigmaNoise, tmp);
+        CommonOps_DDRM.mult(tmp, A, tmp2);
+        */
+       
         DMatrixRMaj sigmaTemp = new DMatrixRMaj(sampleSize, sampleSize);
         DMatrixRMaj sigmaTransformed = new DMatrixRMaj(sampleSize, sampleSize);
         CommonOps_DDRM.multTransA(A, sigma, sigmaTemp);
         CommonOps_DDRM.mult(sigmaTemp, A, sigmaTransformed);
         
         //decompose sigma temp as noise = U*W*U^t
-        svd = DecompositionFactory_DDRM.svd(sampleSize, sampleSize, true, false, false);
+        svd = DecompositionFactory_DDRM.svd(sampleSize, sampleSize, true, true, false);
         this.say("Decomposition yielded: " + svd.decompose(sigmaTransformed));
         DMatrixRMaj D = svd.getU(null, false);
         
         this.projectionMatrix = new DMatrixRMaj(sampleSize, sampleSize);
         CommonOps_DDRM.mult(A, D, this.projectionMatrix);
+        CommonOps_DDRM.transpose(this.projectionMatrix);
+        
+        this.unprojectionMatrix = new DMatrixRMaj(this.projectionMatrix);
+        CommonOps_DDRM.invert(this.unprojectionMatrix);
         
         //CommonOps_DDRM.transpose(this.projectionMatrix);      
         this.projectionMatrix.reshape(numComponents, sampleSize);
+        this.unprojectionMatrix.reshape(sampleSize, numComponents);
+        this.unprojectionMatrix = new DMatrixRMaj(this.unprojectionMatrix); //ensure internal buffer size is the right shape
         this.say("Finished");
-
 	}
 
 	
 	@Override
 	public DMatrixRMaj reduce(HyperspectralImageData source) {
 		DMatrixRMaj img = source.toDoubleMatrix();
-		for (int i = 0; i < this.sampleSize; i++) {
+		for (int i = 0; i < img.getNumRows(); i++) {
 			for (int j = 0; j < img.getNumCols(); j++) {
 				img.minus(img.getIndex(i, j), this.mean[i]);
 			}
@@ -152,7 +167,7 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
 	public void boost(DMatrixRMaj src, HyperspectralImageData dst) {
 		this.sayLn("Boosting samples from reduced space to the original...");
 		DMatrixRMaj res = new DMatrixRMaj(this.sampleSize, src.getNumCols());
-		CommonOps_DDRM.multTransA(projectionMatrix, src, res);
+		CommonOps_DDRM.mult(unprojectionMatrix, src, res);
 		for (int i = 0; i < this.sampleSize; i++) {
 			for (int j = 0; j < res.getNumCols(); j++) {
 				res.plus(res.getIndex(i, j), this.mean[i]);
@@ -170,7 +185,7 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
     	//write the mean
     	bw.writeDoubleArray(mean, this.sampleSize);
     	//write the matrix
-    	bw.writeDoubleArray(projectionMatrix.getData(), this.sampleSize * numComponents);
+    	bw.writeDoubleArray(unprojectionMatrix.getData(), this.sampleSize * numComponents);
 	}
 
 	@Override
@@ -182,9 +197,9 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
     	//read the mean
     	this.mean = bw.readDoubleArray(sampleSize);
     	//read the projection matrix
-    	projectionMatrix = new DMatrixRMaj();
-    	projectionMatrix.setData(bw.readDoubleArray(this.sampleSize * this.numComponents));
-    	projectionMatrix.reshape(numComponents,mean.length,true);
+    	unprojectionMatrix = new DMatrixRMaj();
+    	unprojectionMatrix.setData(bw.readDoubleArray(this.sampleSize * this.numComponents));
+    	unprojectionMatrix.reshape(this.sampleSize,this.numComponents,true);
 	}
 
 	@Override
