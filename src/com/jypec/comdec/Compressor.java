@@ -73,7 +73,7 @@ public class Compressor extends DefaultVerboseable {
 			
 			/** get max and min from the resulting transform, and create the best data type possible */
 			ImageDataType targetType = new ImageDataType(cp.bits, true);
-			if (cp.shaveMap.containsKey(i)) {
+			if (cp.shaveMap.hasMappingForKey(i)) {
 				targetType.mutatePrecision(-cp.shaveMap.get(i));
 			}
 			

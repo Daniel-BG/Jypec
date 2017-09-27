@@ -12,12 +12,13 @@ import org.junit.Test;
 import com.jypec.comdec.ComParameters;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.datastructures.LowKeyHashMap;
 
 /**
  * @author Daniel
  * Test compressor parameters class
  */
-public class ComParametersRecoveryTest {
+public class TestComParametersRecovery {
 
 	
 	/**
@@ -37,6 +38,11 @@ public class ComParametersRecoveryTest {
 			BitInputStream input;
 			
 			cp.wavePasses = r.nextInt(0x100);
+			cp.bits = r.nextInt(0x100);
+			LowKeyHashMap<Integer, Integer> hm = new LowKeyHashMap<Integer, Integer>();
+			hm.put(0, 20);
+			hm.put(5, 6);
+			cp.shaveMap = hm;
 			
 			try {
 				cp.saveTo(output);

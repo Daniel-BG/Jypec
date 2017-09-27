@@ -61,7 +61,7 @@ public class Decompressor extends DefaultVerboseable {
 			double bandMin = input.readDouble();
 			double bandMax = input.readDouble();
 			ImageDataType targetType = new ImageDataType(cp.bits, true);
-			if (cp.shaveMap.containsKey(i)) {
+			if (cp.shaveMap.hasMappingForKey(i)) {
 				targetType.mutatePrecision(-cp.shaveMap.get(i));
 			}
 			

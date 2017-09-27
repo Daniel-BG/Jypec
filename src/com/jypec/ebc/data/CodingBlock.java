@@ -1,8 +1,8 @@
 package com.jypec.ebc.data;
 
 import com.jypec.ebc.SubBand;
-import com.jypec.util.data.BidimensionalArrayIntegerMatrix;
-import com.jypec.util.data.IntegerMatrix;
+import com.jypec.util.datastructures.BidimensionalArrayIntegerMatrix;
+import com.jypec.util.datastructures.IntegerMatrix;
 
 /**
  * Class for the storage and manipulation of coding blocks that are coded

@@ -1,4 +1,4 @@
-package com.jypec.unstable;
+package com.jypec.dimreduction.alg;
 
 import java.io.IOException;
 import org.ejml.data.DMatrixRMaj;
@@ -141,10 +141,13 @@ public class MinimumNoiseFraction extends DimensionalityReduction {
         
         this.unprojectionMatrix = new DMatrixRMaj(this.projectionMatrix);
         CommonOps_DDRM.invert(this.unprojectionMatrix);
+        //CommonOps_DDRM.transpose(this.unprojectionMatrix);
         
         //CommonOps_DDRM.transpose(this.projectionMatrix);      
-        this.projectionMatrix.reshape(numComponents, sampleSize);
-        this.unprojectionMatrix.reshape(sampleSize, numComponents);
+        this.projectionMatrix.reshape(numComponents, sampleSize, true);
+        CommonOps_DDRM.transpose(this.unprojectionMatrix);
+        this.unprojectionMatrix.reshape(numComponents, sampleSize, true);
+        CommonOps_DDRM.transpose(this.unprojectionMatrix);
         this.unprojectionMatrix = new DMatrixRMaj(this.unprojectionMatrix); //ensure internal buffer size is the right shape
         this.say("Finished");
 	}

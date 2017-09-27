@@ -1,6 +1,6 @@
 package com.jypec.quantization;
 
-import com.jypec.util.data.IntegerMatrix;
+import com.jypec.util.datastructures.IntegerMatrix;
 
 /**
  * Matrix quantizer

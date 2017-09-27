@@ -1,4 +1,4 @@
-package com.jypec.util.data;
+package com.jypec.util.datastructures;
 
 /**
  * Wrapper for integer arrays of arrays

@@ -1,4 +1,4 @@
-package com.jypec.util.data;
+package com.jypec.util.datastructures;
 
 /**
  * @author Daniel

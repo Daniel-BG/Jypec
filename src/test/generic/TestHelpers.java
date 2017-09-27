@@ -2,7 +2,7 @@ package test.generic;
 
 import java.util.Random;
 
-import com.jypec.util.data.IntegerMatrix;
+import com.jypec.util.datastructures.IntegerMatrix;
 
 /**
  * @author Daniel

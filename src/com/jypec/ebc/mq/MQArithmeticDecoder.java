@@ -26,6 +26,8 @@ public class MQArithmeticDecoder {
 	//specific to the decoder
 	private int maxCodeBytesToRead;
 	private int lastByteRead;
+	//flag indicating if the decoding has finished
+	private boolean isFinished = false;
 	
 	
 	private EnumMap<ContextLabel, MQProbabilityTable> contextStates;
@@ -55,7 +57,7 @@ public class MQArithmeticDecoder {
 							contextLabel.getDefaultMPS()));
 		}
 		
-		
+		this.isFinished = false;
 		this.lastByteRead = 0; 
 		this.tempByteBuffer = 0;
 		this.codeBytesRead = 0;
@@ -83,6 +85,7 @@ public class MQArithmeticDecoder {
 			if (this.tempByteBuffer == 0xff && this.lastByteRead >= MQConstants.SPECIAL_CODE_START_INTERVAL) {
 				this.maxCodeBytesToRead = this.codeBytesRead; //max has been reached, automatically stop reading further
 				this.normalizedLowerBound += 0xff;
+				this.isFinished = true;
 			} else {
 				if (this.tempByteBuffer == 0xff) {
 					this.countdownTimer = 7;
@@ -161,7 +164,6 @@ public class MQArithmeticDecoder {
 			this.renormalizeOnce(input);
 		}
 		
-		
 		return recoveredSymbol;
 	}
 
@@ -178,6 +180,13 @@ public class MQArithmeticDecoder {
 		this.normalizedIntervalLength <<= 1;
 		this.normalizedLowerBound <<= 1;
 		this.countdownTimer--;
+	}
+
+	/**
+	 * @return true if the decoding has reached the bit flag
+	 */
+	public boolean isFinished() {
+		return this.isFinished;
 	}
 	
 }

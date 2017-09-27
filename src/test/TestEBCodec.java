@@ -15,8 +15,8 @@ import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
-import com.jypec.util.data.BidimensionalArrayIntegerMatrix;
-import com.jypec.util.data.IntegerMatrix;
+import com.jypec.util.datastructures.BidimensionalArrayIntegerMatrix;
+import com.jypec.util.datastructures.IntegerMatrix;
 import com.jypec.util.debug.Logger;
 
 import test.generic.TestHelpers;

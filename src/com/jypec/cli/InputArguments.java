@@ -1,9 +1,9 @@
 package com.jypec.cli;
 
-import java.util.HashMap;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+
+import com.jypec.util.datastructures.LowKeyHashMap;
 
 /**
  * Store input arguments in their parsed form for easier processing
@@ -53,7 +53,7 @@ public class InputArguments {
 	/** If we want the inner classes to be verbose */
 	public boolean verbose;
 	/** Band shaves */
-	public HashMap<Integer, Integer> shaves;
+	public LowKeyHashMap<Integer, Integer> shaves;
 	
 	
 	/**
@@ -86,9 +86,9 @@ public class InputArguments {
 		if (args.requestWavelet = line.hasOption(JypecCLI.OPTION_WAVELET)) {
 			args.passes = Integer.parseInt(line.getOptionValue(JypecCLI.OPTION_WAVELET));
 		}
-		args.shaves = new HashMap<Integer, Integer>();
+		args.shaves = new LowKeyHashMap<Integer, Integer>();
 		if (line.hasOption(JypecCLI.OPTION_SHAVE)) {
-			String[] values = line.getOptionValues(JypecCLI.OPTION_SHAVE)[0].trim().split(" ");
+			String[] values = line.getOptionValues(JypecCLI.OPTION_SHAVE);
 			if (values.length % 2 != 0) {
 				throw new ParseException("Values for shaving come in pairs");
 			}

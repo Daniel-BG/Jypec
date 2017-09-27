@@ -15,8 +15,9 @@ import org.junit.runners.Suite.SuiteClasses;
 	TestWaveletTransform.class,
 	TestQuantizer.class,
 	TestBitStreamReaderWriter.class,
-	ComParametersRecoveryTest.class,
-	PCARecoveryTest.class
+	TestComParametersRecovery.class,
+	TestPCARecovery.class,
+	TestLowKeyHashMap.class
 })
 
 

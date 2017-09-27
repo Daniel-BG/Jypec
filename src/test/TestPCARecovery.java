@@ -26,7 +26,7 @@ import test.generic.TestHelpers;
  * Test the PrincipalComponentAnalysis class, as well as its recovery
  */
 @RunWith(Parameterized.class)
-public class PCARecoveryTest {
+public class TestPCARecovery {
 	
 	/**
 	 * @return a list of wavelets to be tested
@@ -52,7 +52,7 @@ public class PCARecoveryTest {
 	 * @param seed seed for the RNG
 	 * @param wavelet wavelet to test
 	 */
-	public PCARecoveryTest(int numSamples, int eigenSize, int sampleSize, long seed) {
+	public TestPCARecovery(int numSamples, int eigenSize, int sampleSize, long seed) {
 		this.numSamples = numSamples;
 		this.eigenSize = eigenSize;
 		this.sampleSize = sampleSize;

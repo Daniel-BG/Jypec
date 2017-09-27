@@ -2,7 +2,7 @@ package com.jypec.img;
 
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
-import com.jypec.util.data.IntegerMatrix;
+import com.jypec.util.datastructures.IntegerMatrix;
 
 /**
  * Class that stores one hyperspectral band and can be used for extracting blocks for coding and such
