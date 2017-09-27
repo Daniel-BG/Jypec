@@ -1,6 +1,5 @@
 package com.jypec.dimreduction.alg;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,14 +10,10 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
-import com.jypec.comdec.ComParameters;
-import com.jypec.dimreduction.DimensionalityReduction;
+import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.img.HyperspectralImageData;
-import com.jypec.img.ImageHeaderData;
 import com.jypec.util.MathOperations;
 import com.jypec.util.Pair;
-import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
 
 /**
  * <p>
@@ -43,7 +38,7 @@ import com.jypec.util.bits.BitOutputStream;
  * 1) call setup()<br>
  * 2) For each sample (e.g. an image ) call addSample()<br>
  * 3) After all the samples have been added call computeBasis()<br>
- * 4) Call  sampleToEigenSpace() , eigenToSampleSpace() , errorMembership() , response()
+ * 4) Call  sampleToEigenSpace() , eigenToSampleSpace()
  * </p>
  *
  * @author Peter Abeles
@@ -51,23 +46,11 @@ import com.jypec.util.bits.BitOutputStream;
  */
 
 
-public class PrincipalComponentAnalysis extends DimensionalityReduction {
-
-    // principal component subspace is stored in the rows
-    private DMatrixRMaj V_t;
-
-    // how many principal components are used
-    private int numComponents;
-
-    // dimension of the original space
-    private int sampleSize;
-    
+public class PrincipalComponentAnalysis extends ProjectingDimensionalityReduction {    
     // where the data is stored
     private DMatrixRMaj A = new DMatrixRMaj(1,1);
     private int sampleIndex;
 
-    // mean values of each element across all the samples
-    double mean[];
 
     /**
      * Create a PCA object
@@ -83,11 +66,11 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
      * @param sampleSize Number of elements in each sample.
      */
     public void setup( int numSamples , int sampleSize ) {
-        mean = new double[ sampleSize ];
+        adjustment = new double[ sampleSize ];
         A.reshape(sampleSize, numSamples,false);
-        this.sampleSize = sampleSize;
+        this.dimOrig = sampleSize;
         sampleIndex = 0;
-        numComponents = -1;
+        dimProj = -1;
     }
 
 	/**
@@ -97,7 +80,7 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 	 * @param sampleData Sample from original raw data.
 	 */
     public void addSample( double[] sampleData ) {
-        if( this.sampleSize != sampleData.length )
+        if( this.dimOrig != sampleData.length )
             throw new IllegalArgumentException("Unexpected sample size");
         if( sampleIndex >= A.getNumCols() )
             throw new IllegalArgumentException("Too many samples");
@@ -117,35 +100,35 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
      * smaller than the number of elements in the input vector.
      */
     public void computeBasis( int numComponents ) {
-        if( numComponents > this.sampleSize )
+        if( numComponents > this.dimOrig )
             throw new IllegalArgumentException("More components requested that the data's length.");
         if( sampleIndex != A.getNumCols() )
             throw new IllegalArgumentException("Not all the data has been added");
         if( numComponents > sampleIndex )
             throw new IllegalArgumentException("More data needed to compute the desired number of components");
         
-        this.numComponents = numComponents;
+        this.dimProj = numComponents;
         
         DMatrixRMaj ones = new DMatrixRMaj(A.getNumCols(), 1);
         for (int i = 0; i < ones.getNumElements(); i++) {
         	ones.set(i, 1);
         }
-        DMatrixRMaj summ = new DMatrixRMaj(this.sampleSize, 1);
+        DMatrixRMaj summ = new DMatrixRMaj(this.dimOrig, 1);
 
         //compute the summation of all the samples
         CommonOps_DDRM.mult(A, ones, summ);
         
         //compute the mean of all samples
-        DMatrixRMaj meann = new DMatrixRMaj(this.sampleSize, 1);
-        for( int j = 0; j < this.sampleSize; j++ ) {
-        	mean[j] = summ.get(j) / (double) A.getNumCols();
-        	meann.set(j, mean[j]);
+        DMatrixRMaj meann = new DMatrixRMaj(this.dimOrig, 1);
+        for( int j = 0; j < this.dimOrig; j++ ) {
+        	adjustment[j] = summ.get(j) / (double) A.getNumCols();
+        	meann.set(j, adjustment[j]);
         }
         
         //create covariance matrix
-        DMatrixRMaj s = new DMatrixRMaj(this.sampleSize, this.sampleSize);
+        DMatrixRMaj s = new DMatrixRMaj(this.dimOrig, this.dimOrig);
         CommonOps_DDRM.multTransB(A, A, s);
-        DMatrixRMaj s2 = new DMatrixRMaj(this.sampleSize, this.sampleSize);
+        DMatrixRMaj s2 = new DMatrixRMaj(this.dimOrig, this.dimOrig);
         CommonOps_DDRM.multTransB(meann, summ, s2);
         CommonOps_DDRM.subtract(s, s2, s);
         
@@ -166,14 +149,17 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 			}
         });
         
-        V_t = new DMatrixRMaj(numComponents, mean.length);
+        projectionMatrix = new DMatrixRMaj(numComponents, adjustment.length);
         
         for (int i = 0; i < numComponents; i++) {
         	DMatrixRMaj vec = list.get(i).second();
-        	for (int j = 0; j < mean.length; j++) {
-        		V_t.set(i, j, vec.get(j));
+        	for (int j = 0; j < adjustment.length; j++) {
+        		projectionMatrix.set(i, j, vec.get(j));
         	}
         }
+        
+        unprojectionMatrix = new DMatrixRMaj(projectionMatrix);
+        CommonOps_DDRM.transpose(unprojectionMatrix);
     }
 
     /**
@@ -183,122 +169,21 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
      * @return Vector from the PCA basis.
      */
     public double[] getBasisVector( int which ) {
-        if( which < 0 || which >= numComponents )
+        if( which < 0 || which >= dimProj )
             throw new IllegalArgumentException("Invalid component");
 
-        DMatrixRMaj v = new DMatrixRMaj(1,this.sampleSize);
-        CommonOps_DDRM.extract(V_t,which,which+1,0,this.sampleSize,v,0,0);
+        DMatrixRMaj v = new DMatrixRMaj(1,this.dimOrig);
+        CommonOps_DDRM.extract(projectionMatrix,which,which+1,0,this.dimOrig,v,0,0);
 
         return v.data;
-    }
-    
-	@Override
-	public DMatrixRMaj reduce(HyperspectralImageData src) {
-		DMatrixRMaj img = src.toDoubleMatrix();
-		for (int i = 0; i < this.sampleSize; i++) {
-			for (int j = 0; j < img.getNumCols(); j++) {
-				img.minus(img.getIndex(i, j), this.mean[i]);
-			}
-		}
-		DMatrixRMaj res = new DMatrixRMaj(this.numComponents, img.getNumCols());
-		CommonOps_DDRM.mult(V_t, img, res);
-		return res;
-	}
-
-    /**
-     * Converts a vector from sample space into eigen space.
-     *
-     * @param sampleData Sample space data.
-     * @return Eigen space projection.
-     */
-    public double[] sampleToEigenSpace( double[] sampleData ) {
-        if( sampleData.length != this.sampleSize )
-            throw new IllegalArgumentException("Unexpected sample length");
-        DMatrixRMaj mean = DMatrixRMaj.wrap(this.sampleSize,1,this.mean);
-
-        DMatrixRMaj s = new DMatrixRMaj(this.sampleSize,1,true,sampleData);
-        DMatrixRMaj r = new DMatrixRMaj(numComponents,1);
-
-        CommonOps_DDRM.subtract(s, mean, s);
-
-        CommonOps_DDRM.mult(V_t,s,r);
-
-        return r.data;
-    }
-    
-	@Override
-	public void boost(DMatrixRMaj src, HyperspectralImageData dst) {
-		this.sayLn("Boosting samples from reduced space to the original...");
-		DMatrixRMaj res = new DMatrixRMaj(this.sampleSize, src.getNumCols());
-		CommonOps_DDRM.multTransA(V_t, src, res);
-		for (int i = 0; i < this.sampleSize; i++) {
-			for (int j = 0; j < res.getNumCols(); j++) {
-				res.plus(res.getIndex(i, j), this.mean[i]);
-			}
-		}
-		dst.copyDataFrom(res);
-	}
-
-    /**
-     * Converts a vector from eigen space into sample space.
-     *
-     * @param eigenData Eigen space data.
-     * @return Sample space projection.
-     */
-    public double[] eigenToSampleSpace( double[] eigenData ) {
-        if( eigenData.length != numComponents )
-            throw new IllegalArgumentException("Unexpected sample length");
-
-        DMatrixRMaj s = new DMatrixRMaj(this.sampleSize,1);
-        DMatrixRMaj r = DMatrixRMaj.wrap(numComponents,1,eigenData);
-        
-        CommonOps_DDRM.multTransA(V_t,r,s);
-
-        DMatrixRMaj mean = DMatrixRMaj.wrap(this.sampleSize,1,this.mean);
-        CommonOps_DDRM.add(s,mean,s);
-
-        return s.data;
-    }
-	
-	/**
-	 * @return the number of components that this PCA reduces to
-	 */
-	public int getNumComponents() {
-		return this.numComponents;
-	}
-	
-    @Override
-    public void doSaveTo(BitOutputStream bw) throws IOException {
-    	//write the number of dimensions in the original space
-    	bw.writeInt(this.sampleSize);
-    	//write the number of dimensions in the reduced space
-    	bw.writeInt(numComponents);
-    	//write the mean
-    	bw.writeDoubleArray(mean, this.sampleSize);
-    	//write the matrix
-    	bw.writeDoubleArray(V_t.getData(), this.sampleSize * numComponents);
-    }
-    
-    @Override
-    public void doLoadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) throws IOException {
-    	//read the number of dimensions in the original space
-    	this.sampleSize = bw.readInt();
-    	//read the number of dimensions in the reduced space
-    	this.numComponents = bw.readInt();
-    	//read the mean
-    	this.mean = bw.readDoubleArray(sampleSize);
-    	//read the projection matrix
-    	V_t = new DMatrixRMaj();
-    	V_t.setData(bw.readDoubleArray(this.sampleSize * this.numComponents));
-    	V_t.reshape(numComponents,mean.length,true);
     }
 
 	@Override
 	public void train(HyperspectralImageData source) {
-		if (this.numComponents <= 0) {
+		if (this.dimProj <= 0) {
 			throw new IllegalStateException("Please first set the number of components for this dimensionality reduction algorithm");
 		}
-		int nc = this.numComponents;
+		int nc = this.dimProj;
 		this.setup(source.getNumberOfLines() * source.getNumberOfSamples(), source.getNumberOfBands());
 		
 		this.sayLn("Adding samples to train...");
@@ -311,12 +196,6 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 		this.sayLn("Computing basis");
 		this.computeBasis(nc);
 	}
-	
-
-	@Override
-	public void setNumComponents(int numComponents) {
-		this.numComponents = numComponents;
-	}
 
 
 	@Override
@@ -328,4 +207,48 @@ public class PrincipalComponentAnalysis extends DimensionalityReduction {
 	public double getMinValue(HyperspectralImageData img) {
 		return -MathOperations.getMaximumDistance(img.getDataType().getDynamicRange(), img.getNumberOfBands());
 	}
+	
+	
+	
+    /**
+     * Converts a vector from sample space into eigen space.
+     *
+     * @param sampleData Sample space data.
+     * @return Eigen space projection.
+     */
+    public double[] sampleToEigenSpace( double[] sampleData ) {
+        if( sampleData.length != this.dimOrig )
+            throw new IllegalArgumentException("Unexpected sample length");
+        DMatrixRMaj mean = DMatrixRMaj.wrap(this.dimOrig,1,this.adjustment);
+
+        DMatrixRMaj s = new DMatrixRMaj(this.dimOrig,1,true,sampleData);
+        DMatrixRMaj r = new DMatrixRMaj(dimProj,1);
+
+        CommonOps_DDRM.subtract(s, mean, s);
+
+        CommonOps_DDRM.mult(projectionMatrix,s,r);
+
+        return r.data;
+    }
+
+    /**
+     * Converts a vector from eigen space into sample space.
+     *
+     * @param eigenData Eigen space data.
+     * @return Sample space projection.
+     */
+    public double[] eigenToSampleSpace( double[] eigenData ) {
+        if( eigenData.length != dimProj )
+            throw new IllegalArgumentException("Unexpected sample length");
+
+        DMatrixRMaj s = new DMatrixRMaj(this.dimOrig,1);
+        DMatrixRMaj r = DMatrixRMaj.wrap(dimProj,1,eigenData);
+        
+        CommonOps_DDRM.mult(unprojectionMatrix,r,s);
+
+        DMatrixRMaj mean = DMatrixRMaj.wrap(this.dimOrig,1,this.adjustment);
+        CommonOps_DDRM.add(s,mean,s);
+
+        return s.data;
+    }
 }
