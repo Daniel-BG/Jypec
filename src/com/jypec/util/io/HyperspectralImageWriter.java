@@ -34,7 +34,7 @@ public class HyperspectralImageWriter {
 			} else {
 				bos = new BitOutputStream(new FileOutputStream(args.output));
 			}
-			ImageHeaderReaderWriter.saveToUncompressedStream(hi.getHeader(), bos, args.essentialHeader);
+			byteOffset = ImageHeaderReaderWriter.saveToUncompressedStream(hi.getHeader(), bos, args.essentialHeader, args.outputHeader == null);
 			//if header is separate, byteoffset is too
 			if (args.outputHeader != null) {
 				byteOffset = 0;

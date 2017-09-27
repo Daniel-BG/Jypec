@@ -150,14 +150,16 @@ public class ImageHeaderReaderWriter {
 	 * @param ihd 
 	 * @param brw where to save it
 	 * @param essential if true only the essential information to read the image is output, everything else discarded
+	 * @param embedded set to true if the data goes after in the same output stream (this enables calculation of header offset)
 	 * @return the number of BYTES written
 	 * @throws IOException 
 	 */
-	public static int saveToUncompressedStream(ImageHeaderData ihd, OutputStream brw, boolean essential) throws IOException {
+	public static int saveToUncompressedStream(ImageHeaderData ihd, OutputStream brw, boolean essential, boolean embedded) throws IOException {
 		ArrayList<Byte> list = new ArrayList<Byte>();
 		byte[] lineSeparator = "\n".getBytes(StandardCharsets.UTF_8);
+		
+		/** Add header and all entries */
 		Utilities.addAllBytes(list, "ENVI\n".getBytes(StandardCharsets.UTF_8));
-
 		for (Entry<HeaderConstants, Object> e: ihd.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			if (essential && !prw.getHeaderConstant().isEssential()) {
@@ -170,17 +172,20 @@ public class ImageHeaderReaderWriter {
 			//add a newline
 			Utilities.addAllBytes(list, lineSeparator);
 		}
-		Utilities.addAllBytes(list, "header offset = ".getBytes(StandardCharsets.UTF_8));
 		
-		Integer listSize = list.size() + lineSeparator.length;
-		Integer totalSize = listSize + listSize.toString().length();
-		if (totalSize.toString().length() != listSize.toString().length()) {
-			totalSize++;
+		/** If data comes afterwards, indicate header offset, otherwise ommit */
+		if (embedded) {
+			Utilities.addAllBytes(list, "header offset = ".getBytes(StandardCharsets.UTF_8));
+			Integer listSize = list.size() + lineSeparator.length;
+			Integer totalSize = listSize + listSize.toString().length();
+			if (totalSize.toString().length() != listSize.toString().length()) {
+				totalSize++;
+			}
+			Utilities.addAllBytes(list, totalSize.toString().getBytes());
+			Utilities.addAllBytes(list, lineSeparator);
 		}
-		Utilities.addAllBytes(list, totalSize.toString().getBytes());
-		Utilities.addAllBytes(list, lineSeparator);
-		//now the data could be compressed into the outputstream
-		
+
+		/** Output result */
 		byte[] result = new byte[list.size()];
 		int index = 0;
 		for (Byte b: list) {
