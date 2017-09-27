@@ -10,6 +10,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import com.jypec.comdec.ComParameters;
+import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.datastructures.LowKeyHashMap;
@@ -43,6 +44,7 @@ public class TestComParametersRecovery {
 			hm.put(0, 20);
 			hm.put(5, 6);
 			cp.shaveMap = hm;
+			cp.dr = new DeletingDimensionalityReduction();
 			
 			try {
 				cp.saveTo(output);

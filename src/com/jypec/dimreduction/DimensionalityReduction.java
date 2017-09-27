@@ -6,6 +6,7 @@ import org.ejml.data.DMatrixRMaj;
 
 import com.jypec.cli.InputArguments;
 import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
+import com.jypec.dimreduction.alg.IndependentComponentAnalysis;
 import com.jypec.dimreduction.alg.MinimumNoiseFraction;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.util.DefaultVerboseable;
@@ -28,7 +29,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 		/** {@link DeletingDimensionalityReduction} */
 		DRA_DELETING_DIMENSIONALITY_REDUCTION, 
 		/** {@link MinimumNoiseFraction} */
-		DRA_MNF
+		DRA_MNF,
+		/** {@link IndependentComponentAnalysis} */
+		DRA_ICA
 	}
 	
 	private DimensionalityReductionAlgorithm dra;
@@ -131,6 +134,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 		case DRA_MNF:
 			dr = new MinimumNoiseFraction();
 			break;
+		case DRA_ICA:
+			dr = new IndependentComponentAnalysis();
+			break;
 		default:
 			throw new IllegalArgumentException("Cannot load that kind of Dimensionality Reduction algorithm: " + type);
 		}
@@ -193,6 +199,11 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 				MinimumNoiseFraction mnf = new MinimumNoiseFraction();
 				mnf.setNumComponents(dimensions);
 				return mnf;
+			} else if (args.reductionArgs.length == 2 && args.reductionArgs[0].toLowerCase().equals("ica")) {
+				int dimensions = Integer.parseInt(args.reductionArgs[1]);
+				IndependentComponentAnalysis ica = new IndependentComponentAnalysis();
+				ica.setNumComponents(dimensions);
+				return ica;
 			}
 		}
 		//default to no reduction
