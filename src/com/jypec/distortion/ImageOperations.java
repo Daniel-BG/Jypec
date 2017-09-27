@@ -47,9 +47,19 @@ public class ImageOperations {
 	 */
 	public static double variance(DMatrixRMaj h1) {
 		double avg = averageValue(h1);
-		SimpleMatrix m = SimpleMatrix.wrap(new DMatrixRMaj(h1));
-		m.plus(-avg);
-		return m.elementMult(m).elementSum() / (double) m.getNumElements();
+		//SimpleMatrix m = SimpleMatrix.wrap(new DMatrixRMaj(h1));
+		//m.plus(-avg);
+		//return m.elementMult(m).elementSum() / (double) m.getNumElements();
+		
+		double acc = 0;
+		for (int j = 0; j < h1.getNumRows(); j++) {
+			for (int k = 0; k < h1.getNumCols(); k++) {
+				double val = (double) h1.get(j, k) - avg;
+				acc += val * val;
+			}
+		}
+		int dim = h1.getNumElements();
+		return acc / (double) dim;
 	}
 	
 	/**
