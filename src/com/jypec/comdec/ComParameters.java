@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map.Entry;
 
 import com.jypec.cli.InputArguments;
+import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.datastructures.LowKeyHashMap;
@@ -24,6 +25,8 @@ public class ComParameters {
 	public int bits = DEFAULT_BITS;
 	/** Number of bits shaved from each band */
 	public LowKeyHashMap<Integer, Integer> shaveMap;
+	/** Dimensionality reduction algorithm */
+	public DimensionalityReduction dr;
 
 	/**
 	 * @param args read the compression parameters from the input arguments 
@@ -36,6 +39,7 @@ public class ComParameters {
 			this.bits = args.bits;
 		}
 		this.shaveMap = args.shaves;
+		this.dr = DimensionalityReduction.loadFrom(args);
 	}
 	
 	/** Create empty parameters to be loaded from {@link #loadFrom(BitInputStream)}*/
@@ -54,7 +58,7 @@ public class ComParameters {
 			bw.writeByte((byte) (int)e.getKey());
 			bw.writeByte((byte) (int)e.getValue());
 		}
-		
+		dr.saveTo(bw);
 	}
 	
 	
@@ -72,6 +76,7 @@ public class ComParameters {
 		for (int i = 0; i < entries; i++) {
 			this.shaveMap.put((int) bw.readByte(), (int) bw.readByte());
 		}
+		this.dr = DimensionalityReduction.loadFrom(bw);
 	}
 	
 	

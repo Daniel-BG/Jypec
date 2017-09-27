@@ -9,7 +9,6 @@ import org.ejml.data.DMatrixRMaj;
 import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
 import com.jypec.comdec.Compressor;
-import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.distortion.ImageComparisons;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.util.JypecException;
@@ -46,7 +45,6 @@ public class Jypec {
 		/** load the image, and compression parameters */
 		HyperspectralImage hi = HyperspectralImageReader.read(args.input, args.inputHeader, args.verbose);
 		ComParameters cp = new ComParameters(args);
-		DimensionalityReduction dr = DimensionalityReduction.loadFrom(args);
 		
 		/** create the compressor */
 		Compressor c = new Compressor(cp);
@@ -55,7 +53,7 @@ public class Jypec {
 		/** Create the output stream and save the compressed result */
 		BitOutputStream output = new BitOutputStream(new FileOutputStream(new File(args.output)));
 		ImageHeaderReaderWriter.saveToCompressedStream(hi.getHeader(), output, args.essentialHeader);
-		c.compress(hi.getData(), output, dr);
+		c.compress(hi.getData(), output);
 		
 		/** Show some stats */
 		if (args.showCompressionStats) {

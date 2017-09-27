@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.ejml.data.DMatrixRMaj;
 
-import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBandData;
@@ -44,11 +43,11 @@ public class Compressor extends DefaultVerboseable {
 	 * @param dr dimensionality reduction algorithm that is to be applied
 	 * @throws IOException 
 	 */
-	public void compress(HyperspectralImageData srcImg, BitOutputStream output, DimensionalityReduction dr) throws IOException {
+	public void compress(HyperspectralImageData srcImg, BitOutputStream output) throws IOException {
 		/** Project all image values onto the reduced space */
 		this.sayLn("Applying dimensionality reduction");
-		dr.setParentVerboseable(this);
-		DMatrixRMaj reduced = dr.trainReduce(srcImg.toDoubleMatrix());
+		cp.dr.setParentVerboseable(this);
+		DMatrixRMaj reduced = cp.dr.trainReduce(srcImg.toDoubleMatrix());
 		
 		/** create the wavelet transform, and coder we'll be using, which won't change over the bands */
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
@@ -57,13 +56,12 @@ public class Compressor extends DefaultVerboseable {
 		/** Save metadata before compressing the image */
 		this.say("Saving compression parameters... ");
 		this.cp.saveTo(output);
-		dr.saveTo(output);
 		this.sayLn("(" + output.getBitsOutput() + " bits)");
 		
 		/** Proceed to compress the reduced image */
 		int lastBits = output.getBitsOutput();
-		for (int i = 0; i < dr.getNumComponents(); i++) {
-			this.sayLn("Compressing band [" + (i+1) + "/" + dr.getNumComponents() + "]: ");
+		for (int i = 0; i < cp.dr.getNumComponents(); i++) {
+			this.sayLn("Compressing band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]: ");
 			
 			/** Apply the wavelet transform */
 			this.sayLn("\tApplying wavelet... ");

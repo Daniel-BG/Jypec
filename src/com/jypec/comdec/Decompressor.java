@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.ejml.data.DMatrixRMaj;
 
-import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HeaderConstants;
@@ -42,22 +41,20 @@ public class Decompressor extends DefaultVerboseable {
 		int samples = (int) ihd.get(HeaderConstants.HEADER_SAMPLES);
 		ImageDataType idt = ImageDataType.fromHeaderCode((byte) ihd.get(HeaderConstants.HEADER_DATA_TYPE));
 		
+		/** Recover compression parameter setup */
 		this.sayLn("Loading decompression parameters...");
 		ComParameters cp = new ComParameters();
 		cp.loadFrom(input);
 		
-		/** Recover dr setup */
-		DimensionalityReduction dr = DimensionalityReduction.loadFrom(input);
-		
 		/** Uncompress the data stream */
-		double[][][] reduced = new double[dr.getNumComponents()][lines][samples];
+		double[][][] reduced = new double[cp.dr.getNumComponents()][lines][samples];
 
 		EBDecoder decoder = new EBDecoder();
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
 		
 		/** Proceed to uncompress the reduced image band by band */
-		for (int i = 0; i < dr.getNumComponents(); i++) {
-			this.sayLn("Extracting compressed band [" + (i+1) + "/" + dr.getNumComponents() + "]");
+		for (int i = 0; i < cp.dr.getNumComponents(); i++) {
+			this.sayLn("Extracting compressed band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]");
 			/** Get this band's max and min values, and use that to create the quantizer */
 			this.sayLn("\tLoading dequantizer...");
 			double bandMin = input.readDouble();
@@ -95,7 +92,7 @@ public class Decompressor extends DefaultVerboseable {
 		HyperspectralImageData srcImg = new HyperspectralImageData(null, srcDT, bands, lines, samples);
 		this.sayLn("Projecting back into original dimension...");
 		DMatrixRMaj result = new DMatrixRMaj(bands, lines*samples);
-		dr.boost(MatrixTransforms.getMatrix(reduced, dr.getNumComponents(), lines, samples), result);
+		cp.dr.boost(MatrixTransforms.getMatrix(reduced, cp.dr.getNumComponents(), lines, samples), result);
 		srcImg.copyDataFrom(result);
 		
 		
