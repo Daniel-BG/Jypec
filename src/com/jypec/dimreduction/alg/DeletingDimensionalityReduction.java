@@ -1,12 +1,10 @@
 package com.jypec.dimreduction.alg;
 
+import java.io.IOException;
+
 import org.ejml.data.DMatrixRMaj;
 
-import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.DimensionalityReduction;
-import com.jypec.img.HeaderConstants;
-import com.jypec.img.HyperspectralImageData;
-import com.jypec.img.ImageHeaderData;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 
@@ -25,40 +23,37 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	private int numComponents = -1;
 
 	@Override
-	public void train(HyperspectralImageData source) {
+	public void train(DMatrixRMaj source) {
 		//no training needed. If unset just preserve dimension
 		if (numComponents == -1)
-			this.numComponents = source.getNumberOfBands();
+			this.numComponents = source.getNumRows();
 	}
 
 	@Override
-	public DMatrixRMaj reduce(HyperspectralImageData src) {
-		DMatrixRMaj res = new DMatrixRMaj(this.numComponents, src.getNumberOfLines()*src.getNumberOfSamples());
+	public DMatrixRMaj reduce(DMatrixRMaj src) {
+		DMatrixRMaj res = new DMatrixRMaj(this.numComponents, src.getNumCols());
 		
 		for (int i = 0; i < this.numComponents; i++) {
-			for (int j = 0; j < src.getNumberOfLines(); j++) {
-				for (int k = 0; k < src.getNumberOfSamples(); k++) {
-					res.set(i, j*src.getNumberOfSamples() + k, src.getValueAt(i, j, k));
-				}
+			for (int j = 0; j < src.getNumCols(); j++) {
+				res.set(i, j, src.get(i, j));
 			}
+			
 		}
 		return res;
 	}
 
 	@Override
-	public void boost(DMatrixRMaj src, HyperspectralImageData dst) {
+	public void boost(DMatrixRMaj src, DMatrixRMaj dst) {
 		for (int i = 0; i < this.numComponents; i++) {
-			for (int j = 0; j < dst.getNumberOfLines(); j++) {
-				for (int k = 0; k < dst.getNumberOfSamples(); k++) {
-					dst.setValueAt(src.get(i, j*dst.getNumberOfSamples() + k), i, j, k);
-				}
+			for (int j = 0; j < dst.getNumCols(); j++) {
+				dst.set(i, j, src.get(i, j));
 			}
 		}
 	}
 
 	@Override
-	public void doLoadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) {
-		this.numComponents = (int) ihd.get(HeaderConstants.HEADER_BANDS);
+	public void doLoadFrom(BitInputStream bw) throws IOException {
+		this.numComponents = bw.readInt();
 	}
 
 	@Override
@@ -67,23 +62,13 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public double getMaxValue(HyperspectralImageData img) {
-		return img.getDataType().getMaxValue();
-	}
-
-	@Override
-	public double getMinValue(HyperspectralImageData img) {
-		return img.getDataType().getMinValue();
-	}
-
-	@Override
 	public void setNumComponents(int numComponents) {
 		this.numComponents = numComponents;
 	}
 
 	@Override
-	public void doSaveTo(BitOutputStream bw) {
-		//nothing to do, saved already in the header metadata
+	public void doSaveTo(BitOutputStream bw) throws IOException {
+		bw.writeInt(this.numComponents);
 	}
 
 }

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
+import org.ejml.data.DMatrixRMaj;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -65,16 +66,15 @@ public class TestPCARecovery {
 	@Test
 	public void testPCARecovery() {
 		PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
+		pca.setNumComponents(eigenSize);
 		
-		pca.setup(numSamples, sampleSize);
-		double[] inputData = new double[sampleSize];
+		double[] inputData = new double[sampleSize*numSamples];
+		TestHelpers.randomGaussianFillArray(inputData, sampleSize*numSamples, r, 1000, 0);
+		DMatrixRMaj mat = new DMatrixRMaj(sampleSize, numSamples);
+		mat.setData(inputData);
 		
-		for (int i = 0; i < numSamples; i++) {
-			TestHelpers.randomGaussianFillArray(inputData, sampleSize, r, 1000, 0);
-			pca.addSample(inputData);
-		}
+		pca.train(mat);
 		
-		pca.computeBasis(eigenSize);
 		
 		ByteArrayOutputStream bais = new ByteArrayOutputStream();
 		BitOutputStream output = new BitOutputStream(bais);
@@ -86,7 +86,7 @@ public class TestPCARecovery {
 			pca.saveTo(output);
 			output.paddingFlush();
 			input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
-			pcaRec = (PrincipalComponentAnalysis) DimensionalityReduction.loadFrom(input, null, null);
+			pcaRec = (PrincipalComponentAnalysis) DimensionalityReduction.loadFrom(input);
 			
 			input.close();
 			output.close();
@@ -97,9 +97,10 @@ public class TestPCARecovery {
 		
 		
 		for (int i = 0; i < pca.getNumComponents(); i++) {
-			double[] orig = pca.getBasisVector(i);
-			double[] rec = pcaRec.getBasisVector(i);
-			assertArrayEquals(orig, rec, 0.0);
+			DMatrixRMaj orig = pca.getUnProjectionMatrix();
+			DMatrixRMaj rec = pcaRec.getUnProjectionMatrix();
+			
+			assertArrayEquals(orig.data, rec.data, 0.0);
 		}
 		
 	}

@@ -5,9 +5,7 @@ import java.io.IOException;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
-import com.jypec.comdec.ComParameters;
-import com.jypec.img.HyperspectralImageData;
-import com.jypec.img.ImageHeaderData;
+import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 
@@ -22,7 +20,7 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	}
 	
 	/** Dimension of the projected space */
-	protected int dimProj;
+	protected int dimProj = -1;
 	/** Dimension of the original space */
 	protected int dimOrig;
 	/** Matrix used to go from original to projected space */
@@ -32,7 +30,7 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	/** Substracted before projection, added after unprojection. <br>
 	 * This is usually the sample mean that centers in zero. <br>
 	 * If null it is not applied */
-	protected double adjustment[];
+	protected DMatrixRMaj adjustment;
 	
 	
 	@Override
@@ -42,19 +40,21 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
     	//write the number of dimensions in the reduced space
     	bw.writeInt(dimProj);
     	//write the mean
-    	bw.writeDoubleArray(adjustment, dimOrig);
+    	bw.writeDoubleArray(adjustment.getData(), dimOrig);
     	//write the matrix
     	bw.writeDoubleArray(unprojectionMatrix.getData(), dimOrig * dimProj);
 	}
 
 	@Override
-	public void doLoadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) throws IOException {
+	public void doLoadFrom(BitInputStream bw) throws IOException {
     	//read the number of dimensions in the original space
 		dimOrig = bw.readInt();
     	//read the number of dimensions in the reduced space
 		dimProj = bw.readInt();
     	//read the mean
-    	adjustment = bw.readDoubleArray(dimOrig);
+		double[] data = bw.readDoubleArray(dimOrig);
+    	adjustment = new DMatrixRMaj(dimOrig, 1);
+    	adjustment.setData(data);
     	//read the projection matrix
     	unprojectionMatrix = new DMatrixRMaj();
     	unprojectionMatrix.setData(bw.readDoubleArray(dimOrig * dimProj));
@@ -68,35 +68,44 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 
 	@Override
 	public void setNumComponents(int dimProj) {
-        if( dimProj > dimOrig )
-            throw new IllegalArgumentException("More components requested that the data's length.");
 		this.dimProj = dimProj;
 	}
 	
 	@Override
-	public DMatrixRMaj reduce(HyperspectralImageData source) {
-		DMatrixRMaj img = source.toDoubleMatrix();
-		for (int i = 0; i < img.getNumRows(); i++) {
-			for (int j = 0; j < img.getNumCols(); j++) {
-				img.minus(img.getIndex(i, j), adjustment[i]);
-			}
-		}
+	public DMatrixRMaj reduce(DMatrixRMaj img) {
+		DMatrixRMaj ones = MatrixOperations.ones(1, img.getNumCols());
+		DMatrixRMaj sub = new DMatrixRMaj(img.getNumRows(), img.getNumCols());
+		CommonOps_DDRM.mult(adjustment, ones, sub);
+		CommonOps_DDRM.subtract(img, sub, img);
 		DMatrixRMaj res = new DMatrixRMaj(dimProj, img.getNumCols());
 		CommonOps_DDRM.mult(projectionMatrix, img, res);
 		return res;
 	}
 
 	@Override
-	public void boost(DMatrixRMaj src, HyperspectralImageData dst) {
+	public void boost(DMatrixRMaj src, DMatrixRMaj dst) {
 		this.sayLn("Boosting samples from reduced space to the original...");
 		DMatrixRMaj res = new DMatrixRMaj(dimOrig, src.getNumCols());
 		CommonOps_DDRM.mult(unprojectionMatrix, src, res);
-		for (int i = 0; i < dimOrig; i++) {
-			for (int j = 0; j < res.getNumCols(); j++) {
-				res.plus(res.getIndex(i, j), adjustment[i]);
-			}
-		}
-		dst.copyDataFrom(res);
+		DMatrixRMaj ones = MatrixOperations.ones(1, res.getNumCols());
+		DMatrixRMaj add = new DMatrixRMaj(res.getNumRows(), res.getNumCols());
+		CommonOps_DDRM.mult(adjustment, ones, add);
+		CommonOps_DDRM.add(res, add, res);
+		dst.set(res);
+	}
+	
+	/**
+	 * @return a copy of this {@link ProjectingDimensionalityReduction} projection matrix.
+	 */
+	public DMatrixRMaj getProjectionMatrix() {
+		return this.projectionMatrix.copy();
+	}
+	
+	/**
+	 * @return a copy of this {@link ProjectingDimensionalityReduction} unprojection matrix.
+	 */
+	public DMatrixRMaj getUnProjectionMatrix() {
+		return this.unprojectionMatrix.copy();
 	}
 	
 }

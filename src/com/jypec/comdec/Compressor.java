@@ -48,7 +48,7 @@ public class Compressor extends DefaultVerboseable {
 		/** Project all image values onto the reduced space */
 		this.sayLn("Applying dimensionality reduction");
 		dr.setParentVerboseable(this);
-		DMatrixRMaj reduced = dr.trainReduce(srcImg);
+		DMatrixRMaj reduced = dr.trainReduce(srcImg.toDoubleMatrix());
 		
 		/** create the wavelet transform, and coder we'll be using, which won't change over the bands */
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);

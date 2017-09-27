@@ -2,6 +2,8 @@ package com.jypec.comdec;
 
 import java.io.IOException;
 
+import org.ejml.data.DMatrixRMaj;
+
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.data.CodingBlock;
@@ -45,7 +47,7 @@ public class Decompressor extends DefaultVerboseable {
 		cp.loadFrom(input);
 		
 		/** Recover dr setup */
-		DimensionalityReduction dr = DimensionalityReduction.loadFrom(input, cp, ihd);
+		DimensionalityReduction dr = DimensionalityReduction.loadFrom(input);
 		
 		/** Uncompress the data stream */
 		double[][][] reduced = new double[dr.getNumComponents()][lines][samples];
@@ -92,7 +94,9 @@ public class Decompressor extends DefaultVerboseable {
 		ImageDataType srcDT = new ImageDataType(idt.getBitDepth(), idt.isSigned());
 		HyperspectralImageData srcImg = new HyperspectralImageData(null, srcDT, bands, lines, samples);
 		this.sayLn("Projecting back into original dimension...");
-		dr.boost(MatrixTransforms.getMatrix(reduced, dr.getNumComponents(), lines, samples), srcImg);
+		DMatrixRMaj result = new DMatrixRMaj(bands, lines*samples);
+		dr.boost(MatrixTransforms.getMatrix(reduced, dr.getNumComponents(), lines, samples), result);
+		srcImg.copyDataFrom(result);
 		
 		
 		

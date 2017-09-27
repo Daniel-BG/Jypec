@@ -5,12 +5,9 @@ import java.io.IOException;
 import org.ejml.data.DMatrixRMaj;
 
 import com.jypec.cli.InputArguments;
-import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
 import com.jypec.dimreduction.alg.MinimumNoiseFraction;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
-import com.jypec.img.HyperspectralImageData;
-import com.jypec.img.ImageHeaderData;
 import com.jypec.util.DefaultVerboseable;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
@@ -45,43 +42,45 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	
 	
 	/**
-	 * Wrapper to call {@link #train(HyperspectralImageData)} then {@link #reduce(HyperspectralImageData)}
+	 * Wrapper to call {@link #train(DMatrixRMaj)} then {@link #reduce(DMatrixRMaj)}
 	 * @param source
-	 * @return the reduced image after training with source
+	 * @return the reduced matrix after training with source
 	 */
-	public DMatrixRMaj trainReduce(HyperspectralImageData source) {
+	public DMatrixRMaj trainReduce(DMatrixRMaj source) {
 		this.train(source);
 		return this.reduce(source);
 	}
 	
 	/**
-	 * Train this dimensionality reduction with the given image, to analize and then
-	 * be able to {@link #reduce(HyperspectralImageData, HyperspectralImageData)} it (or others)
+	 * Train this dimensionality reduction with the given matrix, to analize and then
+	 * be able to {@link #reduce(DMatrixRMaj, DMatrixRMaj)} it (or others)
 	 * to a lower dimension space
-	 * @param source the source image. Pixels will be analyzed (in the spectral dimension) and
+	 * @param source the source matrix. Samples will be analyzed and
 	 * based on similarities, will later be reduced without the loss of significant information,
-	 * with calls to {@link #reduce(HyperspectralImageData, HyperspectralImageData)}
+	 * with calls to {@link #reduce(DMatrixRMaj, DMatrixRMaj)}.
+	 * <br>
+	 * samples are assumed to be the <b>columns</b> of source
 	 */
-	public abstract void train(HyperspectralImageData source);
+	public abstract void train(DMatrixRMaj source);
 	
 	
 	/**
-	 * Reduces the spectral dimension of the given image, into a new space. 
-	 * The spatial dimensions of the image remain unchanged. 
-	 * @param source the source image
-	 * @return the source image projected into the smaller dimension space
+	 * Reduces the dimension of the given matrix, into a new space. The given matrix
+	 * might be changed.
+	 * @param source the source matrix
+	 * @return the source matrix projected into the smaller dimension space
 	 */
-	public abstract DMatrixRMaj reduce(HyperspectralImageData source);
+	public abstract DMatrixRMaj reduce(DMatrixRMaj source);
 	
 	
 	
 	/**
-	 * Boosts an image's spectral dimension from the reduced space into the original one.
-	 * Spatial dimensions remain unchanged
-	 * @param source the source image (in the reduced dimension space)
-	 * @param dst will hold the result: the original image in the original space
+	 * Boosts a matrix's dimension from the reduced space into the original one.
+	 * Spatial dimensions remain unchanged. The input matrices might change.
+	 * @param source the source matrix (in the reduced dimension space)
+	 * @param dst will hold the result: the original matrix in the original space
 	 */
-	public abstract void boost(DMatrixRMaj source, HyperspectralImageData dst);
+	public abstract void boost(DMatrixRMaj source, DMatrixRMaj dst);
 	
 	
 	/**
@@ -105,16 +104,14 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	
 	
 	/**
-	 * Loads the necessary data from the BitStream so as to be able to {@link #boost(HyperspectralImageData)}
-	 * an image into its original space. The given BitStream must've been filled with 
+	 * Loads the necessary data from the BitStream so as to be able to {@link #boost(DMatrixRMaj)}
+	 * an matrix into its original space. The given BitStream must've been filled with 
 	 * {@link #saveTo(BitStreamDataReaderWriter)}
 	 * @param bw The BitStream handler that encapsulates the BitStream
-	 * @param cp Compressor Parameters in case it needs global info to restore
-	 * @param ihd Image parameters in case it needs information
 	 * @return the proper dimensionality reduction algorithm
 	 * @throws IOException 
 	 */
-	public static final DimensionalityReduction loadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) throws IOException {
+	public static final DimensionalityReduction loadFrom(BitInputStream bw) throws IOException {
 		DimensionalityReduction dr;
 		byte type = bw.readByte();
 		
@@ -138,19 +135,17 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 			throw new IllegalArgumentException("Cannot load that kind of Dimensionality Reduction algorithm: " + type);
 		}
 		
-		dr.doLoadFrom(bw, cp, ihd);
+		dr.doLoadFrom(bw);
 		
 		return dr;
 	}
 	
 	/**
 	 * Load the information specific to this algorithm
-	 * @param bw
-	 * @param cp
-	 * @param ihd
+	 * @param bw where to load from
 	 * @throws IOException 
 	 */
-	public abstract void doLoadFrom(BitInputStream bw, ComParameters cp, ImageHeaderData ihd) throws IOException;
+	public abstract void doLoadFrom(BitInputStream bw) throws IOException;
 	
 	
 	/**
@@ -166,15 +161,19 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 
 	/**
 	 * @param img where to get the max value from
-	 * @return the maximum value that the reduced image can have on its samples
+	 * @return the maximum value that the reduced matrix can have on its samples
 	 */
-	public abstract double getMaxValue(HyperspectralImageData img);
+	public double getMaxValue(DMatrixRMaj img) {
+		throw new UnsupportedOperationException();
+	}
 	
 	/**
 	 * @param img where to get the min value from
-	 * @return the minimum value that the reduced image can have on its samples
+	 * @return the minimum value that the reduced matrix can have on its samples
 	 */
-	public abstract double getMinValue(HyperspectralImageData img);
+	public double getMinValue(DMatrixRMaj img){
+		throw new UnsupportedOperationException();
+	}
 
 	/**
 	 * Load the proper dimensionality reduction algorithm selected in the input arguments

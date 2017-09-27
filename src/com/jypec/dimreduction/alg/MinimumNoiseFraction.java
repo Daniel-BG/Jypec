@@ -5,7 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
-import com.jypec.img.HyperspectralImageData;
+import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.arrays.MatrixTransforms;
 
 /**
@@ -56,39 +56,18 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
 
 	//https://www.researchgate.net/profile/Angelo_Palombo/publication/224354550_Experimental_Approach_to_the_Selection_of_the_Components_in_the_Minimum_Noise_Fraction/links/02bfe51064486871c4000000.pdf
 	@Override
-	public void train(HyperspectralImageData source) {
+	public void train(DMatrixRMaj data) {
 		//initialize values
-		dimOrig = source.getNumberOfBands();
-		int samples = source.getNumberOfLines() * source.getNumberOfSamples();
-		adjustment = new double[dimOrig];
+		dimOrig = data.getNumRows();
 		//find out data and noise. The data is NOT zero-meaned,
 		//while the noise is assumed to be
-		DMatrixRMaj data = source.toDoubleMatrix();
 		DMatrixRMaj noise = extractNoise(data);
 		//CommonOps_DDRM.subtract(data, noise, data);
 		
 		/**Create data covariance matrix */
-        //compute the summation of all the samples
-        DMatrixRMaj ones = new DMatrixRMaj(samples, 1);
-        for (int i = 0; i < ones.getNumElements(); i++) {
-        	ones.set(i, 1);
-        }
-        DMatrixRMaj summ = new DMatrixRMaj(dimOrig, 1);
-        CommonOps_DDRM.mult(data, ones, summ);
-		
-		//compute the mean of all samples
-        DMatrixRMaj meann = new DMatrixRMaj(dimOrig, 1);
-        for( int j = 0; j < dimOrig; j++ ) {
-        	adjustment[j] = summ.get(j) / (double) data.getNumCols();
-        	meann.set(j, adjustment[j]);
-        }
-        
-        //create covariance matrix
-        DMatrixRMaj sigma = new DMatrixRMaj(dimOrig, dimOrig);
-        CommonOps_DDRM.multTransB(data, data, sigma);
-        DMatrixRMaj sigmaHelper = new DMatrixRMaj(dimOrig, dimOrig);
-        CommonOps_DDRM.multTransB(meann, summ, sigmaHelper);
-        CommonOps_DDRM.subtract(sigma, sigmaHelper, sigma);
+		adjustment = new DMatrixRMaj(dimOrig, 1);
+		DMatrixRMaj sigma = new DMatrixRMaj(dimOrig, dimOrig);
+		MatrixOperations.generateCovarianceMatrix(data, sigma, null, adjustment);
 		/*********************************/
         
         /**Create noise covariance matrix */
@@ -141,14 +120,6 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
         this.say("Finished");
 	}
 
-	@Override
-	public double getMaxValue(HyperspectralImageData img) {
-		throw new UnsupportedOperationException();
-	}
 
-	@Override
-	public double getMinValue(HyperspectralImageData img) {
-		throw new UnsupportedOperationException();
-	}
 
 }
