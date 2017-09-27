@@ -43,14 +43,13 @@ public class ImageOperations {
 	
 	/**
 	 * @param h1
+	 * @param avg precalculated average for faster computation (if null will calculate)
 	 * @return the variance of the samples of the given image
 	 */
-	public static double variance(DMatrixRMaj h1) {
-		double avg = averageValue(h1);
-		//SimpleMatrix m = SimpleMatrix.wrap(new DMatrixRMaj(h1));
-		//m.plus(-avg);
-		//return m.elementMult(m).elementSum() / (double) m.getNumElements();
-		
+	public static double variance(DMatrixRMaj h1, Double avg) {
+		if (avg == null) {
+			avg = averageValue(h1);
+		}
 		double acc = 0;
 		for (int j = 0; j < h1.getNumRows(); j++) {
 			for (int k = 0; k < h1.getNumCols(); k++) {
@@ -58,32 +57,41 @@ public class ImageOperations {
 				acc += val * val;
 			}
 		}
-		int dim = h1.getNumElements();
-		return acc / (double) dim;
+		return acc / (double) h1.getNumElements();
 	}
 	
 	/**
 	 * @param h1
 	 * @param h2 
+	 * @param avg1 average of h1 used for speed up. If not available send null
+	 * @param avg2 average of h2 used for speed up. If not available send null
 	 * @return the covariance of both images
 	 */
-	public static double covariance(DMatrixRMaj h1, DMatrixRMaj h2) {
-		double avg1 = averageValue(h1);
-		double avg2 = averageValue(h2);
-		SimpleMatrix m1 = SimpleMatrix.wrap(new DMatrixRMaj(h1));
-		SimpleMatrix m2 = SimpleMatrix.wrap(new DMatrixRMaj(h2));
-		m1.plus(-avg1);
-		m2.plus(-avg2);
+	public static double covariance(DMatrixRMaj h1, DMatrixRMaj h2, Double avg1, Double avg2) {
+		ImageComparisons.checkDimensions(h1, h2);
+		if (avg1 == null) {
+			avg1 = averageValue(h1);
+		}
+		if (avg2 == null) {
+			avg2 = averageValue(h2);
+		}
+		double acc = 0;
+		for (int i = 0; i < h1.getNumRows(); i++) {
+			for (int j = 0; j < h1.getNumCols(); j++) {
+				acc += (h1.get(i, j) - avg1) * (h2.get(i, j) - avg2);
+			}
+		}
 
-		return m1.elementMult(m2).elementSum() / (double) m1.getNumElements();
+		return acc / (double) h1.getNumElements();
 	}
 	
 	/**
 	 * @param h1
+	 * @param avg average of h1, used to speed up calculations. if null, it will be calculated
 	 * @return the std of the samples of the given image
 	 */
-	public static double std(DMatrixRMaj h1) {
-		return Math.sqrt(variance(h1));
+	public static double std(DMatrixRMaj h1, Double avg) {
+		return Math.sqrt(variance(h1, avg));
 	}
 
 }

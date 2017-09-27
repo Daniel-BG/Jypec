@@ -1,8 +1,6 @@
 package com.jypec.distortion;
 
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.simple.SimpleMatrix;
 
 /**
  * @author Daniel
@@ -45,7 +43,7 @@ public class ImageComparisons {
 	 * @return the signal noise ratio between the given images
 	 */
 	public static double SNR(DMatrixRMaj h1, DMatrixRMaj h2) {
-		double var = ImageOperations.variance(h1);
+		double var = ImageOperations.variance(h1, null);
 		double mse = MSE(h1, h2);
 		return 10 * Math.log10(var / mse);
 	}
@@ -65,10 +63,14 @@ public class ImageComparisons {
 	 */
 	public static double MSE (DMatrixRMaj h1, DMatrixRMaj h2) {
 		checkDimensions(h1, h2);
-		SimpleMatrix m1 = SimpleMatrix.wrap(new DMatrixRMaj(h1));
-		SimpleMatrix m2 = SimpleMatrix.wrap(new DMatrixRMaj(h2));
-		SimpleMatrix m3 = m1.minus(m2);
-		return m3.elementMult(m3).elementSum() / (double) m3.getNumElements();
+		double acc = 0;
+		for (int i = 0; i < h1.getNumRows(); i++) {
+			for (int j = 0; j < h2.getNumCols(); j++) {
+				double val = h1.get(i, j) - h2.get(i, j);
+				acc += val * val;
+			}
+		}
+		return acc / (double) h1.getNumElements();
 	}
 	
 	/**
@@ -78,10 +80,16 @@ public class ImageComparisons {
 	 */
 	public static double maxSE (DMatrixRMaj h1, DMatrixRMaj h2) {
 		checkDimensions(h1, h2);
-		SimpleMatrix m1 = SimpleMatrix.wrap(new DMatrixRMaj(h1));
-		SimpleMatrix m2 = SimpleMatrix.wrap(new DMatrixRMaj(h2));
-		SimpleMatrix m3 = m1.minus(m2);
-		return m3.elementMult(m3).elementMaxAbs();
+		double acc = Double.MIN_VALUE;
+		for (int i = 0; i < h1.getNumRows(); i++) {
+			for (int j = 0; j < h2.getNumCols(); j++) {
+				double val = h1.get(i, j) - h2.get(i, j);
+				val *= val;
+				if (val > acc)
+					acc = val;
+			}
+		}
+		return acc;
 	}	
 	
 	/**
@@ -111,9 +119,9 @@ public class ImageComparisons {
 		//add up all squared differences
 		double mu1 = ImageOperations.averageValue(h1);
 		double mu2 = ImageOperations.averageValue(h2);
-		double v1 = ImageOperations.variance(h1);
-		double v2 = ImageOperations.variance(h2);
-		double sigma = ImageOperations.covariance(h1, h2);
+		double v1 = ImageOperations.variance(h1, mu1);
+		double v2 = ImageOperations.variance(h2, mu2);
+		double sigma = ImageOperations.covariance(h1, h2, mu1, mu2);
 		double L = dynRange;
 		
 		double c1 = k1*k1*L*L;
@@ -125,7 +133,12 @@ public class ImageComparisons {
 				((mu1*mu1 + mu2*mu2 + c1) * (v1 + v2 + c2));
 	}
 
-	private static void checkDimensions(DMatrixRMaj h1, DMatrixRMaj h2) {
+	/**
+	 * Check that both matrices are of the same shape. Will throw exception otherwise
+	 * @param h1
+	 * @param h2
+	 */
+	public static void checkDimensions(DMatrixRMaj h1, DMatrixRMaj h2) {
 		if (h1.getNumCols() != h2.getNumCols() || h1.getNumRows() != h2.getNumRows())
 			throw new IllegalArgumentException("Image sizes do not match!");
 	}
