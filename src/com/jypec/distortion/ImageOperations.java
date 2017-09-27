@@ -1,7 +1,7 @@
 package com.jypec.distortion;
 
-import com.jypec.img.HyperspectralBandData;
-import com.jypec.img.HyperspectralImageData;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.simple.SimpleMatrix;
 
 /**
  * @author Daniel
@@ -14,39 +14,13 @@ public class ImageOperations {
 	 * @return a pair of integers, the firs one being the minimum value within the image, 
 	 * the second one being the maximum. 
 	 */
-	public static int[] minMaxVal(HyperspectralImageData h1) {
-		int[] minMax = new int[2];
+	public static double[] minMaxVal(DMatrixRMaj h1) {
+		double[] minMax = new double[2];
 		minMax[0] = Integer.MAX_VALUE;
 		minMax[1] = Integer.MIN_VALUE;
-		for (int i = 0; i < h1.getNumberOfBands(); i++) {
-			for (int j = 0; j < h1.getNumberOfLines(); j++) {
-				for (int k = 0; k < h1.getNumberOfSamples(); k++) {
-					int sample = h1.getValueAt(i, j, k);
-					if (minMax[0] > sample) {
-						minMax[0] = sample;
-					}
-					if (minMax[1] < sample) {
-						minMax[1] = sample;
-					}
-				}
-			}
-		}
-		return minMax;
-	}
-
-	
-	/**
-	 * @param h1
-	 * @return a pair of integers, the firs one being the minimum value within the band, 
-	 * the second one being the maximum. 
-	 */
-	public static int[] minMaxVal(HyperspectralBandData h1) {
-		int[] minMax = new int[2];
-		minMax[0] = Integer.MAX_VALUE;
-		minMax[1] = Integer.MIN_VALUE;
-		for (int j = 0; j < h1.getNumberOfLines(); j++) {
-			for (int k = 0; k < h1.getNumberOfSamples(); k++) {
-				int sample = h1.getValueAt(j, k);
+		for (int i = 0; i < h1.getNumRows(); i++) {
+			for (int j = 0; j < h1.getNumCols(); j++) {
+				double sample = h1.get(i, j);
 				if (minMax[0] > sample) {
 					minMax[0] = sample;
 				}
@@ -58,75 +32,24 @@ public class ImageOperations {
 		return minMax;
 	}
 	
-	
 	/**
 	 * @param h1
 	 * @return the average value of the samples in h1
 	 */
-	public static double averageValue(HyperspectralImageData h1) {
-		double acc = 0;
-		for (int i = 0; i < h1.getNumberOfBands(); i++) {
-			for (int j = 0; j < h1.getNumberOfLines(); j++) {
-				for (int k = 0; k < h1.getNumberOfSamples(); k++) {
-					acc += (double) h1.getValueAt(i, j, k);
-				}
-			}
-		}
-		int dim = h1.getNumberOfBands() * h1.getNumberOfLines() * h1.getNumberOfSamples();
-		return acc / (double) dim;
-	}
-	
-	
-	/**
-	 * @param h1
-	 * @return the average value of the samples in h1
-	 */
-	public static double averageValue(HyperspectralBandData h1) {
-		double acc = 0;
-		for (int j = 0; j < h1.getNumberOfLines(); j++) {
-			for (int k = 0; k < h1.getNumberOfSamples(); k++) {
-				acc += (double) h1.getValueAt(j, k);
-			}
-		}
-		int dim = h1.getNumberOfLines() * h1.getNumberOfSamples();
-		return acc / (double) dim;
-	}
-	
-	
-	/**
-	 * @param h1
-	 * @return the variance of the samples of the given image
-	 */
-	public static double variance(HyperspectralImageData h1) {
-		double avg = averageValue(h1);
-		double acc = 0;
-		for (int i = 0; i < h1.getNumberOfBands(); i++) {
-			for (int j = 0; j < h1.getNumberOfLines(); j++) {
-				for (int k = 0; k < h1.getNumberOfSamples(); k++) {
-					double val = (double) h1.getValueAt(i, j, k) - avg;
-					acc += val * val;
-				}
-			}
-		}
-		int dim = h1.getNumberOfBands() * h1.getNumberOfLines() * h1.getNumberOfSamples();
-		return acc / (double) dim;
+	public static double averageValue(DMatrixRMaj h1) {
+		SimpleMatrix m = SimpleMatrix.wrap(h1);
+		return m.elementSum() / (double) m.getNumElements();
 	}
 	
 	/**
 	 * @param h1
 	 * @return the variance of the samples of the given image
 	 */
-	public static double variance(HyperspectralBandData h1) {
+	public static double variance(DMatrixRMaj h1) {
 		double avg = averageValue(h1);
-		double acc = 0;
-		for (int j = 0; j < h1.getNumberOfLines(); j++) {
-			for (int k = 0; k < h1.getNumberOfSamples(); k++) {
-				double val = (double) h1.getValueAt(j, k) - avg;
-				acc += val * val;
-			}
-		}
-		int dim = h1.getNumberOfLines() * h1.getNumberOfSamples();
-		return acc / (double) dim;
+		SimpleMatrix m = SimpleMatrix.wrap(new DMatrixRMaj(h1));
+		m.plus(-avg);
+		return m.elementMult(m).elementSum() / (double) m.getNumElements();
 	}
 	
 	/**
@@ -134,57 +57,23 @@ public class ImageOperations {
 	 * @param h2 
 	 * @return the covariance of both images
 	 */
-	public static double covariance(HyperspectralImageData h1, HyperspectralImageData h2) {
+	public static double covariance(DMatrixRMaj h1, DMatrixRMaj h2) {
 		double avg1 = averageValue(h1);
 		double avg2 = averageValue(h2);
-		double acc = 0;
-		for (int i = 0; i < h1.getNumberOfBands(); i++) {
-			for (int j = 0; j < h1.getNumberOfLines(); j++) {
-				for (int k = 0; k < h1.getNumberOfSamples(); k++) {
-					double v1 = (double) h1.getValueAt(i, j, k);
-					double v2 = (double) h2.getValueAt(i, j, k);
-					acc += (v1 - avg1) * (v2 - avg2);
-				}
-			}
-		}
-		int dim = h1.getTotalNumberOfSamples();
-		return acc / (double) dim ;
-	}
-	
-	/**
-	 * @param h1
-	 * @param h2 
-	 * @return the covariance of both images
-	 */
-	public static double covariance(HyperspectralBandData h1, HyperspectralBandData h2) {
-		double avg1 = averageValue(h1);
-		double avg2 = averageValue(h2);
-		double acc = 0;
-		for (int j = 0; j < h1.getNumberOfLines(); j++) {
-			for (int k = 0; k < h1.getNumberOfSamples(); k++) {
-				double v1 = (double) h1.getValueAt(j, k);
-				double v2 = (double) h2.getValueAt(j, k);
-				acc += (v1 - avg1) * (v2 - avg2);
-			}
-		}
-		int dim = h1.getNumberOfLines() * h2.getNumberOfSamples();
-		return acc / (double) dim ;
-	}
-	
-	
-	/**
-	 * @param h1
-	 * @return the std of the samples of the given image
-	 */
-	public static double std(HyperspectralImageData h1) {
-		return Math.sqrt(variance(h1));
+		SimpleMatrix m1 = SimpleMatrix.wrap(new DMatrixRMaj(h1));
+		SimpleMatrix m2 = SimpleMatrix.wrap(new DMatrixRMaj(h2));
+		m1.plus(-avg1);
+		m2.plus(-avg2);
+
+		return m1.elementMult(m2).elementSum() / (double) m1.getNumElements();
 	}
 	
 	/**
 	 * @param h1
 	 * @return the std of the samples of the given image
 	 */
-	public static double std(HyperspectralBandData h1) {
+	public static double std(DMatrixRMaj h1) {
 		return Math.sqrt(variance(h1));
 	}
+
 }

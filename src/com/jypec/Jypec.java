@@ -3,6 +3,9 @@ package com.jypec;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import org.ejml.data.DMatrixRMaj;
+
 import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
 import com.jypec.comdec.Compressor;
@@ -108,13 +111,16 @@ public class Jypec {
 		}
 		
 		//output metrics
-		System.out.println("RAW PSNR is: " + ImageComparisons.rawPSNR(first.getData(), second.getData()));
-		System.out.println("Normalized PSNR is: " + ImageComparisons.normalizedPSNR(first.getData(), second.getData()));
-		System.out.println("SNR is: " + ImageComparisons.SNR(first.getData(), second.getData()));
-		System.out.println("MSE is: " + ImageComparisons.MSE(first.getData(), second.getData()));
-		System.out.println("maxSE is: " + ImageComparisons.maxSE(first.getData(), second.getData()));
-		System.out.println("MSR is: " + ImageComparisons.MSR(first.getData(), second.getData()));
-		System.out.println("SSIM is: " + ImageComparisons.SSIM(first.getData(), second.getData()));
+		DMatrixRMaj fdm = first.getData().toDoubleMatrix();
+		DMatrixRMaj sdm = second.getData().toDoubleMatrix();
+		double dynRange = first.getData().getDataType().getDynamicRange();
+		System.out.println("RAW PSNR is: " + ImageComparisons.rawPSNR(fdm, sdm, dynRange));
+		System.out.println("Normalized PSNR is: " + ImageComparisons.normalizedPSNR(fdm, sdm));
+		System.out.println("SNR is: " + ImageComparisons.SNR(fdm, sdm));
+		System.out.println("MSE is: " + ImageComparisons.MSE(fdm, sdm));
+		System.out.println("maxSE is: " + ImageComparisons.maxSE(fdm, sdm));
+		System.out.println("MSR is: " + ImageComparisons.MSR(fdm, sdm));
+		System.out.println("SSIM is: " + ImageComparisons.SSIM(fdm, sdm, dynRange));
 	}
 	
 }
