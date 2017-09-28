@@ -26,4 +26,19 @@ public class BitTwiddling {
 		return (number > 0) && ((number & (number - 1)) == 0);
 	}
 	
+	/**
+	 * Calculate the number of bits needed to store the given number, which is assumed unsigned.
+	 * This function is not efficient so change it if you plan on intensive calling
+	 * @param number
+	 * @return the number of bits needed to represent the given number
+	 */
+	public static int bitsOf(int number) {
+		int result = 0;
+		while (number != 0) {
+			result++;
+			number >>>= 1;
+		}
+		return result;
+	}
+	
 }

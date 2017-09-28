@@ -91,8 +91,8 @@ public class Decompressor extends DefaultVerboseable {
 		ImageDataType srcDT = new ImageDataType(idt.getBitDepth(), idt.isSigned());
 		HyperspectralImageData srcImg = new HyperspectralImageData(null, srcDT, bands, lines, samples);
 		this.sayLn("Projecting back into original dimension...");
-		DMatrixRMaj result = new DMatrixRMaj(bands, lines*samples);
-		cp.dr.boost(MatrixTransforms.getMatrix(reduced, cp.dr.getNumComponents(), lines, samples), result);
+		DMatrixRMaj result = cp.dr.boost(MatrixTransforms.getMatrix(reduced, cp.dr.getNumComponents(), lines, samples));
+		
 		srcImg.copyDataFrom(result);
 		
 		

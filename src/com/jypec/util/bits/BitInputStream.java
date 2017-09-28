@@ -275,6 +275,36 @@ public class BitInputStream extends InputStream {
 	}
 	
 	/**
+	 * Reads an integer array of the specified length
+	 * @param length
+	 * @return the array
+	 * @throws IOException
+	 */
+	public int[] readIntArray(int length) throws IOException {
+		int[] res = new int[length];
+		for (int i = 0; i < length; i++) {
+			res[i] = this.readInt();
+		}
+		return res;
+	}
+	
+	
+	/**
+	 * Reads an integer array of the specified length
+	 * @param bits the number of bits of each (unsigned) integer to be read
+	 * @param length
+	 * @return the array
+	 * @throws IOException
+	 */
+	public int[] readNBitNumberArray(int bits, int length) throws IOException {
+		int[] res = new int[length];
+		for (int i = 0; i < length; i++) {
+			res[i] = this.readNBitNumber(bits);
+		}
+		return res;
+	}
+	
+	/**
 	 * Reads an array of the specified length
 	 * @param length
 	 * @return the read array
@@ -312,6 +342,8 @@ public class BitInputStream extends InputStream {
 	public int getLastReadBits() {
 		return this.lastBitsRead;
 	}
+
+
 
 
 }

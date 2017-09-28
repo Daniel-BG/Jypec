@@ -43,12 +43,14 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public void boost(DMatrixRMaj src, DMatrixRMaj dst) {
+	public DMatrixRMaj boost(DMatrixRMaj src) {
+		DMatrixRMaj dst = new DMatrixRMaj(this.numComponents, src.getNumCols());
 		for (int i = 0; i < this.numComponents; i++) {
-			for (int j = 0; j < dst.getNumCols(); j++) {
+			for (int j = 0; j < src.getNumCols(); j++) {
 				dst.set(i, j, src.get(i, j));
 			}
 		}
+		return dst;
 	}
 
 	@Override

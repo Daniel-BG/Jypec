@@ -44,5 +44,14 @@ public abstract class DefaultVerboseable implements Verboseable {
 			System.out.println(s);
 		}
 	}
+	
+	@Override
+	public void continueSaying(String s) {
+		if (parent != null) {
+			this.parent.continueSaying(s);
+		} else if (verbose()) {
+			System.out.print(s);
+		}
+	}
 
 }

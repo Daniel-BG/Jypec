@@ -83,7 +83,7 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	}
 
 	@Override
-	public void boost(DMatrixRMaj src, DMatrixRMaj dst) {
+	public DMatrixRMaj boost(DMatrixRMaj src) {
 		this.sayLn("Boosting samples from reduced space to the original...");
 		DMatrixRMaj res = new DMatrixRMaj(dimOrig, src.getNumCols());
 		CommonOps_DDRM.mult(unprojectionMatrix, src, res);
@@ -91,7 +91,7 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 		DMatrixRMaj add = new DMatrixRMaj(res.getNumRows(), res.getNumCols());
 		CommonOps_DDRM.mult(adjustment, ones, add);
 		CommonOps_DDRM.add(res, add, res);
-		dst.set(res);
+		return res;
 	}
 	
 	/**

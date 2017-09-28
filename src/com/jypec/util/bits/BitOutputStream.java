@@ -240,6 +240,31 @@ public class BitOutputStream extends OutputStream {
 	}
 	
 	/**
+	 * Write the given array up to the given position
+	 * @param array
+	 * @param length
+	 * @throws IOException
+	 */
+	public void writeIntArray(int[] array, int length) throws IOException {
+		for (int i = 0; i < length; i++) {
+			this.writeInt(array[i]);
+		}
+	}
+	
+	/**
+	 * Write the given array up to the given position
+	 * @param array
+	 * @param bits the bits to write from each integer
+	 * @param length
+	 * @throws IOException
+	 */
+	public void writeNBitNumberArray(int[] array, int bits, int length) throws IOException {
+		for (int i = 0; i < length; i++) {
+			this.writeNBitNumber(array[i], bits);
+		}
+	}
+	
+	/**
 	 * Writes the given array up to the given position
 	 * @param array
 	 * @param length
@@ -268,6 +293,8 @@ public class BitOutputStream extends OutputStream {
 	public int getBitsOutput() {
 		return this.bitsOutput;
 	}
+
+
 	
 
 }

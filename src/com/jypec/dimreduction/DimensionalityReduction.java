@@ -9,6 +9,7 @@ import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
 import com.jypec.dimreduction.alg.IndependentComponentAnalysis;
 import com.jypec.dimreduction.alg.MinimumNoiseFraction;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
+import com.jypec.dimreduction.alg.VectorQuantizationPrincipalComponentAnalysis;
 import com.jypec.util.DefaultVerboseable;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
@@ -31,7 +32,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 		/** {@link MinimumNoiseFraction} */
 		DRA_MNF,
 		/** {@link IndependentComponentAnalysis} */
-		DRA_ICA
+		DRA_ICA,
+		/** {@link VectorQuantizationPrincipalComponentAnalysis} */
+		DRA_VQPCA
 	}
 	
 	private DimensionalityReductionAlgorithm dra;
@@ -81,9 +84,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	 * Boosts a matrix's dimension from the reduced space into the original one.
 	 * Spatial dimensions remain unchanged. The input matrices might change.
 	 * @param source the source matrix (in the reduced dimension space)
-	 * @param dst will hold the result: the original matrix in the original space
+	 * @return the original matrix in the original space
 	 */
-	public abstract void boost(DMatrixRMaj source, DMatrixRMaj dst);
+	public abstract DMatrixRMaj boost(DMatrixRMaj source);
 	
 	
 	/**
@@ -136,6 +139,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 			break;
 		case DRA_ICA:
 			dr = new IndependentComponentAnalysis();
+			break;
+		case DRA_VQPCA:
+			dr = new VectorQuantizationPrincipalComponentAnalysis();
 			break;
 		default:
 			throw new IllegalArgumentException("Cannot load that kind of Dimensionality Reduction algorithm: " + type);
@@ -204,6 +210,13 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 				IndependentComponentAnalysis ica = new IndependentComponentAnalysis();
 				ica.setNumComponents(dimensions);
 				return ica;
+			} else if (args.reductionArgs.length == 3 && args.reductionArgs[0].toLowerCase().equals("vqpca")) {
+				int dimensions = Integer.parseInt(args.reductionArgs[1]);
+				int clusters = Integer.parseInt(args.reductionArgs[2]);
+				VectorQuantizationPrincipalComponentAnalysis vqpca = new VectorQuantizationPrincipalComponentAnalysis();
+				vqpca.setNumComponents(dimensions);
+				vqpca.setNumClusters(clusters);
+				return vqpca;
 			}
 		}
 		//default to no reduction

@@ -1,20 +1,15 @@
 package com.jypec.dimreduction.alg;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
+import com.jypec.dimreduction.JSATWrapper;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.arrays.MatrixOperations;
 
 import jsat.SimpleDataSet;
-import jsat.classifiers.DataPoint;
 import jsat.datatransform.FastICA;
-import jsat.linear.DenseVector;
 import jsat.linear.Matrix;
-import jsat.linear.Vec;
 
 /**
  * Wrapper for the ICA algorithm from
@@ -39,17 +34,10 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 		MatrixOperations.generateCovarianceMatrix(source, null, null, adjustment); //calculate mean instead of doing more reflection hacks
 		
 		/** Transform source to JSAT notation */
-		List<DataPoint> points = new ArrayList<DataPoint>();
-		for (int i = 0; i < source.getNumCols(); i++) {
-			double[] array = new double[source.getNumRows()];
-			for (int j = 0; j < source.getNumRows(); j++) {
-				array[j] = source.get(j, i) - adjustment.get(j);
-			}
-			Vec vec = new DenseVector(array);
-			DataPoint dp = new DataPoint(vec);
-			points.add(dp);
-		}
-		SimpleDataSet dataSet = new SimpleDataSet(points);
+		DMatrixRMaj adjustmentSubstract = new DMatrixRMaj(source.getNumRows(), source.getNumCols());
+		CommonOps_DDRM.mult(adjustment, MatrixOperations.ones(1, source.getNumCols()), adjustmentSubstract);
+		CommonOps_DDRM.subtract(source, adjustmentSubstract, adjustmentSubstract);
+		SimpleDataSet dataSet = JSATWrapper.toDataSet(adjustmentSubstract);
 		
 		/** Perform ICA */
 		FastICA fica = new FastICA(dimProj);
@@ -57,29 +45,12 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 		fica.fit(dataSet);
 		
 		/** Reflection hackity hack to get private fields */
-		Matrix mixing, unmixing;
-		try {
-			Field f = fica.getClass().getDeclaredField("mixing");
-			f.setAccessible(true);
-			mixing = (Matrix) f.get(fica);
-			
-			f = fica.getClass().getDeclaredField("unmixing");
-			f.setAccessible(true);
-			unmixing = (Matrix) f.get(fica);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new IllegalStateException("Failed when reflecting for ICA");
-		}
+		Matrix mixing = (Matrix) JSATWrapper.getField(fica, "mixing");
+		Matrix unmixing = (Matrix) JSATWrapper.getField(fica, "unmixing");
 		
 		/** Get data in a readable way */
-		this.projectionMatrix = new DMatrixRMaj(this.dimProj, this.dimOrig);
-		this.unprojectionMatrix = new DMatrixRMaj(this.dimOrig, this.dimProj);
-		for (int i = 0; i < this.dimProj; i++) {
-			for (int j = 0; j < this.dimOrig; j++) {
-				this.projectionMatrix.set(i, j, unmixing.get(j, i));
-				this.unprojectionMatrix.set(j, i, mixing.get(i, j));
-			}
-		}
+		this.projectionMatrix = JSATWrapper.toDMatrixRMaj(unmixing, true);
+		this.unprojectionMatrix = JSATWrapper.toDMatrixRMaj(mixing, true);
 	}
 	
 

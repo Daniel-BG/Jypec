@@ -35,6 +35,11 @@ public interface Verboseable {
 	 */
 	public void sayLn(String s);
 	
+	/**
+	 * Inline say for when we do not want to add tabs
+	 * @param s
+	 */
+	public void continueSaying(String s);
 	
 	/**
 	 * @param parent another verboseable object within which this one will work, so that 
