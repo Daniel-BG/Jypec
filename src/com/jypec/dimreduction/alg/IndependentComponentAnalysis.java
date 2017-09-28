@@ -34,12 +34,16 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 	@Override
 	public void train(DMatrixRMaj source) {		
 		dimOrig = source.getNumRows();
+		/** Get mean first, since we will be centering the data around zero */
+		adjustment = new DMatrixRMaj(this.dimOrig, 1);
+		MatrixOperations.generateCovarianceMatrix(source, null, null, adjustment); //calculate mean instead of doing more reflection hacks
+		
 		/** Transform source to JSAT notation */
 		List<DataPoint> points = new ArrayList<DataPoint>();
 		for (int i = 0; i < source.getNumCols(); i++) {
 			double[] array = new double[source.getNumRows()];
 			for (int j = 0; j < source.getNumRows(); j++) {
-				array[j] = source.get(j, i);
+				array[j] = source.get(j, i) - adjustment.get(j);
 			}
 			Vec vec = new DenseVector(array);
 			DataPoint dp = new DataPoint(vec);
@@ -49,16 +53,17 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 		
 		/** Perform ICA */
 		FastICA fica = new FastICA(dimProj);
+		fica.setPreWhitened(true);
 		fica.fit(dataSet);
 		
-		Matrix mixing, unmixing;
 		/** Reflection hackity hack to get private fields */
+		Matrix mixing, unmixing;
 		try {
-			Field f = fica.getClass().getDeclaredField("mixing"); //NoSuchFieldException
+			Field f = fica.getClass().getDeclaredField("mixing");
 			f.setAccessible(true);
 			mixing = (Matrix) f.get(fica);
 			
-			f = fica.getClass().getDeclaredField("unmixing"); //NoSuchFieldException
+			f = fica.getClass().getDeclaredField("unmixing");
 			f.setAccessible(true);
 			unmixing = (Matrix) f.get(fica);
 		} catch (Exception e) {
@@ -75,10 +80,6 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 				this.unprojectionMatrix.set(j, i, mixing.get(i, j));
 			}
 		}
-		
-		adjustment = new DMatrixRMaj(this.dimOrig, 1);
-		MatrixOperations.generateCovarianceMatrix(source, null, null, adjustment); //calculate mean instead of doing more reflection hacks
-		System.out.println("Test");
 	}
 	
 

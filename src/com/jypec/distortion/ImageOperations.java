@@ -1,6 +1,7 @@
 package com.jypec.distortion;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
 
 /**
@@ -92,6 +93,28 @@ public class ImageOperations {
 	 */
 	public static double std(DMatrixRMaj h1, Double avg) {
 		return Math.sqrt(variance(h1, avg));
+	}
+	
+	/**
+	 * Calculate the mean difference of each row
+	 * @param h1
+	 * @param h2
+	 * @return a matrix of size (h1.rows, 1) containing the mean diff of each row of h1 and h2
+	 */
+	public static DMatrixRMaj meanDiff(DMatrixRMaj h1, DMatrixRMaj h2) {
+		ImageComparisons.checkDimensions(h1, h2);
+		
+		DMatrixRMaj res = new DMatrixRMaj(h1.getNumRows(), 1);
+		
+		for (int i = 0; i < h1.getNumRows(); i++) {
+			for (int j = 0; j < h1.getNumCols(); j++) {
+				res.add(i, 0, h1.get(i, j) - h2.get(i, j));
+			}
+		}
+		
+		CommonOps_DDRM.divide(res, h1.getNumCols());
+		
+		return res;
 	}
 
 }
