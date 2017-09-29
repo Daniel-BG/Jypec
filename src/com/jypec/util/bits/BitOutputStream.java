@@ -67,7 +67,7 @@ public class BitOutputStream extends OutputStream {
 	 * @param bit
 	 * @throws IOException 
 	 */
-	public void putBit(int bit) throws IOException {
+	public void writeBit(int bit) throws IOException {
 		if (bit != 0 && bit != 1) {
 			throw new IllegalStateException("Whoops @FIFOBitStream.putBit");
 		}
@@ -90,8 +90,8 @@ public class BitOutputStream extends OutputStream {
 	 * @param bit
 	 * @throws IOException 
 	 */
-	public void putBit(Bit bit) throws IOException {
-		this.putBit(bit.toInteger());
+	public void writeBit(Bit bit) throws IOException {
+		this.writeBit(bit.toInteger());
 	}
 
 
@@ -101,19 +101,19 @@ public class BitOutputStream extends OutputStream {
 	 * @param ordering
 	 * @throws IOException 
 	 */
-	public void putBits(int bits, int quantity, BitStreamConstants ordering) throws IOException {
+	public void writeBits(int bits, int quantity, BitStreamConstants ordering) throws IOException {
 		switch (ordering) {
 		case ORDERING_LEFTMOST_FIRST:
 			//adjust the bits so that the first one is in the leftmost position
 			bits <<= Integer.SIZE - quantity;
 			for (int i = 0; i < quantity; i++) {
-				putBit(Bit.fromInteger(bits & BitStreamConstants.INT_LEFT_BIT_MASK));
+				writeBit(Bit.fromInteger(bits & BitStreamConstants.INT_LEFT_BIT_MASK));
 				bits <<= 1;
 			}
 			break;
 		case ORDERING_RIGHTMOST_FIRST:
 			for (int i = 0; i < quantity; i++) {
-				putBit(Bit.fromInteger(bits & BitStreamConstants.INT_RIGHT_BIT_MASK));
+				writeBit(Bit.fromInteger(bits & BitStreamConstants.INT_RIGHT_BIT_MASK));
 				bits >>= 1;
 			}
 			break;
@@ -128,7 +128,7 @@ public class BitOutputStream extends OutputStream {
 	 * @throws IOException 
 	 */
 	public void writeNBitNumber(int i, int bits) throws IOException {
-		this.putBits(i, bits, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+		this.writeBits(i, bits, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 	}
 	
 	/**

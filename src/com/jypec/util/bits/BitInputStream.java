@@ -74,14 +74,14 @@ public class BitInputStream extends InputStream {
 	 * @throws IOException 
 	 */
 	public Bit getBit() throws IOException {
-		return Bit.fromInteger(this.getBitAsInt());
+		return Bit.fromInteger(this.readBitAsInt());
 	}
 	
 	/**
 	 * @return the next bit from the input stream as an integer (a zero means the bit ZERO, anything else is a ONE)
 	 * @throws IOException 
 	 */
-	public int getBitAsInt() throws IOException {
+	public int readBitAsInt() throws IOException {
 		if (availableBits == 0) {
 			this.buffer = this.source.read();
 			if (this.buffer == -1) {
@@ -104,21 +104,21 @@ public class BitInputStream extends InputStream {
 	 * @return the specified number of bits
 	 * @throws IOException 
 	 */
-	public int getBits(int quantity, BitStreamConstants ordering) throws IOException {
+	public int readBits(int quantity, BitStreamConstants ordering) throws IOException {
 		int result = 0;
 		switch (ordering) {
 		case ORDERING_RIGHTMOST_FIRST:
 			for (int i = 0; i < quantity; i++) {
 				result >>= 1;
 				result &= BitStreamConstants.INT_LEFT_BIT_MASK;
-				result |= getBitAsInt() << (Integer.SIZE - 1);
+				result |= readBitAsInt() << (Integer.SIZE - 1);
 			}
 			result >>>= (Integer.SIZE - quantity);
 			break;
 		case ORDERING_LEFTMOST_FIRST:
 			for (int i = 0; i < quantity; i++) {
 				result <<= 1;
-				result |= getBitAsInt();
+				result |= readBitAsInt();
 			}
 			break;
 		}
@@ -148,14 +148,14 @@ public class BitInputStream extends InputStream {
 			for (int i = 0; i < quantity; i++) {
 				result >>= 1;
 				result &= BitStreamConstants.INT_LEFT_BIT_MASK;
-				result |= getBitAsInt() << (Integer.SIZE - 1);
+				result |= readBitAsInt() << (Integer.SIZE - 1);
 			}
 			result >>>= (Integer.SIZE - quantity);
 			break;
 		case ORDERING_LEFTMOST_FIRST:
 			for (int i = 0; i < quantity; i++) {
 				result <<= 1;
-				result |= getBitAsInt();
+				result |= readBitAsInt();
 			}
 			break;
 		}

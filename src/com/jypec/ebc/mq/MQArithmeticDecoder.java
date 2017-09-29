@@ -81,7 +81,7 @@ public class MQArithmeticDecoder {
 		if (this.codeBytesRead == this.maxCodeBytesToRead) {
 			this.normalizedLowerBound += 0xff;
 		} else {			
-			this.lastByteRead = input.getBits(8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+			this.lastByteRead = input.readBits(8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 			if (this.tempByteBuffer == 0xff && this.lastByteRead >= MQConstants.SPECIAL_CODE_START_INTERVAL) {
 				this.maxCodeBytesToRead = this.codeBytesRead; //max has been reached, automatically stop reading further
 				this.normalizedLowerBound += 0xff;

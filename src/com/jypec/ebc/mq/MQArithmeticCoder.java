@@ -83,8 +83,8 @@ public class MQArithmeticCoder {
 	 * @throws IOException 
 	 */
 	public void markEndOfStream(BitOutputStream output) throws IOException {
-		output.putBits(MQConstants.BYTE_MARKER, 8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
-		output.putBits(MQConstants.BYTE_END_OF_MQ_CODER, 8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+		output.writeBits(MQConstants.BYTE_MARKER, 8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+		output.writeBits(MQConstants.BYTE_END_OF_MQ_CODER, 8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 	}
 	
 	/**
@@ -201,7 +201,7 @@ public class MQArithmeticCoder {
 	 */
 	private void putByte(BitOutputStream output) throws IOException {
 		if (this.codeBytesGenerated >= 0) {
-			output.putBits(this.tempByteBuffer, 8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+			output.writeBits(this.tempByteBuffer, 8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 		}
 		this.codeBytesGenerated++;
 	}	

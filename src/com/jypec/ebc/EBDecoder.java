@@ -222,7 +222,7 @@ public class EBDecoder {
 	private void removeMarkEndOfStream(BitInputStream input) throws IOException {
 		//the stream might end with extra bytes. Remove those if present
 		while ((input.getLastReadBits() & MQConstants.CODE_MASK) != MQConstants.CODE_END_OF_BLOCK) {
-			input.getBits(8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+			input.readBits(8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
 		}
 	}
 
