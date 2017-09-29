@@ -26,11 +26,11 @@ import jsat.clustering.kmeans.KMeans;
  */
 public class VectorQuantizationPrincipalComponentAnalysis extends DimensionalityReduction {
 
-	private int dimOrig;	//number of components in the original space
-	private int dimProj;	//number of components to retain on each cluster
-	private int numClusters;	//number of clusters to split the original space into
-	private int[] classification; //classes of the training points
-	private DMatrixRMaj trainedWith; //check that we reduce the same matrix we trained with, Otherwise the algorithm wont work
+	private int dimOrig;			//number of components in the original space
+	private int dimProj;			//number of components to retain on each cluster
+	private int numClusters;		//number of clusters to split the original space into
+	private int[] classification;	//classes of the training points
+	private DMatrixRMaj trainedWith;//check that we reduce the same matrix we trained with, Otherwise the algorithm wont work
 	private ArrayList<PrincipalComponentAnalysis> pcas;
 	
 	/**
@@ -70,8 +70,8 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	@Override
 	public DMatrixRMaj reduce(DMatrixRMaj source) {
 		if (source != this.trainedWith) {
-			throw new IllegalArgumentException("The matrix to be reduced must be the same one this was trained with. Won't work otherwise. "
-					+ "Note that this is only a shallow chech for object equality, and contents (which should be the same) are not checked");
+			System.err.println("The matrix to be reduced must be the same one this was trained with. Won't work otherwise. "
+					+ "Note that this is only a shallow chech for object equality, same contents with different objects will print this");
 		}
 		/** initialize stuff */
 		DMatrixRMaj res = new DMatrixRMaj(this.dimProj, source.getNumCols());

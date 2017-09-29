@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import com.jypec.util.arrays.ArrayTransforms;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
@@ -40,9 +41,11 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
     	//write the number of dimensions in the reduced space
     	bw.writeInt(dimProj);
     	//write the mean
-    	bw.writeDoubleArray(adjustment.getData(), dimOrig);
+    	//bw.writeDoubleArray(adjustment.getData(), dimOrig);
+    	bw.writeFloatArray(ArrayTransforms.changeType(adjustment.getData()), dimOrig);
     	//write the matrix
-    	bw.writeDoubleArray(unprojectionMatrix.getData(), dimOrig * dimProj);
+    	//bw.writeDoubleArray(unprojectionMatrix.getData(), dimOrig * dimProj);
+    	bw.writeFloatArray(ArrayTransforms.changeType(unprojectionMatrix.getData()), dimOrig * dimProj);
 	}
 
 	@Override
@@ -52,12 +55,14 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
     	//read the number of dimensions in the reduced space
 		dimProj = bw.readInt();
     	//read the mean
-		double[] data = bw.readDoubleArray(dimOrig);
+		//double[] data = bw.readDoubleArray(dimOrig);
+		double[] data = ArrayTransforms.changeType(bw.readFloatArray(dimOrig));
     	adjustment = new DMatrixRMaj(dimOrig, 1);
     	adjustment.setData(data);
     	//read the projection matrix
     	unprojectionMatrix = new DMatrixRMaj();
-    	unprojectionMatrix.setData(bw.readDoubleArray(dimOrig * dimProj));
+    	//unprojectionMatrix.setData(bw.readDoubleArray(dimOrig * dimProj));
+    	unprojectionMatrix.setData(ArrayTransforms.changeType(bw.readFloatArray(dimOrig * dimProj)));
     	unprojectionMatrix.reshape(dimOrig, dimProj, true);
 	}
 

@@ -83,4 +83,28 @@ public class ArrayTransforms {
 		}
 	}
 	
+	
+	/**
+	 * @param d a double array
+	 * @return the same array casted to float
+	 */
+	public static float[] changeType(double[] d) {
+		float[] f = new float[d.length];
+		for (int i = 0; i < d.length; i++) {
+			f[i] = (float) d[i];
+		}
+		return f;
+	}
+	
+	/**
+	 * @param f a float array
+	 * @return the same array casted to double
+	 */
+	public static double[] changeType(float[] f) {
+		double[] d = new double[f.length];
+		for (int i = 0; i < f.length; i++) {
+			d[i] = (double) f[i];
+		}
+		return d;
+	}
 }
