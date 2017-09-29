@@ -41,4 +41,38 @@ public class BitTwiddling {
 		return result;
 	}
 	
+	/**
+	 * @param number
+	 * @return the number of trailing zeros
+	 */
+	public static int trailingZerosOf(int number) {
+		int result = 0;
+		for (int i = 0; i < 32; i++) {
+			if ((number & 0x1) == 0) {
+				result ++;
+			} else {
+				break;
+			}
+			number >>= 1;
+		}
+		return result;
+	}
+	
+	/**
+	 * @param number
+	 * @return the number of trailing ones
+	 */
+	public static int trailingOnesOf(int number) {
+		int result = 0;
+		for (int i = 0; i < 32; i++) {
+			if ((number & 0x1) == 1) {
+				result ++;
+			} else {
+				break;
+			}
+			number >>= 1;
+		}
+		return result;
+	}
+	
 }

@@ -1,7 +1,10 @@
 package com.jypec.arithco;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import com.jypec.util.bits.Bit;
+import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 
 /**
@@ -21,6 +24,8 @@ import com.jypec.util.bits.BitOutputStream;
  */
 public class ArithmeticCoder {
 	/** Settings */
+	private final int codeValueBits;
+	private final int numberOfChars;
 	
 	/** Splitting points for the coding interval */
 	private final long topValue;
@@ -34,6 +39,9 @@ public class ArithmeticCoder {
 	/** model the probabilities and such */
 	private ArithmeticCoderModel acm;
 	
+	private ArithmeticDecoder ad;
+	private BitOutputStream adbos;
+	private ByteArrayOutputStream adbaos;
 
 	
 	/**
@@ -43,6 +51,8 @@ public class ArithmeticCoder {
 	 * @param maxFrequency maximum frequency allowed for any char
 	 */
 	public ArithmeticCoder(int codeValueBits, int numberOfChars, int maxFrequency) {
+		this.codeValueBits = codeValueBits;
+		this.numberOfChars = numberOfChars;
 		//set interval values
 		this.topValue = (1L << codeValueBits) - 1;
 		this.firstQtr = topValue/4+1;
@@ -63,8 +73,14 @@ public class ArithmeticCoder {
 	 * @param bos the output stream where to output bits
 	 */
 	public void code(int[] symbols, BitOutputStream bos) {
+		/** hack to get the mininum number of extra bits needed for decompression 
+		 * delete if you find out how the math works */
+		this.ad = new ArithmeticDecoder(this.codeValueBits, this.numberOfChars, acm.maxFrequency);
+		this.adbaos = new ByteArrayOutputStream();
+		this.adbos = new BitOutputStream(adbaos);
+		/** end hack */
+		
 		acm.startModel();
-		//TODO initialize bos? (not necessary)
 		startEncoding();
 		
 		for (int i = 0; i < symbols.length; i++) {
@@ -132,15 +148,34 @@ public class ArithmeticCoder {
 	private void outputBit(int bit, BitOutputStream bos) {
 		try {
 			bos.writeBit(bit);
+			adbos.writeBit(bit);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	
+	/** this whole function is basically a hack to get the number of garbage bits 
+	 * that will be later decoded, so that they can be put right now, and de decoder
+	 * ends perfectly at the end of the codeword. Otherwise we don't know where the decoder ends, 
+	 * and if the word is embedded in a stream, the decoder might overstep its ground. 
+	 * @param bos
+	 */
 	private void doneOutputingBits(BitOutputStream bos) {
 		try {
-			bos.paddingFlush();
+			this.adbos.paddingFlush();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		ByteArrayInputStream bais = new ByteArrayInputStream(adbaos.toByteArray());
+		BitInputStream bis = new BitInputStream(bais);
+		int bitsWritten = bos.getBitsOutput();
+		this.ad.decode(bis);
+		int bitsRead = bis.getBitsInput();
+		int garbage = this.ad.getGarbageBits();
+		int totalGarbage = garbage+bitsRead - bitsWritten;
+		
+		try {
+			bos.writeNBitNumber(0, totalGarbage);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

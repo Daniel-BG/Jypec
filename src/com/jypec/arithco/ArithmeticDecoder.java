@@ -69,11 +69,9 @@ public class ArithmeticDecoder {
 		while(true) {
 			int symbol = decodeSymbol(acm.cumFreq, bis);
 			if (symbol == endOfFileSymbol) {
-				System.out.println("EOF reached");
 				break;
 			}
 			int ch = acm.indexToChar[symbol];
-			System.out.println("Char decoded: " + ch);
 			list.add(ch);
 			acm.updateModel(symbol);
 		}
@@ -101,6 +99,9 @@ public class ArithmeticDecoder {
 		for (symbol = 1; cumFreq[symbol] > cum;) {
 			symbol++;
 		} 
+		if (symbol == endOfFileSymbol) {
+			return symbol; //already know we are at the EOF, do not keep reading
+		}
 		
 		high = low + (range*cumFreq[symbol-1])/cumFreq[0] - 1;
 		low = low + (range*cumFreq[symbol])/cumFreq[0];
@@ -133,6 +134,13 @@ public class ArithmeticDecoder {
 		garbageBits = 0;
 	}
 	
+	/** 
+	 * @return get the number of extra 'garbage' bits that were needed to reach EOF 
+	 */
+	public int getGarbageBits() {
+		return this.garbageBits;
+	}
+	
 	
 	private int inputBit(BitInputStream bis) {
 		int t = 0;
@@ -143,8 +151,6 @@ public class ArithmeticDecoder {
 			endOfFile = true;
 		}
 		if (endOfFile) {
-			//TODO mark somehow the end of the stream
-			System.out.println("Garbage bit read!");
 			garbageBits++;
 			if (garbageBits > codeValueBits - 2) {
 				throw new IllegalStateException("Bad input file");
