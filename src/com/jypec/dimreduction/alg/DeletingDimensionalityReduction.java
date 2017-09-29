@@ -20,20 +20,18 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 		super(DimensionalityReductionAlgorithm.DRA_DELETING_DIMENSIONALITY_REDUCTION);
 	}
 
-	private int numComponents = -1;
-
 	@Override
 	public void train(DMatrixRMaj source) {
 		//no training needed. If unset just preserve dimension
-		if (numComponents == -1)
-			this.numComponents = source.getNumRows();
+		if (dimProj == -1)
+			this.dimProj = source.getNumRows();
 	}
 
 	@Override
 	public DMatrixRMaj reduce(DMatrixRMaj src) {
-		DMatrixRMaj res = new DMatrixRMaj(this.numComponents, src.getNumCols());
+		DMatrixRMaj res = new DMatrixRMaj(this.dimProj, src.getNumCols());
 		
-		for (int i = 0; i < this.numComponents; i++) {
+		for (int i = 0; i < this.dimProj; i++) {
 			for (int j = 0; j < src.getNumCols(); j++) {
 				res.set(i, j, src.get(i, j));
 			}
@@ -44,8 +42,8 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 
 	@Override
 	public DMatrixRMaj boost(DMatrixRMaj src) {
-		DMatrixRMaj dst = new DMatrixRMaj(this.numComponents, src.getNumCols());
-		for (int i = 0; i < this.numComponents; i++) {
+		DMatrixRMaj dst = new DMatrixRMaj(this.dimProj, src.getNumCols());
+		for (int i = 0; i < this.dimProj; i++) {
 			for (int j = 0; j < src.getNumCols(); j++) {
 				dst.set(i, j, src.get(i, j));
 			}
@@ -55,22 +53,19 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 
 	@Override
 	public void doLoadFrom(BitInputStream bw) throws IOException {
-		this.numComponents = bw.readInt();
-	}
-
-	@Override
-	public int getNumComponents() {
-		return this.numComponents;
-	}
-
-	@Override
-	public void setNumComponents(int numComponents) {
-		this.numComponents = numComponents;
+		this.dimProj = bw.readInt();
 	}
 
 	@Override
 	public void doSaveTo(BitOutputStream bw) throws IOException {
-		bw.writeInt(this.numComponents);
+		bw.writeInt(this.dimProj);
+	}
+
+	@Override
+	protected void doLoadFrom(String[] args) {
+		if (args.length > 0) {
+			this.dimProj = Integer.parseInt(args[0]);
+		}
 	}
 
 }

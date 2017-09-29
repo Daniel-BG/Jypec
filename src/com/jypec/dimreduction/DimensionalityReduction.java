@@ -1,6 +1,7 @@
 package com.jypec.dimreduction;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -38,6 +39,7 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	}
 	
 	private DimensionalityReductionAlgorithm dra;
+	protected int dimProj = -1;
 	
 	/**
 	 * @param dra indicates the type of reduction being made
@@ -163,13 +165,17 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	/**
 	 * @return the target dimension the algorithm is reducing to / restoring from
 	 */
-	public abstract int getNumComponents();
+	public final int getNumComponents() {
+		return this.dimProj;
+	}
 	
 	/**
 	 * Set the number of components this dimensionality reduction will be reducing to
 	 * @param numComponents 
 	 */
-	public abstract void setNumComponents(int numComponents);
+	public final void setNumComponents(int numComponents) {
+		this.dimProj = numComponents;
+	}
 
 	/**
 	 * @param img where to get the max value from
@@ -194,34 +200,39 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	 */
 	public static DimensionalityReduction loadFrom(InputArguments args) {
 		if (args.requestReduction) {
-			//only PCA for now
-			if (args.reductionArgs.length == 2 && args.reductionArgs[0].toLowerCase().equals("pca")) {
-				int dimensions = Integer.parseInt(args.reductionArgs[1]);
-				PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
-				pca.setNumComponents(dimensions);
-				return pca;
-			} else if (args.reductionArgs.length == 2 && args.reductionArgs[0].toLowerCase().equals("mnf")) {
-				int dimensions = Integer.parseInt(args.reductionArgs[1]);
-				MinimumNoiseFraction mnf = new MinimumNoiseFraction();
-				mnf.setNumComponents(dimensions);
-				return mnf;
-			} else if (args.reductionArgs.length == 2 && args.reductionArgs[0].toLowerCase().equals("ica")) {
-				int dimensions = Integer.parseInt(args.reductionArgs[1]);
-				IndependentComponentAnalysis ica = new IndependentComponentAnalysis();
-				ica.setNumComponents(dimensions);
-				return ica;
-			} else if (args.reductionArgs.length == 3 && args.reductionArgs[0].toLowerCase().equals("vqpca")) {
-				int dimensions = Integer.parseInt(args.reductionArgs[1]);
-				int clusters = Integer.parseInt(args.reductionArgs[2]);
-				VectorQuantizationPrincipalComponentAnalysis vqpca = new VectorQuantizationPrincipalComponentAnalysis();
-				vqpca.setNumComponents(dimensions);
-				vqpca.setNumClusters(clusters);
-				return vqpca;
+			if (args.reductionArgs == null || args.reductionArgs.length < 1) {
+				throw new IllegalArgumentException("Need at least the name of the reduction algorithm");
 			}
+			DimensionalityReduction dr;
+			
+			switch(args.reductionArgs[0].toLowerCase()) {
+				case "pca":
+					dr = new PrincipalComponentAnalysis();
+					break;
+				case "mnf":
+					dr = new MinimumNoiseFraction();
+					break;
+				case "ica":
+					dr = new IndependentComponentAnalysis();
+					break;
+				case "vqpca":
+					dr = new VectorQuantizationPrincipalComponentAnalysis();
+					break;
+				default:
+					throw new UnsupportedOperationException("The algorithm: " + args.reductionArgs[0] + " requested is not available");
+			}
+			dr.doLoadFrom(Arrays.copyOfRange(args.reductionArgs, 1, args.reductionArgs.length));
+			return dr;
+			
 		}
 		//default to no reduction
 		return new DeletingDimensionalityReduction();
 	}
 	
+	/**
+	 * Used to load specific parameters of algorithms, once known its type
+	 * @param args
+	 */
+	protected abstract void doLoadFrom(String[] args);
 
 }

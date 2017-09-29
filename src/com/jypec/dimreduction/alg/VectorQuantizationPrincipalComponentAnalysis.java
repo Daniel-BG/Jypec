@@ -27,7 +27,6 @@ import jsat.clustering.kmeans.KMeans;
 public class VectorQuantizationPrincipalComponentAnalysis extends DimensionalityReduction {
 
 	private int dimOrig;			//number of components in the original space
-	private int dimProj;			//number of components to retain on each cluster
 	private int numClusters;		//number of clusters to split the original space into
 	private int[] classification;	//classes of the training points
 	private DMatrixRMaj trainedWith;//check that we reduce the same matrix we trained with, Otherwise the algorithm wont work
@@ -141,16 +140,6 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 			this.pcas.add(pca);
 		}
 	}
-
-	@Override
-	public int getNumComponents() {
-		return this.dimProj;
-	}
-
-	@Override
-	public void setNumComponents(int numComponents) {
-		this.dimProj = numComponents;
-	}
 	
 	/**
 	 * Set the number of clusters the original space
@@ -159,6 +148,14 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	 */
 	public void setNumClusters(int numClusters) {
 		this.numClusters = numClusters;
+	}
+
+	@Override
+	protected void doLoadFrom(String[] args) {
+		int dimensions = Integer.parseInt(args[0]);
+		int clusters = Integer.parseInt(args[1]);
+		this.setNumComponents(dimensions);
+		this.setNumClusters(clusters);
 	}
 
 }

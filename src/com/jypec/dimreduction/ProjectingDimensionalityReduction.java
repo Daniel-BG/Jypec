@@ -20,8 +20,6 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 		super(dra);
 	}
 	
-	/** Dimension of the projected space */
-	protected int dimProj = -1;
 	/** Dimension of the original space */
 	protected int dimOrig;
 	/** Matrix used to go from original to projected space */
@@ -86,16 +84,6 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
     	unprojectionMatrix.setData(dataUnprojection);
     	unprojectionMatrix.reshape(dimOrig, dimProj, true);
 	}
-
-	@Override
-	public int getNumComponents() {
-		return dimProj;
-	}
-
-	@Override
-	public void setNumComponents(int dimProj) {
-		this.dimProj = dimProj;
-	}
 	
 	@Override
 	public DMatrixRMaj reduce(DMatrixRMaj img) {
@@ -143,4 +131,9 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 		this.precision = precision;
 	}
 	
+	@Override
+	protected void doLoadFrom(String[] args) {
+		int dimensions = Integer.parseInt(args[0]);
+		this.setNumComponents(dimensions);
+	}
 }
