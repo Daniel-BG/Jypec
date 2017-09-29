@@ -32,6 +32,15 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	 * This is usually the sample mean that centers in zero. <br>
 	 * If null it is not applied */
 	protected DMatrixRMaj adjustment;
+	/** Quality of saved matrix */
+	public enum Precision {
+		/** 64 bit double precision*/
+		DOUBLE, 
+		/** 32 bit float precision */
+		FLOAT
+	};
+	private Precision precision = Precision.FLOAT;
+	
 	
 	
 	@Override
@@ -40,12 +49,16 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
     	bw.writeInt(dimOrig);
     	//write the number of dimensions in the reduced space
     	bw.writeInt(dimProj);
-    	//write the mean
-    	//bw.writeDoubleArray(adjustment.getData(), dimOrig);
-    	bw.writeFloatArray(ArrayTransforms.changeType(adjustment.getData()), dimOrig);
-    	//write the matrix
-    	//bw.writeDoubleArray(unprojectionMatrix.getData(), dimOrig * dimProj);
-    	bw.writeFloatArray(ArrayTransforms.changeType(unprojectionMatrix.getData()), dimOrig * dimProj);
+    	//write the precision used
+    	bw.writeEnum(Precision.class, precision, true);
+    	//write the mean and unprojection matrix
+    	if (this.precision == Precision.DOUBLE) {
+    		bw.writeDoubleArray(adjustment.getData(), dimOrig);
+    		bw.writeDoubleArray(unprojectionMatrix.getData(), dimOrig * dimProj);
+    	} else {
+    		bw.writeFloatArray(ArrayTransforms.changeType(adjustment.getData()), dimOrig);
+    		bw.writeFloatArray(ArrayTransforms.changeType(unprojectionMatrix.getData()), dimOrig * dimProj);
+    	}
 	}
 
 	@Override
@@ -54,15 +67,23 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 		dimOrig = bw.readInt();
     	//read the number of dimensions in the reduced space
 		dimProj = bw.readInt();
-    	//read the mean
-		//double[] data = bw.readDoubleArray(dimOrig);
-		double[] data = ArrayTransforms.changeType(bw.readFloatArray(dimOrig));
-    	adjustment = new DMatrixRMaj(dimOrig, 1);
-    	adjustment.setData(data);
-    	//read the projection matrix
+		//read the precision used
+		this.precision = Precision.class.cast(bw.readEnum(Precision.class, true));
+    	//read the mean and unprojection matrix
+		double[] dataAdjustment, dataUnprojection;
+		if (this.precision == Precision.DOUBLE) {
+			dataAdjustment = bw.readDoubleArray(dimOrig);
+			dataUnprojection = bw.readDoubleArray(dimOrig * dimProj);
+		} else {
+			dataAdjustment = ArrayTransforms.changeType(bw.readFloatArray(dimOrig));
+			dataUnprojection = ArrayTransforms.changeType(bw.readFloatArray(dimOrig * dimProj));
+		}
+		//set the matrice's data
+    	adjustment = new DMatrixRMaj();
+    	adjustment.setData(dataAdjustment);
+    	adjustment.reshape(dimOrig, 1, true);
     	unprojectionMatrix = new DMatrixRMaj();
-    	//unprojectionMatrix.setData(bw.readDoubleArray(dimOrig * dimProj));
-    	unprojectionMatrix.setData(ArrayTransforms.changeType(bw.readFloatArray(dimOrig * dimProj)));
+    	unprojectionMatrix.setData(dataUnprojection);
     	unprojectionMatrix.reshape(dimOrig, dimProj, true);
 	}
 
@@ -111,6 +132,15 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	 */
 	public DMatrixRMaj getUnProjectionMatrix() {
 		return this.unprojectionMatrix.copy();
+	}
+
+	/**
+	 * Set the precision for the values that are SAVED. Internal operations are done
+	 * with max precision even if this is set to lower values
+	 * @param precision
+	 */
+	public void setPrecision(Precision precision) {
+		this.precision = precision;
 	}
 	
 }

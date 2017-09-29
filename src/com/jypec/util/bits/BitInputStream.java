@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Wraps around an InputStream to provide bit-wise functionality
  * @author Daniel
+ * @see BitOutputStream
  */
 public class BitInputStream extends InputStream {	
 
@@ -327,6 +328,28 @@ public class BitInputStream extends InputStream {
 	public String readString(int length) throws IOException {
 		byte[] chars = this.readByteArray(length);
 		return new String(chars, StandardCharsets.US_ASCII);
+	}
+	
+	/**
+	 * @param clazz the enum class for which a value is to be read
+	 * @param byteSize if <code>true</code>, the written enum occupies a size
+	 * multiple of a byte in the stream. if <code>false</code>, it is assumed that 
+	 * the minimum possible bit size was used to encode it
+	 * @return the read enum
+	 * @throws IOException 
+	 */
+	public Enum<?> readEnum(Class<?> clazz, boolean byteSize) throws IOException {
+		if (clazz.getEnumConstants() == null) {
+			throw new IllegalArgumentException("The given class is not an Enum");
+		}
+		
+		int numberOfEnums = clazz.getEnumConstants().length;
+		int bitSize = BitTwiddling.bitsOf(numberOfEnums);
+		if (byteSize && bitSize % 8 != 0) {
+			bitSize += (8 - (bitSize % 8));
+		}
+		int index = this.readNBitNumber(bitSize);
+		return (Enum<?>) clazz.getEnumConstants()[index];		
 	}
 	
 	/**

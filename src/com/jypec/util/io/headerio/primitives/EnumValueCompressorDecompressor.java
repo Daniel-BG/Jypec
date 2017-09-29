@@ -13,8 +13,6 @@ public class EnumValueCompressorDecompressor<T extends Enum<T>> extends SingleVa
 
 	private T value;
 	private final Class<T> type;
-	private int byteSize;
-	
 	
 	/**
 	 * Create a value compressor decompressor for the given enum.
@@ -22,14 +20,6 @@ public class EnumValueCompressorDecompressor<T extends Enum<T>> extends SingleVa
 	 */
 	public EnumValueCompressorDecompressor(Class<T> type) {
 		this.type = type;
-		int numberOfEnums = type.getEnumConstants().length;
-		if (numberOfEnums <= 255) {
-			byteSize = 1;
-		} else if (numberOfEnums <= 65535) {
-			byteSize = 2;
-		} else {
-			byteSize = 4;
-		}
 	}
 	
 	
@@ -53,27 +43,12 @@ public class EnumValueCompressorDecompressor<T extends Enum<T>> extends SingleVa
 
 	@Override
 	public void compress(BitOutputStream brw) throws IOException {
-		int ordinal = this.value.ordinal();
-		if (byteSize == 1) {
-			brw.writeByte((byte) ordinal);	
-		} else if (byteSize == 2) {
-			brw.writeShort((short) ordinal);
-		} else {
-			brw.writeInt(ordinal);
-		}
+		brw.writeEnum(type, value, true);
 	}
 
 	@Override
 	public void uncompress(BitInputStream brw) throws IOException {
-		int index;
-		if (byteSize == 1) {
-			index = brw.readByte() & 0xff;	
-		} else if (byteSize == 2) {
-			index = brw.readShort() & 0xffff;
-		} else {
-			index = brw.readInt();
-		}
-		this.value = type.getEnumConstants()[index];
+		this.value = type.cast(brw.readEnum(type, true));
 	}
 	
 	

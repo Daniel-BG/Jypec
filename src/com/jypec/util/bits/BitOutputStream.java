@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Wraps around an output stream providing bit-wise functionality
  * @author Daniel
+ * @see BitInputStream
  */
 public class BitOutputStream extends OutputStream {
 
@@ -284,6 +285,33 @@ public class BitOutputStream extends OutputStream {
 	public void writeString(String val) throws IOException {
 		byte[] chars = val.getBytes(StandardCharsets.US_ASCII);
 		this.writeByteArray(chars, chars.length);
+	}
+	
+	
+	/**
+	 * Writes the given enum (which has to be of the given type) 
+	 * @param clazz
+	 * @param val
+	 * @param byteSize if <code>true</code>, the number of bits written will be a multiple
+	 * of 8, if <code>false</code>, the least possible amount of bits will be used. <br>
+	 * e.g: if the enum has two values, one bit will suffice to save them
+	 * @throws IOException
+	 */
+	public void writeEnum(Class<?> clazz, Enum<?> val, boolean byteSize) throws IOException {
+		if (!val.getClass().equals(clazz)) {
+			throw new IllegalArgumentException("The given value is not of the given class");
+		}
+		if (clazz.getEnumConstants() == null) {
+			throw new IllegalArgumentException("The given class is not an Enum");
+		}
+		
+		int numberOfEnums = clazz.getEnumConstants().length;
+		int bitSize = BitTwiddling.bitsOf(numberOfEnums);
+		if (byteSize && bitSize % 8 != 0) {
+			bitSize += (8 - (bitSize % 8));
+		}
+		int index = val.ordinal();
+		this.writeNBitNumber(index, bitSize);;	
 	}
 	
 
