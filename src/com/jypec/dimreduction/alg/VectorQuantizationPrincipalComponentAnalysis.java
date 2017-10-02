@@ -7,8 +7,8 @@ import java.util.List;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
-import com.jypec.arithco.ArithmeticCoder;
-import com.jypec.arithco.ArithmeticDecoder;
+import com.jypec.arithco.predict.PredictiveArithmeticCodec;
+import com.jypec.arithco.predict.functions.Basic1DPredictiveFunction;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.dimreduction.JSATWrapper;
 import com.jypec.util.bits.BitInputStream;
@@ -25,8 +25,6 @@ import jsat.clustering.kmeans.KMeans;
  * @author Daniel
  */
 public class VectorQuantizationPrincipalComponentAnalysis extends DimensionalityReduction {
-	
-	private static final int arithBits = 32;
 
 	private int dimOrig;			//number of components in the original space
 	private int numClusters;		//number of clusters to split the original space into
@@ -110,13 +108,12 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 		bw.writeInt(this.dimProj);
 		bw.writeInt(this.dimOrig);
     	bw.writeInt(this.numClusters);
+    	bw.writeInt(this.classification.length);
     	
     	/** arith code the cluster indices */
     	int cbits = bw.getBitsOutput();
-    	ArithmeticCoder ac = new ArithmeticCoder(arithBits, this.numClusters, (this.numClusters << 2) + this.numClusters); //maxval experimental value that seems to work the best
-    	ac.initialize();
-    	ac.code(this.classification, bw);
-    	ac.finishCoding(bw);
+    	PredictiveArithmeticCodec pac = new PredictiveArithmeticCodec(new Basic1DPredictiveFunction());
+    	pac.code(this.classification, numClusters, bw);
     	cbits = bw.getBitsOutput() - cbits;
     	bw.writeNBitNumber(0, 8 - (cbits % 8)); //padding
     	
@@ -132,11 +129,14 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 		this.dimProj = bw.readInt();
 		this.dimOrig = bw.readInt();
 		this.numClusters = bw.readInt();
+		int len = bw.readInt();
 		
 		/** arith decode the cluster indices */
 		int cbits = bw.getBitsInput();
-		ArithmeticDecoder ad = new ArithmeticDecoder(arithBits, this.numClusters, (this.numClusters << 2) + this.numClusters);
-		this.classification = ad.decode(bw);
+		
+		PredictiveArithmeticCodec pac = new PredictiveArithmeticCodec(new Basic1DPredictiveFunction());
+    	this.classification = pac.decode(numClusters, bw);
+		
 		cbits = bw.getBitsInput() - cbits;
 		bw.readNBitNumber(8 - (cbits % 8));	
 		
