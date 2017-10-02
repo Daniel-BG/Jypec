@@ -81,10 +81,12 @@ public class ArithmeticCoderModel {
 		if (cumFreq[0] == maxFrequency) {
 			int cum = 0;
 			for (int i = numberOfSymbols; i >= 0; i--) {
-				freq[i] = (freq[i] + 1 / 2);
+				freq[i] = (freq[i] + 1)  / 2;
 				cumFreq[i] = cum;
 				cum += freq[i];
 			}
+		} else if (cumFreq[0] > maxFrequency) {
+			System.out.println("ca");
 		}
 		
 		int i;

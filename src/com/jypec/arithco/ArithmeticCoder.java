@@ -23,6 +23,11 @@ import com.jypec.util.bits.BitOutputStream;
  *
  */
 public class ArithmeticCoder {
+	/** state */
+	private enum State {BUILT, INITIALIZED, CODING, FINISHED};
+	private State state; 
+	
+	
 	/** Settings */
 	private final int codeValueBits;
 	private final int numberOfChars;
@@ -51,6 +56,7 @@ public class ArithmeticCoder {
 	 * @param maxFrequency maximum frequency allowed for any char
 	 */
 	public ArithmeticCoder(int codeValueBits, int numberOfChars, int maxFrequency) {
+		this.state = State.BUILT;
 		this.codeValueBits = codeValueBits;
 		this.numberOfChars = numberOfChars;
 		//set interval values
@@ -67,12 +73,16 @@ public class ArithmeticCoder {
 	}
 	
 	
+	
 	/**
-	 * Code the array of symbols given
-	 * @param symbols
-	 * @param bos the output stream where to output bits
+	 * Initializes this arithmetic coder and the underlying probability model
 	 */
-	public void code(int[] symbols, BitOutputStream bos) {
+	public void initialize() {
+		if (this.state == State.CODING) {
+			System.err.println("You are initializing a coder that's still coding");
+		}
+		this.state = State.INITIALIZED;
+		
 		/** hack to get the mininum number of extra bits needed for decompression 
 		 * delete if you find out how the math works */
 		this.ad = new ArithmeticDecoder(this.codeValueBits, this.numberOfChars, acm.maxFrequency);
@@ -82,13 +92,51 @@ public class ArithmeticCoder {
 		
 		acm.startModel();
 		startEncoding();
-		
-		for (int i = 0; i < symbols.length; i++) {
-			int ch = symbols[i];
-			int symbol = acm.charToIndex[ch];
-			encodeSymbol(symbol, bos);
-			acm.updateModel(symbol);
+	}
+	
+	/**
+	 * Code the symbol given
+	 * @param input the input to be coded
+	 * @param bos the output stream where to output bits
+	 */
+	public void code(int input, BitOutputStream bos) {
+		switch(this.state) {
+		case INITIALIZED:
+			this.cbits = bos.getBitsOutput(); //for padding later
+		case CODING:
+			break;
+		case BUILT:
+		case FINISHED:
+		default:
+			throw new IllegalStateException("Cannot code right now. Please first initialize the coder");
 		}
+		this.state = State.CODING;
+
+		int symbol = acm.charToIndex[input];
+		encodeSymbol(symbol, bos);
+		acm.updateModel(symbol);		
+	}
+	
+	/**
+	 * @param input the array of symbols to be coded
+	 * @param bos where to put the coded data
+	 */
+	public void code(int[] input, BitOutputStream bos) {
+		for (int i = 0; i < input.length; i++) {
+			this.code(input[i], bos);
+		}
+	}
+	
+	
+	/**
+	 * Finish the coding in the given output stream
+	 * @param bos
+	 */
+	public void finishCoding(BitOutputStream bos) {
+		if (this.state != State.CODING) {
+			throw new IllegalStateException("Can only finish coding if we are coding");
+		}
+		this.state = State.FINISHED;
 		
 		encodeSymbol(endOfFileSymbol, bos);
 		doneEncoding(bos);
@@ -154,6 +202,8 @@ public class ArithmeticCoder {
 		}
 	}
 	
+	private int cbits;
+	
 	/** this whole function is basically a hack to get the number of garbage bits 
 	 * that will be later decoded, so that they can be put right now, and de decoder
 	 * ends perfectly at the end of the codeword. Otherwise we don't know where the decoder ends, 
@@ -168,7 +218,7 @@ public class ArithmeticCoder {
 		}
 		ByteArrayInputStream bais = new ByteArrayInputStream(adbaos.toByteArray());
 		BitInputStream bis = new BitInputStream(bais);
-		int bitsWritten = bos.getBitsOutput();
+		int bitsWritten = bos.getBitsOutput() - cbits;
 		this.ad.decode(bis);
 		int bitsRead = bis.getBitsInput();
 		int garbage = this.ad.getGarbageBits();

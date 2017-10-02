@@ -61,11 +61,14 @@ public class ArithmeticDecoder {
 	 * @param bis the input stream from where to read bits
 	 * @return the decoded list of integers
 	 */
-	public Integer[] decode(BitInputStream bis) {
+	public int[] decode(BitInputStream bis) {
+		/** initialize */
 		ArrayList<Integer> list = new ArrayList<Integer>();
 		acm.startModel();
 		startInputingBits();
 		startDecoding(bis);
+		
+		/** Decode */
 		while(true) {
 			int symbol = decodeSymbol(acm.cumFreq, bis);
 			if (symbol == endOfFileSymbol) {
@@ -75,7 +78,13 @@ public class ArithmeticDecoder {
 			list.add(ch);
 			acm.updateModel(symbol);
 		}
-		return list.toArray(new Integer[list.size()]);
+		
+		/** Convert list to array */
+		int[] result = new int[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			result[i] = list.get(i);
+		}
+		return result;
 	}
 	
 	

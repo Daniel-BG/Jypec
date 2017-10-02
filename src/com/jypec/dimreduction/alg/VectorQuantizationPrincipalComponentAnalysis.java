@@ -7,12 +7,12 @@ import java.util.List;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import com.jypec.arithco.ArithmeticCoder;
+import com.jypec.arithco.ArithmeticDecoder;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.dimreduction.JSATWrapper;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
-import com.jypec.util.bits.BitTwiddling;
-
 import jsat.SimpleDataSet;
 import jsat.classifiers.DataPoint;
 import jsat.clustering.ClustererBase;
@@ -25,6 +25,8 @@ import jsat.clustering.kmeans.KMeans;
  * @author Daniel
  */
 public class VectorQuantizationPrincipalComponentAnalysis extends DimensionalityReduction {
+	
+	private static final int arithBits = 32;
 
 	private int dimOrig;			//number of components in the original space
 	private int numClusters;		//number of clusters to split the original space into
@@ -104,18 +106,21 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 
 	@Override
 	public void doSaveTo(BitOutputStream bw) throws IOException {
-		//write the number of components
+		/** write metadata */
 		bw.writeInt(this.dimProj);
 		bw.writeInt(this.dimOrig);
-    	//write the number of clusters
     	bw.writeInt(this.numClusters);
-    	//write the cluster indices
-    	int len = this.classification.length, bits = BitTwiddling.bitsOf(numClusters - 1);
-    	bw.writeInt(len);
-    	bw.writeNBitNumberArray(this.classification, bits, len);
-    	//padding
-    	bw.writeNBitNumber(0, 8 - (len*bits % 8));
-    	//write each pca
+    	
+    	/** arith code the cluster indices */
+    	int cbits = bw.getBitsOutput();
+    	ArithmeticCoder ac = new ArithmeticCoder(arithBits, this.numClusters, (this.numClusters << 2) + this.numClusters); //maxval experimental value that seems to work the best
+    	ac.initialize();
+    	ac.code(this.classification, bw);
+    	ac.finishCoding(bw);
+    	cbits = bw.getBitsOutput() - cbits;
+    	bw.writeNBitNumber(0, 8 - (cbits % 8)); //padding
+    	
+    	/** write each pca */
     	for (PrincipalComponentAnalysis pca: pcas) {
     		pca.doSaveTo(bw);
     	}
@@ -123,16 +128,20 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 
 	@Override
 	public void doLoadFrom(BitInputStream bw) throws IOException {
-		//load metadata
+		/** load metadata */
 		this.dimProj = bw.readInt();
 		this.dimOrig = bw.readInt();
 		this.numClusters = bw.readInt();
-		int len = bw.readInt();
-		int bits = BitTwiddling.bitsOf(numClusters - 1);
-		this.classification = bw.readNBitNumberArray(bits, len);
-		bw.readNBitNumber(8 - (len*bits % 8));
+		
+		/** arith decode the cluster indices */
+		int cbits = bw.getBitsInput();
+		ArithmeticDecoder ad = new ArithmeticDecoder(arithBits, this.numClusters, (this.numClusters << 2) + this.numClusters);
+		this.classification = ad.decode(bw);
+		cbits = bw.getBitsInput() - cbits;
+		bw.readNBitNumber(8 - (cbits % 8));	
+		
+		/** load each pca */
 		this.pcas = new ArrayList<PrincipalComponentAnalysis>(numClusters);
-		// Load pcas
 		for (int i = 0; i < numClusters; i++) {
 			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
 			pca.setParentVerboseable(this);
