@@ -108,14 +108,15 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 		bw.writeInt(this.dimProj);
 		bw.writeInt(this.dimOrig);
     	bw.writeInt(this.numClusters);
-    	bw.writeInt(this.classification.length);
     	
     	/** arith code the cluster indices */
     	int cbits = bw.getBitsOutput();
     	PredictiveArithmeticCodec pac = new PredictiveArithmeticCodec(new Basic1DPredictiveFunction());
     	pac.code(this.classification, numClusters, bw);
     	cbits = bw.getBitsOutput() - cbits;
-    	bw.writeNBitNumber(0, 8 - (cbits % 8)); //padding
+    	if (cbits % 8 != 0) {
+    		bw.writeNBitNumber(0, 8 - (cbits % 8)); //padding
+    	}
     	
     	/** write each pca */
     	for (PrincipalComponentAnalysis pca: pcas) {
@@ -129,16 +130,15 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 		this.dimProj = bw.readInt();
 		this.dimOrig = bw.readInt();
 		this.numClusters = bw.readInt();
-		int len = bw.readInt();
 		
 		/** arith decode the cluster indices */
 		int cbits = bw.getBitsInput();
-		
 		PredictiveArithmeticCodec pac = new PredictiveArithmeticCodec(new Basic1DPredictiveFunction());
     	this.classification = pac.decode(numClusters, bw);
-		
 		cbits = bw.getBitsInput() - cbits;
-		bw.readNBitNumber(8 - (cbits % 8));	
+		if (cbits % 8 != 0) {
+		bw.readNBitNumber(8 - (cbits % 8));
+		}
 		
 		/** load each pca */
 		this.pcas = new ArrayList<PrincipalComponentAnalysis>(numClusters);
