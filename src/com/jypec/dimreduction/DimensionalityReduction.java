@@ -10,6 +10,7 @@ import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
 import com.jypec.dimreduction.alg.IndependentComponentAnalysis;
 import com.jypec.dimreduction.alg.MinimumNoiseFraction;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
+import com.jypec.dimreduction.alg.SingularValueDecomposition;
 import com.jypec.dimreduction.alg.VectorQuantizationPrincipalComponentAnalysis;
 import com.jypec.util.DefaultVerboseable;
 import com.jypec.util.bits.BitInputStream;
@@ -35,7 +36,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 		/** {@link IndependentComponentAnalysis} */
 		DRA_ICA,
 		/** {@link VectorQuantizationPrincipalComponentAnalysis} */
-		DRA_VQPCA
+		DRA_VQPCA,
+		/** {@link PrincipalComponentAnalysisSVD} */
+		DRA_PCASVD
 	}
 	
 	private DimensionalityReductionAlgorithm dra;
@@ -145,6 +148,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 		case DRA_VQPCA:
 			dr = new VectorQuantizationPrincipalComponentAnalysis();
 			break;
+		case DRA_PCASVD:
+			dr = new SingularValueDecomposition();
+			break;
 		default:
 			throw new IllegalArgumentException("Cannot load that kind of Dimensionality Reduction algorithm: " + type);
 		}
@@ -217,6 +223,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 					break;
 				case "vqpca":
 					dr = new VectorQuantizationPrincipalComponentAnalysis();
+					break;
+				case "svd":
+					dr = new SingularValueDecomposition();
 					break;
 				default:
 					throw new UnsupportedOperationException("The algorithm: " + args.reductionArgs[0] + " requested is not available");

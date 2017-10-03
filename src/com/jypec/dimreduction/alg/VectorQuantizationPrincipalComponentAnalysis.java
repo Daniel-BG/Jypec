@@ -16,8 +16,8 @@ import com.jypec.util.bits.BitOutputStream;
 import jsat.SimpleDataSet;
 import jsat.classifiers.DataPoint;
 import jsat.clustering.ClustererBase;
+import jsat.clustering.KClusterer;
 import jsat.clustering.kmeans.ElkanKMeans;
-import jsat.clustering.kmeans.KMeans;
 
 /**
  * Implements the VQPCA algorithm from 
@@ -43,7 +43,6 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	public void train(DMatrixRMaj source) {
 		/** Initialization */
 		this.sayLn("Initializing VQPCA...");
-		KMeans kmeans = new ElkanKMeans();
 		SimpleDataSet dataSet = JSATWrapper.toDataSet(source);
 		this.trainedWith = source;
 		this.pcas = new ArrayList<PrincipalComponentAnalysis>(this.numClusters);
@@ -52,7 +51,8 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 		/** Cluster the data */
 		this.sayLn("Clustering data...");
 		this.classification = new int[source.getNumCols()];
-		kmeans.cluster(dataSet, this.numClusters, null, this.classification);
+		KClusterer clusterer = new ElkanKMeans();
+		clusterer.cluster(dataSet, this.numClusters, null, this.classification);
 		List<List<DataPoint>> list = ClustererBase.createClusterListFromAssignmentArray(this.classification, dataSet);
 		
 		/** Perform PCA for each cluster */
