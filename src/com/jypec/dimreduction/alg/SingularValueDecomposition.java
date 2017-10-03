@@ -69,8 +69,16 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 	@Override
 	protected void doLoadFrom(String[] args) {
 		int dimensions = Integer.parseInt(args[0]);
-		this.center = Boolean.parseBoolean(args[1]);
 		this.setNumComponents(dimensions);
+		this.setCenter(Boolean.parseBoolean(args[1]));
+	}
+	
+	
+	/**
+	 * @param center true if the data is to be centered
+	 */
+	public void setCenter(boolean center) {
+		this.center = center;
 	}
 	
 	

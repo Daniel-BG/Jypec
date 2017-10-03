@@ -12,6 +12,7 @@ import com.jypec.dimreduction.alg.MinimumNoiseFraction;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.dimreduction.alg.SingularValueDecomposition;
 import com.jypec.dimreduction.alg.VectorQuantizationPrincipalComponentAnalysis;
+import com.jypec.dimreduction.alg.VertexComponentAnalysis;
 import com.jypec.util.DefaultVerboseable;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
@@ -38,7 +39,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 		/** {@link VectorQuantizationPrincipalComponentAnalysis} */
 		DRA_VQPCA,
 		/** {@link PrincipalComponentAnalysisSVD} */
-		DRA_PCASVD
+		DRA_PCASVD,
+		/** {@link VertexComponentAnalysis} */
+		DRA_VCA
 	}
 	
 	private DimensionalityReductionAlgorithm dra;
@@ -151,6 +154,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 		case DRA_PCASVD:
 			dr = new SingularValueDecomposition();
 			break;
+		case DRA_VCA:
+			dr = new VertexComponentAnalysis();
+			break;
 		default:
 			throw new IllegalArgumentException("Cannot load that kind of Dimensionality Reduction algorithm: " + type);
 		}
@@ -226,6 +232,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 					break;
 				case "svd":
 					dr = new SingularValueDecomposition();
+					break;
+				case "vca":
+					dr = new VertexComponentAnalysis();
 					break;
 				default:
 					throw new UnsupportedOperationException("The algorithm: " + args.reductionArgs[0] + " requested is not available");
