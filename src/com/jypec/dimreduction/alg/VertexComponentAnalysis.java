@@ -16,9 +16,8 @@ import com.jypec.util.arrays.MatrixOperations;
  *
  */
 public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
-
-	private boolean useSVD = true;
 	
+	private long seed = 2;
 	
 	/**
 	 * Build a VCA dimensionality reductor
@@ -29,93 +28,54 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 
 	@Override
 	public void train(DMatrixRMaj source) {
-		//this choice should be based on SNR but we do not know what the SNR is,
-		//so it is based on parameter selection
-		//snrth = 15 + 10log(this.dimProj)
-		//if snr > snrth
+		/** get metadata */
 		dimOrig = source.getNumRows();
-		
-		int d;
-		DMatrixRMaj y;
-		DMatrixRMaj ud;
-		DMatrixRMaj x;
-		DMatrixRMaj rbar = new DMatrixRMaj(dimOrig, 1);
+
 		/** apply SVD onto the input data, and projective project onto the projected mean */
-		if (useSVD) {
-			d = this.dimProj;
-			//do the svd and project onto its space
-			this.sayLn("Applying SVD...");
-			SingularValueDecomposition svd = new SingularValueDecomposition();
-			svd.setNumComponents(dimProj);
-			svd.setCenter(false);
-			x = svd.trainReduce(source);
-			ud = svd.getProjectionMatrix();
-			//get the mean of the subspaced data
-			this.sayLn("Getting mean...");
-			DMatrixRMaj mean = new DMatrixRMaj(dimProj, 1);
-			MatrixOperations.generateCovarianceMatrix(x, null, null, mean);
-			//projective projection onto the mean vector
-			this.sayLn("Projective projection");
-			DMatrixRMaj projs = new DMatrixRMaj(x.getNumCols(), 1);
-			CommonOps_DDRM.multTransA(x, mean, projs);
-			for (int i = 0; i < x.getNumRows(); i++) {
-				for (int j = 0; j < x.getNumCols(); j++) {
-					double data = x.get(i, j);
-					data /= projs.get(j);
-					x.set(i, j, data);
-				}
-			}
-			//assign y matrix
-			y = new DMatrixRMaj(x);
-		/** apply PCA onto the input data, and create a new row for the max norm of the projected vectors */
-		} else { //use PCA on a lower dimension space
-			d = this.dimProj - 1;
-			//apply PCA and project
-			this.sayLn("Applying PCA...");
-			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
-			pca.setNumComponents(dimProj);
-			x = pca.trainReduce(source);
-			ud = pca.getProjectionMatrix();
-			//get the max norm of the projected vectors
-			this.sayLn("Getting max norm");
-			double argmaxval = 0;
-			int argmax = -1;
-			for (int j = 0; j < x.getNumCols(); j++) {
-				double norm = 0;
-				for (int i = 0; i < x.getNumRows(); i++) {
-					double val = x.get(i, j);
-					norm += val * val;
-				}
-				norm = Math.sqrt(norm);
-				if (norm > argmaxval) {
-					argmaxval = norm;
-					argmax = j;
-				}
-			}
-			//add a row to x and set all to argmax
-			this.sayLn("Building y matrix");
-			y = new DMatrixRMaj(x);
-			y.reshape(dimProj, x.getNumRows(), true);
-			for (int i = 0; i < x.getNumCols(); i++) {
-				y.set(dimProj - 1, i, argmax);
+		//do the svd and project onto its space
+		this.sayLn("Applying SVD...");
+		SingularValueDecomposition svd = new SingularValueDecomposition();
+		svd.setParentVerboseable(this);
+		svd.setNumComponents(dimProj);
+		svd.setCenter(false);
+		DMatrixRMaj x = svd.trainReduce(source);	//get projected values
+		DMatrixRMaj ud = svd.getProjectionMatrix(); //get projection matrix
+		
+		/** Projective project onto the mean of the subspace */
+		//y(:, j) = x(:, j)/(x(:, j)^tu)
+		this.sayLn("Getting mean...");
+		DMatrixRMaj u = new DMatrixRMaj(dimProj, 1);
+		MatrixOperations.generateCovarianceMatrix(x, null, null, u);
+		
+		this.sayLn("Projective projection onto mean...");
+		DMatrixRMaj y = new DMatrixRMaj(x);			//y is the result of projecting onto the mean
+		DMatrixRMaj projs = new DMatrixRMaj(x.getNumCols(), 1);
+		CommonOps_DDRM.multTransA(x, u, projs);
+		for (int i = 0; i < y.getNumRows(); i++) {
+			for (int j = 0; j < y.getNumCols(); j++) {
+				double data = y.get(i, j);
+				data /= projs.get(j);
+				y.set(i, j, data);
 			}
 		}
-		/** onto the next steps which are common */
-		//create some matrices
-		DMatrixRMaj a = new DMatrixRMaj(dimProj, dimProj);
+			
+		/** initialize variables for endmember extraction */
+		DMatrixRMaj a = new DMatrixRMaj(dimProj, dimProj);	//a is used for finding extreme points
 		a.set(dimProj - 1, 0, 1);
 		DMatrixRMaj id = CommonOps_DDRM.identity(dimProj);
-		int[] indices = new int[dimProj];
+		int[] indices = new int[dimProj];					//indices of endmembers
+		Random r = new Random(seed);						//depending on the seed gets slightly different results
 		
-		Random r = new Random(1);
+		/** compute each endmember */
 		for (int i = 0; i < dimProj; i++) {
 			this.sayLn("Computing vector: " + i + "...");
-			//create w
-			DMatrixRMaj w = new DMatrixRMaj(dimProj, 1); //TODO generate w = randn(0, Ip)
+			//create w = randn(0, Ip) (see http://ftp//ftp.dca.fee.unicamp.br/pub/docs/vonzuben/ia013_2s09/material_de_apoio/gen_rand_multivar.pdf for why this works)
+			DMatrixRMaj w = new DMatrixRMaj(dimProj, 1); 
 			for (int j = 0; j < dimProj; j++) {
 				w.set(j, r.nextGaussian());
 			}
-			//create f
+			//create f (orthonormal to subspace spanned by a) 
+			//f = ((I - AA#)w)/(||(I - AA#)w||)
 			DMatrixRMaj inva = new DMatrixRMaj(dimProj, dimProj);
 			CommonOps_DDRM.pinv(a, inva);
 			DMatrixRMaj aia = new DMatrixRMaj(dimProj, dimProj);
@@ -125,10 +85,12 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 			DMatrixRMaj f = new DMatrixRMaj(dimProj, 1);
 			CommonOps_DDRM.mult(tmp, w, f);
 			NormOps_DDRM.normalizeF(f);
-			//create v
+			//create v: projection of y onto f
+			//v = f^ty
 			DMatrixRMaj v = new DMatrixRMaj(1, y.getNumCols());
 			CommonOps_DDRM.multTransA(f, y, v);
-			//get arg max of v
+			//get the max value of those projections. this is the endmember
+			//k = argmax(|v[j]|) for all j=0...N
 			int k = -1;
 			double kmax = 0;
 			for (int j = 0; j < v.getNumElements(); j++) {
@@ -138,41 +100,45 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 					k = j;
 				}
 			}
+			indices[i] = k;
 			
-			//update a matrix
+			//update a matrix with the newly found endmember from the projective projection
+			//a(:, i) = y(:, k)
 			for (int j = 0; j < a.getNumRows(); j++) {
 				a.set(j, i, y.get(j, k));
 			}
 		}
 		
-		//extract the x matrix subset
-		DMatrixRMaj xSubSet = new DMatrixRMaj(d, dimProj);
+		/** extract endmembers */
+		DMatrixRMaj xSubSet = new DMatrixRMaj(dimProj, dimProj);
 		for (int i = 0; i < dimProj; i++) {
-			for (int j = 0; j < d; j++) {
+			for (int j = 0; j < dimProj; j++) {
 				xSubSet.set(j, i, x.get(j, indices[i]));
 			}
 		}
 		
-		//calculate M
+		/** get mixing matrix, which is the reverse projection matrix */
 		DMatrixRMaj m = new DMatrixRMaj(dimOrig, dimProj);
 		CommonOps_DDRM.multTransA(ud, xSubSet, m);
+		this.unprojectionMatrix = m;
 		
-		//add mean if pca was used
-		if (!useSVD) {
-			for (int i = 0; i < dimOrig; i++) {
-				for (int j = 0; j < dimProj; j++) {
-					double val = m.get(i, j);
-					val += rbar.get(i);
-					m.set(i, j, val);
-				}
-			}
-		}
-		
-		this.projectionMatrix = m;
-		this.unprojectionMatrix = new DMatrixRMaj(projectionMatrix);
+		/** the projection matrix is the pseudoinverse */
+		this.projectionMatrix = new DMatrixRMaj(unprojectionMatrix);
 		CommonOps_DDRM.transpose(this.projectionMatrix);
+		CommonOps_DDRM.pinv(this.unprojectionMatrix, this.projectionMatrix);
 		
+		/** adjustment is zero */
 		this.adjustment = new DMatrixRMaj(dimOrig, 1);
+	}
+	
+	
+	@Override
+	protected void doLoadFrom(String[] args) {
+		int dimensions = Integer.parseInt(args[0]);
+		this.setNumComponents(dimensions);
+		if (args.length > 1) { // set seed
+			this.seed = Long.parseLong(args[1]);
+		}
 	}
 
 }

@@ -121,6 +121,14 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	public DMatrixRMaj getUnProjectionMatrix() {
 		return this.unprojectionMatrix.copy();
 	}
+	
+	/**
+	 * @return a copy of this {@link ProjectingDimensionalityReduction} adjustment vector
+	 * (which is usually the mean)
+	 */
+	public DMatrixRMaj getAdjustment() {
+		return this.adjustment.copy();
+	}
 
 	/**
 	 * Set the precision for the values that are SAVED. Internal operations are done
