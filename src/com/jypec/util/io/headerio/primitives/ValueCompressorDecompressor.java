@@ -3,7 +3,7 @@ package com.jypec.util.io.headerio.primitives;
 import java.io.IOException;
 
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
 
 /**
  * Class to transform strings to values (uncompressed to compressed) <br>
@@ -37,7 +37,7 @@ public abstract class ValueCompressorDecompressor {
 	 * @param brw
 	 * @throws IOException 
 	 */
-	public abstract void compress(BitStreamTreeNode brw) throws IOException;
+	public abstract void compress(BitOutputStreamTree brw) throws IOException;
 	
 	/**
 	 * Does {@link #parse(Object)} followed by 
@@ -48,7 +48,7 @@ public abstract class ValueCompressorDecompressor {
 	 * @return the compressed object
 	 * @throws IOException 
 	 */
-	public Object parseCompressAndReturn(Object obj, BitStreamTreeNode brw) throws IOException{
+	public Object parseCompressAndReturn(Object obj, BitOutputStreamTree brw) throws IOException{
 		this.parse(obj);
 		this.compress(brw);
 		return this.getObject();

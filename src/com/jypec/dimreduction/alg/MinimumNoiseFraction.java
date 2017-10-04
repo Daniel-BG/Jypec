@@ -8,6 +8,7 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.arrays.MatrixTransforms;
+import com.jypec.util.debug.Logger;
 
 /**
  * Implements the Minimum noise fraction algorithm for dimensionality reduction
@@ -78,7 +79,7 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
         
         //decompose sigma noise as noise = U*W*U^t
         SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(dimOrig, dimOrig, true, false, false);
-        this.say("Decomposition yielded: " + svd.decompose(sigmaNoise));
+        Logger.getLogger().log("Decomposition yielded: " + svd.decompose(sigmaNoise));
         DMatrixRMaj B = svd.getU(null, false);
         DMatrixRMaj lambda = svd.getW(null);
         
@@ -101,7 +102,7 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
         
         //decompose sigma temp as noise = U*W*U^t
         svd = DecompositionFactory_DDRM.svd(dimOrig, dimOrig, true, true, false);
-        this.say("Decomposition yielded: " + svd.decompose(sigmaTransformed));
+        Logger.getLogger().log("Decomposition yielded: " + svd.decompose(sigmaTransformed));
         DMatrixRMaj D = svd.getU(null, false);
         
         this.projectionMatrix = new DMatrixRMaj(dimOrig, dimOrig);
@@ -118,7 +119,7 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
         this.unprojectionMatrix.reshape(dimProj, dimOrig, true);
         CommonOps_DDRM.transpose(this.unprojectionMatrix);
         this.unprojectionMatrix = new DMatrixRMaj(this.unprojectionMatrix); //ensure internal buffer size is the right shape
-        this.say("Finished");
+        Logger.getLogger().log("Finished");
 	}
 
 

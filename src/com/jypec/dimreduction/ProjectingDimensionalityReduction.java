@@ -8,7 +8,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import com.jypec.util.arrays.ArrayTransforms;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
 
 /**
  * Parent class for all your projecting dimensionality needs
@@ -42,20 +42,20 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	
 	
 	@Override
-	public void doSaveTo(BitStreamTreeNode bw) throws IOException {
+	public void doSaveTo(BitOutputStreamTree bw) throws IOException {
     	//write the number of dimensions in the original space
-    	bw.addChild("original dimension").bos.writeInt(dimOrig);
+    	bw.addChild("original dimension").writeInt(dimOrig);
     	//write the number of dimensions in the reduced space
-    	bw.addChild("projected dimension").bos.writeInt(dimProj);
+    	bw.addChild("projected dimension").writeInt(dimProj);
     	//write the precision used
-    	bw.addChild("precision").bos.writeEnum(Precision.class, precision, true);
+    	bw.addChild("precision").writeEnum(Precision.class, precision, true);
     	//write the mean and unprojection matrix
     	if (this.precision == Precision.DOUBLE) {
-    		bw.addChild("mean").bos.writeDoubleArray(adjustment.getData(), dimOrig);
-    		bw.addChild("projection matrix").bos.writeDoubleArray(unprojectionMatrix.getData(), dimOrig * dimProj);
+    		bw.addChild("mean").writeDoubleArray(adjustment.getData(), dimOrig);
+    		bw.addChild("projection matrix").writeDoubleArray(unprojectionMatrix.getData(), dimOrig * dimProj);
     	} else {
-    		bw.addChild("mean").bos.writeFloatArray(ArrayTransforms.changeType(adjustment.getData()), dimOrig);
-    		bw.addChild("projection matrix").bos.writeFloatArray(ArrayTransforms.changeType(unprojectionMatrix.getData()), dimOrig * dimProj);
+    		bw.addChild("mean").writeFloatArray(ArrayTransforms.changeType(adjustment.getData()), dimOrig);
+    		bw.addChild("projection matrix").writeFloatArray(ArrayTransforms.changeType(unprojectionMatrix.getData()), dimOrig * dimProj);
     	}
 	}
 
@@ -98,7 +98,6 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 
 	@Override
 	public DMatrixRMaj boost(DMatrixRMaj src) {
-		this.sayLn("Boosting samples from reduced space to the original...");
 		DMatrixRMaj res = new DMatrixRMaj(dimOrig, src.getNumCols());
 		CommonOps_DDRM.mult(unprojectionMatrix, src, res);
 		DMatrixRMaj ones = MatrixOperations.ones(1, res.getNumCols());

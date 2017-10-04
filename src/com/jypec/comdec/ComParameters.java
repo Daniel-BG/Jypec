@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import com.jypec.cli.InputArguments;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.datastructures.LowKeyHashMap;
 
 /**
@@ -50,14 +50,14 @@ public class ComParameters {
 	 * @param bw
 	 * @throws IOException 
 	 */
-	public void saveTo(BitStreamTreeNode bw) throws IOException {
-		bw.addChild("wave passes").bos.writeNBitNumber(this.wavePasses, ComDecConstants.WAVE_PASSES_BITS);
-		bw.addChild("red bits").bos.writeNBitNumber(this.bits, ComDecConstants.REDUCTION_BITS_BITS);
-		BitStreamTreeNode cbstn = bw.addChild("shave map");
-		cbstn.bos.writeByte((byte) shaveMap.size());
+	public void saveTo(BitOutputStreamTree bw) throws IOException {
+		bw.addChild("wave passes").writeNBitNumber(this.wavePasses, ComDecConstants.WAVE_PASSES_BITS);
+		bw.addChild("red bits").writeNBitNumber(this.bits, ComDecConstants.REDUCTION_BITS_BITS);
+		BitOutputStreamTree cbstn = bw.addChild("shave map");
+		cbstn.writeByte((byte) shaveMap.size());
 		for (Entry<Integer, Integer> e: shaveMap.entrySet()) {
-			cbstn.bos.writeByte((byte) (int)e.getKey());
-			cbstn.bos.writeByte((byte) (int)e.getValue());
+			cbstn.writeByte((byte) (int)e.getKey());
+			cbstn.writeByte((byte) (int)e.getValue());
 		}
 		dr.saveTo(bw.addChild("dim red"));
 	}

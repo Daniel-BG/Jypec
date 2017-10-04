@@ -3,7 +3,7 @@ package com.jypec.util.io.headerio.primitives;
 import java.io.IOException;
 
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
 
 /**
  * Class to compress/decompress header fields that are enums
@@ -43,8 +43,8 @@ public class EnumValueCompressorDecompressor<T extends Enum<T>> extends SingleVa
 	}
 
 	@Override
-	public void compress(BitStreamTreeNode brw) throws IOException {
-		brw.bos.writeEnum(type, value, true);
+	public void compress(BitOutputStreamTree brw) throws IOException {
+		brw.writeEnum(type, value, true);
 	}
 
 	@Override

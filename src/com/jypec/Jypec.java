@@ -14,7 +14,8 @@ import com.jypec.distortion.ImageComparisons;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.util.JypecException;
 import com.jypec.util.bits.BitOutputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
+import com.jypec.util.debug.Logger;
 import com.jypec.util.io.HyperspectralImageReader;
 import com.jypec.util.io.HyperspectralImageWriter;
 import com.jypec.util.io.headerio.ImageHeaderReaderWriter;
@@ -45,15 +46,14 @@ public class Jypec {
 		checkCompressArguments(args);
 		
 		/** load the image, and compression parameters */
-		HyperspectralImage hi = HyperspectralImageReader.read(args.input, args.inputHeader, args.verbose);
+		HyperspectralImage hi = HyperspectralImageReader.read(args.input, args.inputHeader);
 		ComParameters cp = new ComParameters(args);
 		
 		/** create the compressor */
 		Compressor c = new Compressor(cp);
-		c.setVerbose(args.verbose);
 		
 		/** Create the output stream and save the compressed result */
-		BitStreamTreeNode bstn = new BitStreamTreeNode("root", args.showTree);
+		BitOutputStreamTree bstn = new BitOutputStreamTree("root", args.showTree);
 		ImageHeaderReaderWriter.saveToCompressedStream(hi.getHeader(), bstn.addChild("header"), args.essentialHeader);
 		c.compress(hi.getData(), bstn.addChild("body"));
 		if (args.showTree) {
@@ -65,16 +65,17 @@ public class Jypec {
 		}
 		BitOutputStream output = new BitOutputStream(new FileOutputStream(new File(args.output)));
 		bstn.dumpInBitOutputStream(output);
+		bstn.close();
 		
 		
 		/** Show some stats */
-		if (args.showCompressionStats) {
+		if (args.showCompressionStats && args.verbose) {
 			int orsize = hi.getData().getBitSize();
 			int redsize = output.getBitsOutput();
-			System.out.println("Original size is: " + orsize);
-			System.out.println("Compressed size is: " + redsize);
-			System.out.println("Compression rate: " + (double) orsize / (double) redsize);
-			System.out.println("Bpppb: " + redsize / (double) (hi.getData().getTotalNumberOfSamples()));
+			Logger.getLogger().log("Original size is: " + orsize);
+			Logger.getLogger().log("Compressed size is: " + redsize);
+			Logger.getLogger().log("Compression rate: " + (double) orsize / (double) redsize);
+			Logger.getLogger().log("Bpppb: " + redsize / (double) (hi.getData().getTotalNumberOfSamples()));
 		}
 	}
 
@@ -96,7 +97,7 @@ public class Jypec {
 		checkDecompressArguments(args);
 		
 		/** Read input image, decompressing if compressed format is found */
-		HyperspectralImage hi = HyperspectralImageReader.read(args.input, args.verbose);
+		HyperspectralImage hi = HyperspectralImageReader.read(args.input);
 		
 		/** Save the result */
 		HyperspectralImageWriter.write(hi, args);
@@ -111,8 +112,8 @@ public class Jypec {
 	 */
 	public static void compare(InputArguments args) throws IOException {
 		//read both images
-		HyperspectralImage first = HyperspectralImageReader.read(args.input, args.inputHeader, args.verbose);
-		HyperspectralImage second = HyperspectralImageReader.read(args.output, args.outputHeader, args.verbose);
+		HyperspectralImage first = HyperspectralImageReader.read(args.input, args.inputHeader);
+		HyperspectralImage second = HyperspectralImageReader.read(args.output, args.outputHeader);
 		
 		//check that they are the same size and stuff
 		if (!first.getData().sizeAndTypeEquals(second.getData())) {
@@ -124,13 +125,13 @@ public class Jypec {
 		DMatrixRMaj fdm = first.getData().toDoubleMatrix();
 		DMatrixRMaj sdm = second.getData().toDoubleMatrix();
 		double dynRange = first.getData().getDataType().getDynamicRange();
-		System.out.println("RAW PSNR is: " + ImageComparisons.rawPSNR(fdm, sdm, dynRange));
-		System.out.println("Normalized PSNR is: " + ImageComparisons.normalizedPSNR(fdm, sdm));
-		System.out.println("SNR is: " + ImageComparisons.SNR(fdm, sdm));
-		System.out.println("MSE is: " + ImageComparisons.MSE(fdm, sdm));
-		System.out.println("maxSE is: " + ImageComparisons.maxSE(fdm, sdm));
-		System.out.println("MSR is: " + ImageComparisons.MSR(fdm, sdm));
-		System.out.println("SSIM is: " + ImageComparisons.SSIM(fdm, sdm, dynRange));
+		Logger.getLogger().log("RAW PSNR is: " + ImageComparisons.rawPSNR(fdm, sdm, dynRange));
+		Logger.getLogger().log("Normalized PSNR is: " + ImageComparisons.normalizedPSNR(fdm, sdm));
+		Logger.getLogger().log("SNR is: " + ImageComparisons.SNR(fdm, sdm));
+		Logger.getLogger().log("MSE is: " + ImageComparisons.MSE(fdm, sdm));
+		Logger.getLogger().log("maxSE is: " + ImageComparisons.maxSE(fdm, sdm));
+		Logger.getLogger().log("MSR is: " + ImageComparisons.MSR(fdm, sdm));
+		Logger.getLogger().log("SSIM is: " + ImageComparisons.SSIM(fdm, sdm, dynRange));
 	}
 	
 }

@@ -8,6 +8,7 @@ import org.ejml.dense.row.NormOps_DDRM;
 
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.arrays.MatrixOperations;
+import com.jypec.util.debug.Logger;
 
 /**
  * Implementation of the Vertex Component Analysis 
@@ -33,9 +34,8 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 
 		/** apply SVD onto the input data, and projective project onto the projected mean */
 		//do the svd and project onto its space
-		this.sayLn("Applying SVD...");
+		Logger.getLogger().log("Applying SVD...");
 		SingularValueDecomposition svd = new SingularValueDecomposition();
-		svd.setParentVerboseable(this);
 		svd.setNumComponents(dimProj);
 		svd.setCenter(false);
 		DMatrixRMaj x = svd.trainReduce(source);	//get projected values
@@ -43,11 +43,11 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 		
 		/** Projective project onto the mean of the subspace */
 		//y(:, j) = x(:, j)/(x(:, j)^tu)
-		this.sayLn("Getting mean...");
+		Logger.getLogger().log("Getting mean...");
 		DMatrixRMaj u = new DMatrixRMaj(dimProj, 1);
 		MatrixOperations.generateCovarianceMatrix(x, null, null, u);
 		
-		this.sayLn("Projective projection onto mean...");
+		Logger.getLogger().log("Projective projection onto mean");
 		DMatrixRMaj y = new DMatrixRMaj(x);			//y is the result of projecting onto the mean
 		DMatrixRMaj projs = new DMatrixRMaj(x.getNumCols(), 1);
 		CommonOps_DDRM.multTransA(x, u, projs);
@@ -68,7 +68,7 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 		
 		/** compute each endmember */
 		for (int i = 0; i < dimProj; i++) {
-			this.sayLn("Computing vector: " + i + "...");
+			Logger.getLogger().log("Computing vector: " + i + "...");
 			//create w = randn(0, Ip) (see http://ftp//ftp.dca.fee.unicamp.br/pub/docs/vonzuben/ia013_2s09/material_de_apoio/gen_rand_multivar.pdf for why this works)
 			DMatrixRMaj w = new DMatrixRMaj(dimProj, 1); 
 			for (int j = 0; j < dimProj; j++) {

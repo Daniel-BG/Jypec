@@ -11,10 +11,10 @@ import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
-import com.jypec.util.DefaultVerboseable;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.arrays.MatrixTransforms;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
+import com.jypec.util.debug.Logger;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
@@ -24,7 +24,7 @@ import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
  * @author Daniel
  * Class that wraps around everything else (ebc, wavelet, pca...) to perform compression
  */
-public class Compressor extends DefaultVerboseable {
+public class Compressor {
 
 	private ComParameters cp;
 	
@@ -43,10 +43,9 @@ public class Compressor extends DefaultVerboseable {
 	 * @param dr dimensionality reduction algorithm that is to be applied
 	 * @throws IOException 
 	 */
-	public void compress(HyperspectralImageData srcImg, BitStreamTreeNode output) throws IOException {
+	public void compress(HyperspectralImageData srcImg, BitOutputStreamTree output) throws IOException {
 		/** Project all image values onto the reduced space */
-		this.sayLn("Applying dimensionality reduction");
-		cp.dr.setParentVerboseable(this);
+		Logger.getLogger().log("Applying dimensionality reduction");
 		DMatrixRMaj reduced = cp.dr.trainReduce(srcImg.toDoubleMatrix());
 		
 		/** create the wavelet transform, and coder we'll be using, which won't change over the bands */
@@ -54,18 +53,18 @@ public class Compressor extends DefaultVerboseable {
 		EBCoder coder = new EBCoder();
 		
 		/** Save metadata before compressing the image */
-		this.say("Saving compression parameters... ");
+		Logger.getLogger().log("Saving compression parameters... ");
 		this.cp.saveTo(output.addChild("compression parameters"));
-		this.sayLn("(" + output.getTreeBits() + " bits)");
+		Logger.getLogger().log("(" + output.getTreeBits() + " bits)");
 		
 		/** Proceed to compress the reduced image */
-		int lastBits = 0;
+		int lastBits = output.getTreeBits();
 		for (int i = 0; i < cp.dr.getNumComponents(); i++) {
-			BitStreamTreeNode banditree = output.addChild("code for band " + i);
-			this.sayLn("Compressing band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]: ");
+			BitOutputStreamTree banditree = output.addChild("code for band " + i);
+			Logger.getLogger().log("Compressing band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]: ");
 			
 			/** Apply the wavelet transform */
-			this.sayLn("\tApplying wavelet... ");
+			Logger.getLogger().log("Applying wavelet... ");
 			double[][] waveForm = MatrixTransforms.extractBand(reduced, i, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
 			bdw.forwardTransform(waveForm, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
 			double[] minMax = MatrixOperations.minMax(waveForm);
@@ -77,13 +76,13 @@ public class Compressor extends DefaultVerboseable {
 			}
 			
 			//targetType.mutatePrecision(-cp.bitReduction);
-			this.sayLn("\tApplying quantization to type: " + targetType + "...");
+			Logger.getLogger().log("\tApplying quantization to type: " + targetType + "...");
 			
 			/** custom quantizer for this band */
 			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.375);
 			
-			banditree.bos.writeDouble(minMax[0]);
-			banditree.bos.writeDouble(minMax[1]);
+			banditree.writeDouble(minMax[0]);
+			banditree.writeDouble(minMax[1]);
 			
 			
 			/** quantize the transform and save the quantization over the current band */
@@ -92,15 +91,13 @@ public class Compressor extends DefaultVerboseable {
 			
 			/** Now divide into blocks and encode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
-			this.say("\tEncoding in " + blocker.size() + " blocks");
+			Logger.getLogger().log("\tEncoding in " + blocker.size() + " blocks");
 			for (CodingBlock block: blocker) {
 				block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
 				coder.code(block, banditree.addChild(block.toString()));
-				this.say(".");
 			}
-			this.sayLn("");
-			this.sayLn("\tCurrent size: " + banditree.getTreeBits() + " bits (+" + (banditree.getTreeBits() - lastBits) + ")");
-			lastBits = banditree.getTreeBits();
+			Logger.getLogger().log("\tCurrent size: " + output.getTreeBits() + " bits (+" + (output.getTreeBits() - lastBits) + ")");
+			lastBits = output.getTreeBits();
 		}
 	}
 	

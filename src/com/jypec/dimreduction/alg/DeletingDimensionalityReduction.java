@@ -6,7 +6,7 @@ import org.ejml.data.DMatrixRMaj;
 
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
 
 /**
  * @author Daniel
@@ -57,8 +57,8 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public void doSaveTo(BitStreamTreeNode bw) throws IOException {
-		bw.bos.writeInt(this.dimProj);
+	public void doSaveTo(BitOutputStreamTree bw) throws IOException {
+		bw.writeInt(this.dimProj);
 	}
 
 	@Override

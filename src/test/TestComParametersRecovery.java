@@ -2,8 +2,6 @@ package test;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
@@ -12,7 +10,7 @@ import org.junit.Test;
 import com.jypec.comdec.ComParameters;
 import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.datastructures.LowKeyHashMap;
 
 /**
@@ -34,8 +32,7 @@ public class TestComParametersRecovery {
 		Random r = new Random(0);
 		
 		for (int i = 0; i < 100; i++) {
-			ByteArrayOutputStream bais = new ByteArrayOutputStream();
-			BitOutputStream output = new BitOutputStream(bais);
+			BitOutputStreamTree bost = new BitOutputStreamTree(null, false);
 			BitInputStream input;
 			
 			cp.wavePasses = r.nextInt(0x100);
@@ -47,9 +44,9 @@ public class TestComParametersRecovery {
 			cp.dr = new DeletingDimensionalityReduction();
 			
 			try {
-				cp.saveTo(output);
-				output.paddingFlush();
-				input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
+				cp.saveTo(bost);
+				bost.paddingFlush();
+				input = bost.bis;
 				cpr.loadFrom(input);
 				
 				assertTrue("Compressor parameters do not equal each other", cp.equals(cpr));

@@ -14,6 +14,7 @@ import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.Pair;
 import com.jypec.util.arrays.MatrixOperations;
+import com.jypec.util.debug.Logger;
 
 /**
  * PCA implementation for dimensionality reduction
@@ -34,17 +35,17 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
 
 	@Override
 	public void train(DMatrixRMaj data) {
-		this.sayLn("Taking samples...");
+		Logger.getLogger().log("Taking samples...");
 		dimOrig = data.getNumRows();
 		
-		this.sayLn("Computing covariance matrix...");
+		Logger.getLogger().log("Computing covariance matrix...");
 
 		adjustment = new DMatrixRMaj(dimOrig, 1);
 		DMatrixRMaj s = new DMatrixRMaj(dimOrig, dimOrig);
 		MatrixOperations.generateCovarianceMatrix(data, s, null, adjustment);
         
 		/** Extract eigenvalues, order and keep the most significant */
-        this.sayLn("Extracting eigenvalues...");
+		Logger.getLogger().log("Extracting eigenvalues...");
         EigenDecomposition_F64<DMatrixRMaj> dec = DecompositionFactory_DDRM.eig(s.getNumElements(), true, true);
         dec.decompose(s);
 

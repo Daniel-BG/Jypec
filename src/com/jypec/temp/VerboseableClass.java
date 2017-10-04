@@ -1,4 +1,4 @@
-package com.jypec.util;
+package com.jypec.temp;
 
 /**
  * For classes to implement if they have the option to be verbose.
@@ -6,7 +6,7 @@ package com.jypec.util;
  * @author Daniel
  *
  */
-public interface Verboseable {
+public interface VerboseableClass {
 	
 	/**
 	 * Indentation used when a child verbose calls its parent to write
@@ -47,5 +47,5 @@ public interface Verboseable {
 	 * If a parent is set, then the verbose status of this object should be ignored,
 	 * using that of the parent
 	 */
-	public void setParentVerboseable(Verboseable parent);
+	public void setParentVerboseable(VerboseableClass parent);
 }

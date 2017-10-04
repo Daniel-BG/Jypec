@@ -1,7 +1,6 @@
 package com.jypec.util.bits;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +10,18 @@ import java.util.List;
  * some sense to otherwise difficult to understand bit streams. <br>
  * Note that, as usual with trees, the same structure that represents 
  * the trees also represents the nodes, since there is no functional
- * distinction
+ * distinction<br><br>
+ * Extends the {@link BitOutputStream} functionality, restricting parent
+ * {@link OutputStream} usage, but allowing the creation of a tree-like structure
+ * which organizes the bits in bins. The internal bit-buffers can then 
+ * be dumped via {@link #dumpInBitOutputStream(BitOutputStream)}
  * @author Daniel
  *
  */
-public class BitStreamTreeNode {
+public class BitOutputStreamTree extends BitOutputStream {
 	
-	private BitStreamTreeNode parent;
-	private List<BitStreamTreeNode> children;
+	private BitOutputStreamTree parent;
+	private List<BitOutputStreamTree> children;
 	private BitPipe bitPipe;
 	private String name;
 	private boolean spawnChildren;
@@ -30,50 +33,63 @@ public class BitStreamTreeNode {
 	 * by {@link BitInputStream}
 	 */
 	public final BitInputStream bis = new BitInputStream(null) {
-
-		@Override
-		public int readBitAsInt() throws IOException {
-			return bitPipe.getBitAsInt();
-		}
-
-		@Override
-		public byte readByte() throws IOException {
-			return (byte) this.readNBitNumber(8); 
-		}
+		private int lastBitsRead = 0;
 		
+		@Override
+        public int readBitAsInt() throws IOException {
+			int bit = bitPipe.getBitAsInt();
+			this.lastBitsRead <<= 1;
+			this.lastBitsRead += bit;
+			return bit;
+		}
+
+        @Override
+        public byte readByte() throws IOException {
+        	return (byte) this.readNBitNumber(8);
+        }
+        
+    	@Override
+    	public int getLastReadBits() {
+    		return this.lastBitsRead;
+    	}
+    	
+    	@Override
+    	public int available() {
+    		return bitPipe.getNumberOfBits();
+    	}
+    	
+    	@Override
+    	public void close() {
+    		//nothing
+    	}
 	};
 	
-	/**
-	 * Write bits here (which you can later read with {@link #bis}).
-	 * Native {@link OutputStream} methods will not work since there is no
-	 * underlying {@link OutputStream}. Use only those
-	 * provided by {@link BitOutputStream}
-	 */
-	public final BitOutputStream bos = new BitOutputStream(null) {
+	@Override
+	public void writeBit(int bit) throws IOException {
+		if (hasChildren()) {
+			throw new IllegalStateException("You shouldn't add bits to a tree node if it has children, since it is traversed in preorder and this would break it");
+		}
+		bitPipe.putBit(bit);
+	}
 
-		@Override
-		public void writeBit(int bit) throws IOException {
-			if (hasChildren()) {
-				throw new IllegalStateException("You shouldn't add bits to a tree node if it has children, since it is traversed in preorder and this would break it");
-			}
-			bitPipe.putBit(bit);
+	@Override
+	public void writeByte(byte i) throws IOException {
+		this.writeNBitNumber(i & 0xff, 8);
+	}
+	
+	@Override
+	public void paddingFlush() throws IOException {
+		int bufferSize = this.getBitsOutput() % 8;
+		//flush remaining bits padding with zeroes
+		if (bufferSize > 0) {
+			this.writeNBitNumber(0, 8 - bufferSize);
 		}
-
-		@Override
-		public void writeByte(byte i) throws IOException {
-			this.writeNBitNumber(i & 0xff, 8);
-		}
-		
-		@Override
-		public void paddingFlush() throws IOException {
-			int bufferSize = this.getBitsOutput() % 8;
-			//flush remaining bits padding with zeroes
-			if (bufferSize > 0) {
-				this.writeNBitNumber(0, 8 - bufferSize);
-			}
-		}
-		
-	};
+	}
+	
+	@Override
+	public void close() {
+		//pass
+	}
 	
 	
 	/**
@@ -81,10 +97,18 @@ public class BitStreamTreeNode {
 	 * @param name the name of this tree
 	 * @param spawnChildren if this tree should spawn children (less efficient)
 	 */
-	public BitStreamTreeNode(String name, boolean spawnChildren) {
+	public BitOutputStreamTree(String name, boolean spawnChildren) {
+		super(null);
 		this.name = name;
 		this.bitPipe = new BitPipe();
 		this.spawnChildren = spawnChildren;
+	}
+	
+	/**
+	 * same as calling {@link #BitOutputStreamTree(null, false)}
+	 */
+	public BitOutputStreamTree() {
+		this(null, false);
 	}
 	
 	
@@ -107,14 +131,14 @@ public class BitStreamTreeNode {
 	/**
 	 * @return the parent of this tree, or null if not present
 	 */
-	public BitStreamTreeNode getParent() {
+	public BitOutputStreamTree getParent() {
 		return parent;
 	}
 	
 	/**
 	 * @return the root of this tree, which is itself if it has no parent
 	 */
-	public BitStreamTreeNode getRoot() {
+	public BitOutputStreamTree getRoot() {
 		if (this.isRoot()) {
 			return this;
 		}
@@ -144,7 +168,7 @@ public class BitStreamTreeNode {
 	 * @param index the number of the child to be returned
 	 * @return the requested child
 	 */
-	public BitStreamTreeNode getChild(int index) {
+	public BitOutputStreamTree getChild(int index) {
 		return this.children.get(index);
 	}
 	
@@ -153,15 +177,15 @@ public class BitStreamTreeNode {
 	 * @param name the name of the child bstn
 	 * @return the newly created child
 	 */
-	public BitStreamTreeNode addChild(String name) {
+	public BitOutputStreamTree addChild(String name) {
 		if (!this.spawnChildren) {
 			return this;
 		}
 		
 		if (this.children == null) {
-			this.children = new ArrayList<BitStreamTreeNode>();
+			this.children = new ArrayList<BitOutputStreamTree>();
 		}
-		BitStreamTreeNode bstn = new BitStreamTreeNode(name, this.spawnChildren);
+		BitOutputStreamTree bstn = new BitOutputStreamTree(name, this.spawnChildren);
 		this.children.add(bstn);
 		return bstn;
 	}
@@ -179,7 +203,7 @@ public class BitStreamTreeNode {
 	public int getTreeBits() {
 		int count = this.bitPipe.getNumberOfBits();
 		if (this.hasChildren()) {
-			for (BitStreamTreeNode bstn: this.children) {
+			for (BitOutputStreamTree bstn: this.children) {
 				count += bstn.getTreeBits();
 			}
 		}
@@ -196,7 +220,7 @@ public class BitStreamTreeNode {
 			target.writeBit(this.bitPipe.getBitAsInt());
 		}
 		if (this.hasChildren()) {
-			for (BitStreamTreeNode bstn: this.children) {
+			for (BitOutputStreamTree bstn: this.children) {
 				bstn.dumpInBitOutputStream(target);
 			}
 		}
@@ -213,7 +237,7 @@ public class BitStreamTreeNode {
 		}
 		String res = indent + this.name + " (" + this.getTreeBits() + ") (+" + this.getNodeBits() +")\n";
 		if (this.hasChildren()) {
-			for (BitStreamTreeNode bstn: this.children) {
+			for (BitOutputStreamTree bstn: this.children) {
 				res += bstn.layoutTreeStructure(indent + "\t");
 			}
 		}

@@ -1,7 +1,5 @@
 package test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
@@ -13,11 +11,11 @@ import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
+import com.jypec.temp.ClassLogger;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.datastructures.BidimensionalArrayIntegerMatrix;
 import com.jypec.util.datastructures.IntegerMatrix;
-import com.jypec.util.debug.Logger;
 
 import test.generic.TestHelpers;
 
@@ -37,17 +35,16 @@ public class TestEBCodec {
 	 * @return true if the test was passed
 	 */
 	private boolean testEncoding(IntegerMatrix data, int width, int height, int depth, SubBand band) {
-		Logger.logger().log(this, "Testing: " + height + "x" + width + "x" + depth + " (" + band.toString() + ")");
+		ClassLogger.logger().log(this, "Testing: " + height + "x" + width + "x" + depth + " (" + band.toString() + ")");
 		
 		//Code it
 		CodingBlock block = new CodingBlock(data, height, width, 0, 0, depth, band);
-		ByteArrayOutputStream bais = new ByteArrayOutputStream();
-		BitOutputStream output = new BitOutputStream(bais);
+		BitOutputStreamTree bost = new BitOutputStreamTree();
 		
 		
 		EBCoder coder = new EBCoder();
 		try {
-			coder.code(block, output);
+			coder.code(block, bost);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
@@ -57,7 +54,7 @@ public class TestEBCodec {
 		CodingBlock blockOut = new CodingBlock(height, width, depth, band);
 		EBDecoder decoder = new EBDecoder();
 		
-		BitInputStream input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
+		BitInputStream input = bost.bis;
 		try {
 			decoder.decode(input, blockOut);
 		} catch (IOException e) {

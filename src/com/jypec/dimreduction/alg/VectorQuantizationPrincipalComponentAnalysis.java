@@ -12,7 +12,8 @@ import com.jypec.arithco.predict.functions.Basic1DPredictiveFunction;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.dimreduction.JSATWrapper;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
+import com.jypec.util.debug.Logger;
 
 import jsat.SimpleDataSet;
 import jsat.classifiers.DataPoint;
@@ -43,24 +44,23 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	@Override
 	public void train(DMatrixRMaj source) {
 		/** Initialization */
-		this.sayLn("Initializing VQPCA...");
+		Logger.getLogger().log("Initializing VQPCA...");
 		SimpleDataSet dataSet = JSATWrapper.toDataSet(source);
 		this.trainedWith = source;
 		this.pcas = new ArrayList<PrincipalComponentAnalysis>(this.numClusters);
 		this.dimOrig = source.getNumRows();
 		
 		/** Cluster the data */
-		this.sayLn("Clustering data...");
+		Logger.getLogger().log("Clustering data...");
 		this.classification = new int[source.getNumCols()];
 		KClusterer clusterer = new ElkanKMeans();
 		clusterer.cluster(dataSet, this.numClusters, null, this.classification);
 		List<List<DataPoint>> list = ClustererBase.createClusterListFromAssignmentArray(this.classification, dataSet);
 		
 		/** Perform PCA for each cluster */
-		this.sayLn("Performing " + list.size() + " PCAs");
+		Logger.getLogger().log("Performing " + list.size() + " PCAs");
 		for (List<DataPoint> l: list) {
 			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
-			pca.setParentVerboseable(this);
 			pca.setNumComponents(dimProj);
 			pca.train(JSATWrapper.toDMatrixRMaj(new SimpleDataSet(l)));
 			pcas.add(pca);
@@ -104,11 +104,11 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	}
 
 	@Override
-	public void doSaveTo(BitStreamTreeNode bw) throws IOException {
+	public void doSaveTo(BitOutputStreamTree bw) throws IOException {
 		/** write metadata */
-		bw.addChild("dim proj").bos.writeInt(this.dimProj);
-		bw.addChild("dim orig").bos.writeInt(this.dimOrig);
-    	bw.addChild("num clusters").bos.writeInt(this.numClusters);
+		bw.addChild("dim proj").writeInt(this.dimProj);
+		bw.addChild("dim orig").writeInt(this.dimOrig);
+    	bw.addChild("num clusters").writeInt(this.numClusters);
     	
     	/** arith code the cluster indices */
     	int cbits = bw.getTreeBits();
@@ -116,7 +116,7 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
     	pac.code(this.classification, numClusters, bw.addChild("class classification"));
     	cbits = bw.getTreeBits() - cbits;
     	if (cbits % 8 != 0) {
-    		bw.addChild("padding").bos.writeNBitNumber(0, 8 - (cbits % 8)); //padding
+    		bw.addChild("padding").writeNBitNumber(0, 8 - (cbits % 8)); //padding
     	}
     	
     	/** write each pca */
@@ -145,7 +145,6 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 		this.pcas = new ArrayList<PrincipalComponentAnalysis>(numClusters);
 		for (int i = 0; i < numClusters; i++) {
 			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
-			pca.setParentVerboseable(this);
 			pca.doLoadFrom(bw);
 			this.pcas.add(pca);
 		}

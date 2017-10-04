@@ -3,7 +3,7 @@ package com.jypec.util.io.headerio.primitives;
 import java.io.IOException;
 
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
 
 /**
  * Compress/Decompress arrays of data. Assumes a "{data1, data2, ...}" format. <br>
@@ -53,9 +53,9 @@ public class ArrayValueCompressorDecompressor extends ValueCompressorDecompresso
 	}
 
 	@Override
-	public void compress(BitStreamTreeNode brw) throws IOException {
-		brw.addChild("len").bos.writeInt(this.values.length);
-		BitStreamTreeNode bstn = brw.addChild("array");
+	public void compress(BitOutputStreamTree brw) throws IOException {
+		brw.addChild("len").writeInt(this.values.length);
+		BitOutputStreamTree bstn = brw.addChild("array");
 		for (int i = 0; i < this.values.length; i++) {
 			childComDec.setObject(this.values[i]);
 			childComDec.compress(bstn);

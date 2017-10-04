@@ -1,4 +1,4 @@
-package com.jypec.util;
+package com.jypec.temp;
 
 /**
  * Default verbose implementation so that inheriting classes don't
@@ -6,14 +6,14 @@ package com.jypec.util;
  * @author Daniel
  *
  */
-public abstract class DefaultVerboseable implements Verboseable {
+public abstract class DefaultVerboseableClass implements VerboseableClass {
 
 	private boolean verbose;
-	private Verboseable parent;
+	private VerboseableClass parent;
 
 
 	@Override
-	public void setParentVerboseable(Verboseable parent) {
+	public void setParentVerboseable(VerboseableClass parent) {
 		this.parent = parent;
 	}
 
@@ -30,7 +30,7 @@ public abstract class DefaultVerboseable implements Verboseable {
 	@Override
 	public void say(String s) {
 		if (parent != null) {
-			this.parent.say(Verboseable.INDENT + s);	
+			this.parent.say(VerboseableClass.INDENT + s);	
 		} else if (verbose()) {
 			System.out.print(s);
 		}
@@ -39,7 +39,7 @@ public abstract class DefaultVerboseable implements Verboseable {
 	@Override
 	public void sayLn(String s) {
 		if (parent != null) {
-			this.parent.sayLn(Verboseable.INDENT + s);	
+			this.parent.sayLn(VerboseableClass.INDENT + s);	
 		} else if (verbose()) {
 			System.out.println(s);
 		}

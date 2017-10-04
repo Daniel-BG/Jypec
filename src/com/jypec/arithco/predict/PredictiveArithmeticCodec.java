@@ -3,7 +3,7 @@ package com.jypec.arithco.predict;
 import com.jypec.arithco.ArithmeticCoder;
 import com.jypec.arithco.ArithmeticDecoder;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
 
 /**
  * Wrapper for the {@link ArithmeticCoder} which provides
@@ -32,7 +32,7 @@ public class PredictiveArithmeticCodec {
 	 * 		which must range from 0 to numberOfChars - 1
 	 * @param bos the output stream
 	 */
-	public void code(int[] data, int numberOfChars, BitStreamTreeNode bos) {
+	public void code(int[] data, int numberOfChars, BitOutputStreamTree bos) {
 		//build an arith coder with one more char for encoding right prediction
 		ArithmeticCoder ac = new ArithmeticCoder(32, numberOfChars + 1, numberOfChars * 256); //experimental value that works ok
 		ac.initialize();

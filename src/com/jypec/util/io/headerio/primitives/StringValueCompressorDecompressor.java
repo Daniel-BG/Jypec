@@ -3,7 +3,7 @@ package com.jypec.util.io.headerio.primitives;
 import java.io.IOException;
 
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
 
 /**
  * Com/Dec for Strings
@@ -31,9 +31,9 @@ public class StringValueCompressorDecompressor extends SingleValueCompressorDeco
 	}
 
 	@Override
-	public void compress(BitStreamTreeNode brw) throws IOException {
-		brw.bos.writeInt(value.length());
-		brw.bos.writeString(value);
+	public void compress(BitOutputStreamTree brw) throws IOException {
+		brw.writeInt(value.length());
+		brw.writeString(value);
 	}
 
 	@Override

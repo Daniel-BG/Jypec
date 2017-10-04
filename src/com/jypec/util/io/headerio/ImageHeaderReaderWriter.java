@@ -14,7 +14,7 @@ import com.jypec.img.HeaderConstants;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.util.Utilities;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitStreamTreeNode;
+import com.jypec.util.bits.BitOutputStreamTree;
 
 /**
  * Read/Write image headers
@@ -125,9 +125,9 @@ public class ImageHeaderReaderWriter {
 	 * @return the number of BYTES written to the stream
 	 * @throws IOException 
 	 */
-	public static int saveToCompressedStream(ImageHeaderData ihd, BitStreamTreeNode bstn, boolean essential) throws IOException {
+	public static int saveToCompressedStream(ImageHeaderData ihd, BitOutputStreamTree bstn, boolean essential) throws IOException {
 		int bits = bstn.getTreeBits();
-		bstn.bos.writeByte(CODE_JYPEC_HEADER);
+		bstn.writeByte(CODE_JYPEC_HEADER);
 		for (Entry<HeaderConstants, Object> e: ihd.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			prw.setData(e.getValue());
@@ -135,7 +135,7 @@ public class ImageHeaderReaderWriter {
 				prw.compress(bstn.addChild(e.getKey().name()));
 			}
 		}
-		bstn.addChild("header termination").bos.writeByte((byte)HeaderConstants.HEADER_TERMINATION.ordinal());
+		bstn.addChild("header termination").writeByte((byte)HeaderConstants.HEADER_TERMINATION.ordinal());
 		
 		bits = bstn.getTreeBits() - bits;
 		if (bits % 8 == 0) {

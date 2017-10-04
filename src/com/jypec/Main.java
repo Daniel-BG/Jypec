@@ -10,6 +10,7 @@ import org.apache.commons.cli.ParseException;
 import com.jypec.cli.InputArguments;
 import com.jypec.cli.JypecCLI;
 import com.jypec.util.JypecException;
+import com.jypec.util.debug.Logger;
 
 /**
  * Entry point
@@ -26,6 +27,7 @@ public class Main {
 	        //parse the command line arguments
 	        CommandLine line = parser.parse( JypecCLI.getOptions(), args );
 	        InputArguments iArgs = InputArguments.parseFrom(line);
+	        Logger.getLogger().setLogging(iArgs.verbose);
 	        //go through options
 	        if (iArgs.compress) {
 	        	Jypec.compress(iArgs);

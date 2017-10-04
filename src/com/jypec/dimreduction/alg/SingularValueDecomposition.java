@@ -8,6 +8,7 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.arrays.ArraySortingIndexComparator;
 import com.jypec.util.arrays.MatrixOperations;
+import com.jypec.util.debug.Logger;
 
 /**
  * Overrides the {@link #train(DMatrixRMaj)} method in {@link PrincipalComponentAnalysis} 
@@ -30,7 +31,7 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 
 	@Override
 	public void train(DMatrixRMaj data) {
-		this.sayLn("Taking samples...");
+		Logger.getLogger().log("Taking samples...");
 		dimOrig = data.getNumRows();
 		
 		/** substract mean from data and normalize with the square root of the number of samples */
@@ -52,7 +53,7 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 		 * (and probably can't since it is of size samples * samples) */
 		CommonOps_DDRM.transpose(newData);
 		SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(newData.getNumRows(), newData.getNumCols(), false, true, false);
-		this.say("Decomposition yielded: " + svd.decompose(newData));
+		Logger.getLogger().log("Decomposition yielded: " + svd.decompose(newData));
 		DMatrixRMaj V = svd.getV(null, false);
 		DMatrixRMaj W = svd.getW(null);
 		

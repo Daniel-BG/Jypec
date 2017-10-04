@@ -2,8 +2,6 @@ package test;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,9 +14,10 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.jypec.dimreduction.DimensionalityReduction;
+import com.jypec.dimreduction.ProjectingDimensionalityReduction.Precision;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitOutputStreamTree;
 
 import test.generic.TestHelpers;
 
@@ -66,6 +65,7 @@ public class TestPCARecovery {
 	@Test
 	public void testPCARecovery() {
 		PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
+		pca.setPrecision(Precision.DOUBLE);
 		pca.setNumComponents(eigenSize);
 		
 		double[] inputData = new double[sampleSize*numSamples];
@@ -75,21 +75,19 @@ public class TestPCARecovery {
 		
 		pca.train(mat);
 		
-		
-		ByteArrayOutputStream bais = new ByteArrayOutputStream();
-		BitOutputStream output = new BitOutputStream(bais);
+		BitOutputStreamTree bost = new BitOutputStreamTree();
 		BitInputStream input;
 		
 		PrincipalComponentAnalysis pcaRec = new PrincipalComponentAnalysis();
+		pcaRec.setPrecision(Precision.DOUBLE);
 		
 		try {
-			pca.saveTo(output);
-			output.paddingFlush();
-			input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
+			pca.saveTo(bost);
+			bost.paddingFlush();
+			input = bost.bis;
 			pcaRec = (PrincipalComponentAnalysis) DimensionalityReduction.loadFrom(input);
 			
 			input.close();
-			output.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
