@@ -12,15 +12,15 @@ public class BitPipe {
 	private static final int LEFTMOST_BIT_MASK = 0x1 << (Integer.SIZE - 1);
 	
 	//where to store bits if it gets too big
-	LinkedList<Integer> storage;
+	private LinkedList<Integer> storage;
 	//output is where we are taking bits from, input where we are putting them in
 	//bits might be taken from the input if they are asked for before the whole input fills up
-	int output, input;
+	private int output, input;
 	//bits left in the output (to be output)
 	//and bits left in the input (to be filled)
-	int outputLeft, inputLeft;
+	private int outputLeft, inputLeft;
 	//current size (number of bits stored)
-	int size;
+	private int size;
 		
 	
 	/**
@@ -131,6 +131,13 @@ public class BitPipe {
 	 * @return the number of bits stored in this pipe
 	 */
 	public int getNumberOfBits() {
-		throw new UnsupportedOperationException();
+		return this.size;
+	}
+	
+	/**
+	 * @return true if the pipe is empty
+	 */
+	public boolean isEmpty() {
+		return this.size == 0;
 	}
 }

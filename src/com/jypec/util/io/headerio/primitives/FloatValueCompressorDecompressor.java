@@ -3,7 +3,7 @@ package com.jypec.util.io.headerio.primitives;
 import java.io.IOException;
 
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
 
 
 /**
@@ -31,8 +31,8 @@ public class FloatValueCompressorDecompressor extends SingleValueCompressorDecom
 	}
 
 	@Override
-	public void compress(BitOutputStream brw) throws IOException {
-		brw.writeFloat(this.value);
+	public void compress(BitStreamTreeNode brw) throws IOException {
+		brw.bos.writeFloat(this.value);
 	}
 
 	@Override

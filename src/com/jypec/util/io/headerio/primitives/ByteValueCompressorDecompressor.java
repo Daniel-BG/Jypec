@@ -3,7 +3,7 @@ package com.jypec.util.io.headerio.primitives;
 import java.io.IOException;
 
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
 
 /**
  * Compresses/uncompresses a byte (8 bit) value
@@ -30,8 +30,8 @@ public class ByteValueCompressorDecompressor extends SingleValueCompressorDecomp
 	}
 
 	@Override
-	public void compress(BitOutputStream brw) throws IOException {
-		brw.writeByte(this.value);
+	public void compress(BitStreamTreeNode brw) throws IOException {
+		brw.bos.writeByte(this.value);
 	}
 
 	@Override

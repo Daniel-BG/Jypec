@@ -3,9 +3,11 @@ package com.jypec.arithco;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
 import com.jypec.util.bits.Bit;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
 
 /**
  * Implement the arithmetic coder as per <br>
@@ -99,10 +101,10 @@ public class ArithmeticCoder {
 	 * @param input the input to be coded
 	 * @param bos the output stream where to output bits
 	 */
-	public void code(int input, BitOutputStream bos) {
+	public void code(int input, BitStreamTreeNode bos) {
 		switch(this.state) {
 		case INITIALIZED:
-			this.cbits = bos.getBitsOutput(); //for padding later
+			this.cbits = bos.bos.getBitsOutput(); //for padding later
 		case CODING:
 			break;
 		case BUILT:
@@ -121,7 +123,7 @@ public class ArithmeticCoder {
 	 * @param input the array of symbols to be coded
 	 * @param bos where to put the coded data
 	 */
-	public void code(int[] input, BitOutputStream bos) {
+	public void code(int[] input, BitStreamTreeNode bos) {
 		for (int i = 0; i < input.length; i++) {
 			this.code(input[i], bos);
 		}
@@ -132,7 +134,7 @@ public class ArithmeticCoder {
 	 * Finish the coding in the given output stream
 	 * @param bos
 	 */
-	public void finishCoding(BitOutputStream bos) {
+	public void finishCoding(BitStreamTreeNode bos) {
 		if (this.state != State.CODING) {
 			throw new IllegalStateException("Can only finish coding if we are coding");
 		}
@@ -152,7 +154,7 @@ public class ArithmeticCoder {
 		bitsToFollow = 0;
 	}
 	
-	private void encodeSymbol(int symbol, BitOutputStream bos) {
+	private void encodeSymbol(int symbol, BitStreamTreeNode bos) {
 		long range;
 		range = high - low + 1L;
 		high = low + (range*acm.cumFreq[symbol-1])/acm.cumFreq[0] - 1L;
@@ -176,7 +178,7 @@ public class ArithmeticCoder {
 		}
 	}
 	
-	private void doneEncoding(BitOutputStream bos) {
+	private void doneEncoding(BitStreamTreeNode bos) {
 		bitsToFollow += 1;
 		if (low < firstQtr) {
 			bitPlusFollow(0, bos);
@@ -185,7 +187,7 @@ public class ArithmeticCoder {
 		}
 	}
 	
-	private void bitPlusFollow(int bit, BitOutputStream bos) {
+	private void bitPlusFollow(int bit, BitStreamTreeNode bos) {
 		outputBit(bit, bos);
 		while(bitsToFollow > 0) {
 			outputBit(Bit.fromInteger(bit).getInverse().toInteger(), bos);
@@ -193,9 +195,9 @@ public class ArithmeticCoder {
 		}
 	}
 	
-	private void outputBit(int bit, BitOutputStream bos) {
+	private void outputBit(int bit, BitStreamTreeNode bos) {
 		try {
-			bos.writeBit(bit);
+			bos.bos.writeBit(bit);
 			adbos.writeBit(bit);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -210,7 +212,7 @@ public class ArithmeticCoder {
 	 * and if the word is embedded in a stream, the decoder might overstep its ground. 
 	 * @param bos
 	 */
-	private void doneOutputingBits(BitOutputStream bos) {
+	private void doneOutputingBits(BitStreamTreeNode bos) {
 		try {
 			this.adbos.paddingFlush();
 		} catch (IOException e1) {
@@ -218,14 +220,14 @@ public class ArithmeticCoder {
 		}
 		ByteArrayInputStream bais = new ByteArrayInputStream(adbaos.toByteArray());
 		BitInputStream bis = new BitInputStream(bais);
-		int bitsWritten = bos.getBitsOutput() - cbits;
+		int bitsWritten = bos.bos.getBitsOutput() - cbits;
 		this.ad.decode(bis);
 		int bitsRead = bis.getBitsInput();
 		int garbage = this.ad.getGarbageBits();
 		int totalGarbage = garbage+bitsRead - bitsWritten;
 		
 		try {
-			bos.writeNBitNumber(0, totalGarbage);
+			bos.bos.writeNBitNumber(0, totalGarbage);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

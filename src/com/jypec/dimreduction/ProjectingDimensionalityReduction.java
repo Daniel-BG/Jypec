@@ -8,7 +8,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import com.jypec.util.arrays.ArrayTransforms;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
 
 /**
  * Parent class for all your projecting dimensionality needs
@@ -42,20 +42,20 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	
 	
 	@Override
-	public void doSaveTo(BitOutputStream bw) throws IOException {
+	public void doSaveTo(BitStreamTreeNode bw) throws IOException {
     	//write the number of dimensions in the original space
-    	bw.writeInt(dimOrig);
+    	bw.addChild("original dimension").bos.writeInt(dimOrig);
     	//write the number of dimensions in the reduced space
-    	bw.writeInt(dimProj);
+    	bw.addChild("projected dimension").bos.writeInt(dimProj);
     	//write the precision used
-    	bw.writeEnum(Precision.class, precision, true);
+    	bw.addChild("precision").bos.writeEnum(Precision.class, precision, true);
     	//write the mean and unprojection matrix
     	if (this.precision == Precision.DOUBLE) {
-    		bw.writeDoubleArray(adjustment.getData(), dimOrig);
-    		bw.writeDoubleArray(unprojectionMatrix.getData(), dimOrig * dimProj);
+    		bw.addChild("mean").bos.writeDoubleArray(adjustment.getData(), dimOrig);
+    		bw.addChild("projection matrix").bos.writeDoubleArray(unprojectionMatrix.getData(), dimOrig * dimProj);
     	} else {
-    		bw.writeFloatArray(ArrayTransforms.changeType(adjustment.getData()), dimOrig);
-    		bw.writeFloatArray(ArrayTransforms.changeType(unprojectionMatrix.getData()), dimOrig * dimProj);
+    		bw.addChild("mean").bos.writeFloatArray(ArrayTransforms.changeType(adjustment.getData()), dimOrig);
+    		bw.addChild("projection matrix").bos.writeFloatArray(ArrayTransforms.changeType(unprojectionMatrix.getData()), dimOrig * dimProj);
     	}
 	}
 

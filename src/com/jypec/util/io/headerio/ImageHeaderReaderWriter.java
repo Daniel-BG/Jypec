@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,7 +14,7 @@ import com.jypec.img.HeaderConstants;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.util.Utilities;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
 
 /**
  * Read/Write image headers
@@ -120,24 +120,24 @@ public class ImageHeaderReaderWriter {
 	/**
 	 * save inner information into a compressed stream
 	 * @param ihd 
-	 * @param brw
+	 * @param bstn
 	 * @param essential if true only the essential information to read the image is output, everything else discarded
 	 * @return the number of BYTES written to the stream
 	 * @throws IOException 
 	 */
-	public static int saveToCompressedStream(ImageHeaderData ihd, BitOutputStream brw, boolean essential) throws IOException {
-		int bits = brw.getBitsOutput();
-		brw.writeByte(CODE_JYPEC_HEADER);
+	public static int saveToCompressedStream(ImageHeaderData ihd, BitStreamTreeNode bstn, boolean essential) throws IOException {
+		int bits = bstn.getTreeBits();
+		bstn.bos.writeByte(CODE_JYPEC_HEADER);
 		for (Entry<HeaderConstants, Object> e: ihd.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
 			prw.setData(e.getValue());
 			if (prw.getHeaderConstant() != HeaderConstants.HEADER_OFFSET && (!essential || prw.getHeaderConstant().isEssential())) { //do not save the header offset as it is different
-				prw.compress(brw);
+				prw.compress(bstn.addChild(e.getKey().name()));
 			}
 		}
-		brw.writeByte((byte)HeaderConstants.HEADER_TERMINATION.ordinal());
+		bstn.addChild("header termination").bos.writeByte((byte)HeaderConstants.HEADER_TERMINATION.ordinal());
 		
-		bits = brw.getBitsOutput() - bits;
+		bits = bstn.getTreeBits() - bits;
 		if (bits % 8 == 0) {
 			return bits / 8;
 		} else {

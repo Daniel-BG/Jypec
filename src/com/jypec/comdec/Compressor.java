@@ -14,7 +14,7 @@ import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.DefaultVerboseable;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.arrays.MatrixTransforms;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
@@ -43,7 +43,7 @@ public class Compressor extends DefaultVerboseable {
 	 * @param dr dimensionality reduction algorithm that is to be applied
 	 * @throws IOException 
 	 */
-	public void compress(HyperspectralImageData srcImg, BitOutputStream output) throws IOException {
+	public void compress(HyperspectralImageData srcImg, BitStreamTreeNode output) throws IOException {
 		/** Project all image values onto the reduced space */
 		this.sayLn("Applying dimensionality reduction");
 		cp.dr.setParentVerboseable(this);
@@ -55,12 +55,13 @@ public class Compressor extends DefaultVerboseable {
 		
 		/** Save metadata before compressing the image */
 		this.say("Saving compression parameters... ");
-		this.cp.saveTo(output);
-		this.sayLn("(" + output.getBitsOutput() + " bits)");
+		this.cp.saveTo(output.addChild("compression parameters"));
+		this.sayLn("(" + output.getTreeBits() + " bits)");
 		
 		/** Proceed to compress the reduced image */
-		int lastBits = output.getBitsOutput();
+		int lastBits = 0;
 		for (int i = 0; i < cp.dr.getNumComponents(); i++) {
+			BitStreamTreeNode banditree = output.addChild("code for band " + i);
 			this.sayLn("Compressing band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]: ");
 			
 			/** Apply the wavelet transform */
@@ -81,8 +82,8 @@ public class Compressor extends DefaultVerboseable {
 			/** custom quantizer for this band */
 			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.375);
 			
-			output.writeDouble(minMax[0]);
-			output.writeDouble(minMax[1]);
+			banditree.bos.writeDouble(minMax[0]);
+			banditree.bos.writeDouble(minMax[1]);
 			
 			
 			/** quantize the transform and save the quantization over the current band */
@@ -94,12 +95,12 @@ public class Compressor extends DefaultVerboseable {
 			this.say("\tEncoding in " + blocker.size() + " blocks");
 			for (CodingBlock block: blocker) {
 				block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
-				coder.code(block, output);
+				coder.code(block, banditree.addChild(block.toString()));
 				this.say(".");
 			}
 			this.sayLn("");
-			this.sayLn("\tCurrent size: " + output.getBitsOutput() + " bits (+" + (output.getBitsOutput() - lastBits) + ")");
-			lastBits = output.getBitsOutput();
+			this.sayLn("\tCurrent size: " + banditree.getTreeBits() + " bits (+" + (banditree.getTreeBits() - lastBits) + ")");
+			lastBits = banditree.getTreeBits();
 		}
 	}
 	

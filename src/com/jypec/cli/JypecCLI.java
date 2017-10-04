@@ -41,6 +41,8 @@ public class JypecCLI {
 	public static final String OPTION_COMPARE = "compare";
 	/** Flag to be verbose. Use for retrieving arguments and/or flags  */
 	public static final String OPTION_VERBOSE = "verbose";
+	/** Flag to show the compression tree*/
+	public static final String OPTION_TREE = "tree";
 	
 	/* Options for jypec */
 	private static Options jypecOptions;
@@ -55,6 +57,7 @@ public class JypecCLI {
 		Option compressionStats = new Option(null, OPTION_SHOW_COMPRESSION_STATS, false, "show compression stats");
 		Option noHeaderOutput 	= new Option(null, OPTION_NO_HEADER_OUTPUT, false, "do not output the header");
 		Option essentialHeader 	= new Option(null, OPTION_OUTPUT_ESSENTIAL_HEADER, false, "output only essential information, cut all extra");
+		Option tree 			= new Option(null, OPTION_TREE, false, "output the compression tree");
 		
 		
 		/* input output files */
@@ -144,6 +147,7 @@ public class JypecCLI {
 		jypecOptions.addOption(compare);
 		jypecOptions.addOption(essentialHeader);
 		jypecOptions.addOption(verbose);
+		jypecOptions.addOption(tree);
 	}
 	
 	

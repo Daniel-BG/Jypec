@@ -10,6 +10,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
+
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.Pair;
 import com.jypec.util.arrays.MatrixOperations;

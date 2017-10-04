@@ -15,7 +15,7 @@ import com.jypec.dimreduction.alg.VectorQuantizationPrincipalComponentAnalysis;
 import com.jypec.dimreduction.alg.VertexComponentAnalysis;
 import com.jypec.util.DefaultVerboseable;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
 
 /**
  * @author Daniel
@@ -103,9 +103,9 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	 * @param bw The BitStream handler that encapsulates the BitStream
 	 * @throws IOException 
 	 */
-	public final void saveTo(BitOutputStream bw) throws IOException {
-		bw.writeByte((byte) this.dra.ordinal());
-		this.doSaveTo(bw);
+	public final void saveTo(BitStreamTreeNode bw) throws IOException {
+		bw.addChild("code").bos.writeByte((byte) this.dra.ordinal());
+		this.doSaveTo(bw.addChild("data"));
 	}
 	
 
@@ -114,7 +114,7 @@ public abstract class DimensionalityReduction extends DefaultVerboseable {
 	 * @param bw
 	 * @throws IOException 
 	 */
-	public abstract void doSaveTo(BitOutputStream bw) throws IOException;
+	public abstract void doSaveTo(BitStreamTreeNode bw) throws IOException;
 	
 	
 	/**

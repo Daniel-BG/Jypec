@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.jypec.img.HeaderConstants;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
 import com.jypec.util.io.headerio.primitives.ValueCompressorDecompressor;
 
 /**
@@ -52,15 +52,15 @@ public class ParameterReaderWriter {
 	 * @return the number of bits of the compressed data
 	 * @throws IOException 
 	 */
-	public final int compress(BitOutputStream brw) throws IOException {
-		int cbits = brw.getBitsOutput();
-		this.compressParameterType(brw);
-		this.compressData(brw);
-		return brw.getBitsOutput() - cbits;
+	public final int compress(BitStreamTreeNode brw) throws IOException {
+		int cbits = brw.bos.getBitsOutput();
+		this.compressParameterType(brw.addChild("type"));
+		this.compressData(brw.addChild("data"));
+		return brw.bos.getBitsOutput() - cbits;
 	}
 	
-	private final void compressParameterType(BitOutputStream brw) throws IOException {
-		brw.writeByte(headerConstant.getCode());
+	private final void compressParameterType(BitStreamTreeNode brw) throws IOException {
+		brw.bos.writeByte(headerConstant.getCode());
 	}
 	
 	/**
@@ -95,7 +95,7 @@ public class ParameterReaderWriter {
 	 * @param brw
 	 * @throws IOException 
 	 */
-	private void compressData(BitOutputStream brw) throws IOException {
+	private void compressData(BitStreamTreeNode brw) throws IOException {
 		this.comDec.compress(brw);
 	}
 	

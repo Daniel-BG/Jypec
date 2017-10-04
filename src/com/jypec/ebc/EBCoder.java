@@ -8,7 +8,7 @@ import com.jypec.ebc.mq.ContextLabel;
 import com.jypec.ebc.mq.MQArithmeticCoder;
 import com.jypec.util.Pair;
 import com.jypec.util.bits.Bit;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
 
 /**
  * MQCoder that given an input block codes it into the
@@ -40,7 +40,7 @@ public class EBCoder {
 	 * @param output bitstream where to put the coded block
 	 * @throws IOException 
 	 */ 
-	public void code(CodingBlock block, BitOutputStream output) throws IOException {
+	public void code(CodingBlock block, BitStreamTreeNode output) throws IOException {
 		this.initialize(block.getWidth(), block.getHeight());
 		
 		int numberOfBitPlanes = block.getMagnitudeBitPlaneNumber();
@@ -68,7 +68,7 @@ public class EBCoder {
 	 * @param output
 	 * @throws IOException 
 	 */
-	private void codeCleanup(CodingPlane plane, BitOutputStream output) throws IOException {
+	private void codeCleanup(CodingPlane plane, BitStreamTreeNode output) throws IOException {
 		//code full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -125,7 +125,7 @@ public class EBCoder {
 	 * @param onlySign if only the sign is to be coded, ignoring the magnitude
 	 * @throws IOException 
 	 */
-	private void codeSignificanceBit(CodingPlane plane, BitOutputStream output, int row, int column, boolean onlySign) throws IOException {
+	private void codeSignificanceBit(CodingPlane plane, BitStreamTreeNode output, int row, int column, boolean onlySign) throws IOException {
 		//code the bit (zero or one we code it anyways)
 		Bit symbol = plane.getSymbolAt(row, column);
 		if (!onlySign) {
@@ -155,7 +155,7 @@ public class EBCoder {
 	 * @param output
 	 * @throws IOException 
 	 */
-	private void codeSignificance(CodingPlane plane, BitOutputStream output) throws IOException {
+	private void codeSignificance(CodingPlane plane, BitStreamTreeNode output) throws IOException {
 		//code full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -185,7 +185,7 @@ public class EBCoder {
 	 * @param row
 	 * @throws IOException 
 	 */
-	private void codeRefinementBit(CodingPlane plane, BitOutputStream output, int row, int column) throws IOException {
+	private void codeRefinementBit(CodingPlane plane, BitStreamTreeNode output, int row, int column) throws IOException {
 		this.coder.codeSymbol(plane.getSymbolAt(row, column), this.sigTable.getMagnitudeRefinementContextAt(row, column), output);
 		plane.setCoded(row, column);
 	}
@@ -196,7 +196,7 @@ public class EBCoder {
 	 * @param output
 	 * @throws IOException 
 	 */
-	private void codeRefinement(CodingPlane plane, BitOutputStream output) throws IOException {
+	private void codeRefinement(CodingPlane plane, BitStreamTreeNode output) throws IOException {
 		//code full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {

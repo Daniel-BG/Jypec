@@ -12,7 +12,8 @@ import com.jypec.arithco.predict.functions.Basic1DPredictiveFunction;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.dimreduction.JSATWrapper;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
+
 import jsat.SimpleDataSet;
 import jsat.classifiers.DataPoint;
 import jsat.clustering.ClustererBase;
@@ -103,24 +104,24 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	}
 
 	@Override
-	public void doSaveTo(BitOutputStream bw) throws IOException {
+	public void doSaveTo(BitStreamTreeNode bw) throws IOException {
 		/** write metadata */
-		bw.writeInt(this.dimProj);
-		bw.writeInt(this.dimOrig);
-    	bw.writeInt(this.numClusters);
+		bw.addChild("dim proj").bos.writeInt(this.dimProj);
+		bw.addChild("dim orig").bos.writeInt(this.dimOrig);
+    	bw.addChild("num clusters").bos.writeInt(this.numClusters);
     	
     	/** arith code the cluster indices */
-    	int cbits = bw.getBitsOutput();
+    	int cbits = bw.getTreeBits();
     	PredictiveArithmeticCodec pac = new PredictiveArithmeticCodec(new Basic1DPredictiveFunction());
-    	pac.code(this.classification, numClusters, bw);
-    	cbits = bw.getBitsOutput() - cbits;
+    	pac.code(this.classification, numClusters, bw.addChild("class classification"));
+    	cbits = bw.getTreeBits() - cbits;
     	if (cbits % 8 != 0) {
-    		bw.writeNBitNumber(0, 8 - (cbits % 8)); //padding
+    		bw.addChild("padding").bos.writeNBitNumber(0, 8 - (cbits % 8)); //padding
     	}
     	
     	/** write each pca */
     	for (PrincipalComponentAnalysis pca: pcas) {
-    		pca.doSaveTo(bw);
+    		pca.doSaveTo(bw.addChild("dr#"));
     	}
 	}
 

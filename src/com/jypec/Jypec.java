@@ -3,6 +3,7 @@ package com.jypec;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -13,6 +14,7 @@ import com.jypec.distortion.ImageComparisons;
 import com.jypec.img.HyperspectralImage;
 import com.jypec.util.JypecException;
 import com.jypec.util.bits.BitOutputStream;
+import com.jypec.util.bits.BitStreamTreeNode;
 import com.jypec.util.io.HyperspectralImageReader;
 import com.jypec.util.io.HyperspectralImageWriter;
 import com.jypec.util.io.headerio.ImageHeaderReaderWriter;
@@ -51,9 +53,19 @@ public class Jypec {
 		c.setVerbose(args.verbose);
 		
 		/** Create the output stream and save the compressed result */
+		BitStreamTreeNode bstn = new BitStreamTreeNode("root", args.showTree);
+		ImageHeaderReaderWriter.saveToCompressedStream(hi.getHeader(), bstn.addChild("header"), args.essentialHeader);
+		c.compress(hi.getData(), bstn.addChild("body"));
+		if (args.showTree) {
+			String res = bstn.layoutTreeStructure(null);
+			PrintWriter out = new PrintWriter(args.output + ".tree");
+			out.println(res);
+			out.flush();
+			out.close();
+		}
 		BitOutputStream output = new BitOutputStream(new FileOutputStream(new File(args.output)));
-		ImageHeaderReaderWriter.saveToCompressedStream(hi.getHeader(), output, args.essentialHeader);
-		c.compress(hi.getData(), output);
+		bstn.dumpInBitOutputStream(output);
+		
 		
 		/** Show some stats */
 		if (args.showCompressionStats) {

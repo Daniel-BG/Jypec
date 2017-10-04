@@ -26,6 +26,8 @@ public class InputArguments {
 	public boolean compare = false;
 	/** True if we only want to output essential header info */
 	public boolean essentialHeader = false;
+	/** True if the user whats a tree structure of the file */
+	public boolean showTree = false;
 	
 	//files
 	/** Input file path. Null if not set */
@@ -76,6 +78,7 @@ public class InputArguments {
 		args.compare = line.hasOption(JypecCLI.OPTION_COMPARE);
 		args.essentialHeader = line.hasOption(JypecCLI.OPTION_OUTPUT_ESSENTIAL_HEADER);
 		args.verbose = line.hasOption(JypecCLI.OPTION_VERBOSE);
+		args.showTree = line.hasOption(JypecCLI.OPTION_TREE);
 		
 		if (args.requestReduction = line.hasOption(JypecCLI.OPTION_REDUCTION)) {
 			args.reductionArgs = line.getOptionValues(JypecCLI.OPTION_REDUCTION);

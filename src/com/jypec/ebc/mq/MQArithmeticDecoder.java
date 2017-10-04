@@ -6,8 +6,8 @@ import java.util.EnumMap;
 import com.jypec.ebc.EBCoder;
 import com.jypec.util.bits.Bit;
 import com.jypec.util.bits.BitInputStream;
-import com.jypec.util.bits.BitTwiddling;
 import com.jypec.util.bits.BitStreamConstants;
+import com.jypec.util.bits.BitTwiddling;
 
 /**
  * Implementation of the MQ arithmetic decoder
