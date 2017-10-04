@@ -101,7 +101,7 @@ public class BitStreamTreeNode {
 	 * @return true if this is the root of the tree
 	 */
 	public boolean isRoot() {
-		return parent != null;
+		return parent == null;
 	}
 	
 	/**

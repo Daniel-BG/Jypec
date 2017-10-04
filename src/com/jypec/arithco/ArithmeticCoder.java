@@ -104,7 +104,7 @@ public class ArithmeticCoder {
 	public void code(int input, BitStreamTreeNode bos) {
 		switch(this.state) {
 		case INITIALIZED:
-			this.cbits = bos.bos.getBitsOutput(); //for padding later
+			this.cbits = bos.getRoot().getTreeBits(); //for padding later
 		case CODING:
 			break;
 		case BUILT:
@@ -220,7 +220,7 @@ public class ArithmeticCoder {
 		}
 		ByteArrayInputStream bais = new ByteArrayInputStream(adbaos.toByteArray());
 		BitInputStream bis = new BitInputStream(bais);
-		int bitsWritten = bos.bos.getBitsOutput() - cbits;
+		int bitsWritten = bos.getRoot().getTreeBits() - cbits;
 		this.ad.decode(bis);
 		int bitsRead = bis.getBitsInput();
 		int garbage = this.ad.getGarbageBits();
