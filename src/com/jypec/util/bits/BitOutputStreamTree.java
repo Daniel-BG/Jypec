@@ -314,7 +314,8 @@ public class BitOutputStreamTree extends BitOutputStream {
 	 * by {@link BitInputStream}<br><br>
 	 * This object will only work if this {@link BitOutputStreamTree} was not
 	 * constructed with {@link #BitOutputStreamTree(OutputStream)}
-	 * @return the internal {@link BitInputStream} <br>
+	 * @return the internal {@link BitInputStream}, or <code>null</code> if this was constructed
+	 * using {@link #BitOutputStreamTree(OutputStream)}
 	 */
 	public BitInputStream getBis() {
 		return this.bis;
