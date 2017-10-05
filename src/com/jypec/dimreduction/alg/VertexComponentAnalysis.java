@@ -2,9 +2,9 @@ package com.jypec.dimreduction.alg;
 
 import java.util.Random;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.NormOps_DDRM;
+import org.ejml.data.FMatrixRMaj;
+import org.ejml.dense.row.CommonOps_FDRM;
+import org.ejml.dense.row.NormOps_FDRM;
 
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.arrays.MatrixOperations;
@@ -28,7 +28,7 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 	}
 
 	@Override
-	public void train(DMatrixRMaj source) {
+	public void train(FMatrixRMaj source) {
 		/** get metadata */
 		dimOrig = source.getNumRows();
 
@@ -38,31 +38,31 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 		SingularValueDecomposition svd = new SingularValueDecomposition();
 		svd.setNumComponents(dimProj);
 		svd.setCenter(false);
-		DMatrixRMaj x = svd.trainReduce(source);	//get projected values
-		DMatrixRMaj ud = svd.getProjectionMatrix(); //get projection matrix
+		FMatrixRMaj x = svd.trainReduce(source);	//get projected values
+		FMatrixRMaj ud = svd.getProjectionMatrix(); //get projection matrix
 		
 		/** Projective project onto the mean of the subspace */
 		//y(:, j) = x(:, j)/(x(:, j)^tu)
 		Logger.getLogger().log("Getting mean...");
-		DMatrixRMaj u = new DMatrixRMaj(dimProj, 1);
+		FMatrixRMaj u = new FMatrixRMaj(dimProj, 1);
 		MatrixOperations.generateCovarianceMatrix(x, null, null, u);
 		
 		Logger.getLogger().log("Projective projection onto mean");
-		DMatrixRMaj y = new DMatrixRMaj(x);			//y is the result of projecting onto the mean
-		DMatrixRMaj projs = new DMatrixRMaj(x.getNumCols(), 1);
-		CommonOps_DDRM.multTransA(x, u, projs);
+		FMatrixRMaj y = new FMatrixRMaj(x);			//y is the result of projecting onto the mean
+		FMatrixRMaj projs = new FMatrixRMaj(x.getNumCols(), 1);
+		CommonOps_FDRM.multTransA(x, u, projs);
 		for (int i = 0; i < y.getNumRows(); i++) {
 			for (int j = 0; j < y.getNumCols(); j++) {
-				double data = y.get(i, j);
+				float data = y.get(i, j);
 				data /= projs.get(j);
 				y.set(i, j, data);
 			}
 		}
 			
 		/** initialize variables for endmember extraction */
-		DMatrixRMaj a = new DMatrixRMaj(dimProj, dimProj);	//a is used for finding extreme points
+		FMatrixRMaj a = new FMatrixRMaj(dimProj, dimProj);	//a is used for finding extreme points
 		a.set(dimProj - 1, 0, 1);
-		DMatrixRMaj id = CommonOps_DDRM.identity(dimProj);
+		FMatrixRMaj id = CommonOps_FDRM.identity(dimProj);
 		int[] indices = new int[dimProj];					//indices of endmembers
 		Random r = new Random(seed);						//depending on the seed gets slightly different results
 		
@@ -70,31 +70,31 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 		for (int i = 0; i < dimProj; i++) {
 			Logger.getLogger().log("Computing vector: " + i + "...");
 			//create w = randn(0, Ip) (see http://ftp//ftp.dca.fee.unicamp.br/pub/docs/vonzuben/ia013_2s09/material_de_apoio/gen_rand_multivar.pdf for why this works)
-			DMatrixRMaj w = new DMatrixRMaj(dimProj, 1); 
+			FMatrixRMaj w = new FMatrixRMaj(dimProj, 1); 
 			for (int j = 0; j < dimProj; j++) {
-				w.set(j, r.nextGaussian());
+				w.set(j, (float) r.nextGaussian());
 			}
 			//create f (orthonormal to subspace spanned by a) 
 			//f = ((I - AA#)w)/(||(I - AA#)w||)
-			DMatrixRMaj inva = new DMatrixRMaj(dimProj, dimProj);
-			CommonOps_DDRM.pinv(a, inva);
-			DMatrixRMaj aia = new DMatrixRMaj(dimProj, dimProj);
-			CommonOps_DDRM.mult(a, inva, aia);
-			DMatrixRMaj tmp = new DMatrixRMaj(dimProj, dimProj);
-			CommonOps_DDRM.subtract(id, aia, tmp);
-			DMatrixRMaj f = new DMatrixRMaj(dimProj, 1);
-			CommonOps_DDRM.mult(tmp, w, f);
-			NormOps_DDRM.normalizeF(f);
+			FMatrixRMaj inva = new FMatrixRMaj(dimProj, dimProj);
+			CommonOps_FDRM.pinv(a, inva);
+			FMatrixRMaj aia = new FMatrixRMaj(dimProj, dimProj);
+			CommonOps_FDRM.mult(a, inva, aia);
+			FMatrixRMaj tmp = new FMatrixRMaj(dimProj, dimProj);
+			CommonOps_FDRM.subtract(id, aia, tmp);
+			FMatrixRMaj f = new FMatrixRMaj(dimProj, 1);
+			CommonOps_FDRM.mult(tmp, w, f);
+			NormOps_FDRM.normalizeF(f);
 			//create v: projection of y onto f
 			//v = f^ty
-			DMatrixRMaj v = new DMatrixRMaj(1, y.getNumCols());
-			CommonOps_DDRM.multTransA(f, y, v);
+			FMatrixRMaj v = new FMatrixRMaj(1, y.getNumCols());
+			CommonOps_FDRM.multTransA(f, y, v);
 			//get the max value of those projections. this is the endmember
 			//k = argmax(|v[j]|) for all j=0...N
 			int k = -1;
-			double kmax = 0;
+			float kmax = 0;
 			for (int j = 0; j < v.getNumElements(); j++) {
-				double val = Math.abs(v.get(j));
+				float val = Math.abs(v.get(j));
 				if (val > kmax) {
 					kmax = val;
 					k = j;
@@ -110,7 +110,7 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 		}
 		
 		/** extract endmembers */
-		DMatrixRMaj xSubSet = new DMatrixRMaj(dimProj, dimProj);
+		FMatrixRMaj xSubSet = new FMatrixRMaj(dimProj, dimProj);
 		for (int i = 0; i < dimProj; i++) {
 			for (int j = 0; j < dimProj; j++) {
 				xSubSet.set(j, i, x.get(j, indices[i]));
@@ -118,17 +118,17 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 		}
 		
 		/** get mixing matrix, which is the reverse projection matrix */
-		DMatrixRMaj m = new DMatrixRMaj(dimOrig, dimProj);
-		CommonOps_DDRM.multTransA(ud, xSubSet, m);
+		FMatrixRMaj m = new FMatrixRMaj(dimOrig, dimProj);
+		CommonOps_FDRM.multTransA(ud, xSubSet, m);
 		this.unprojectionMatrix = m;
 		
 		/** the projection matrix is the pseudoinverse */
-		this.projectionMatrix = new DMatrixRMaj(unprojectionMatrix);
-		CommonOps_DDRM.transpose(this.projectionMatrix);
-		CommonOps_DDRM.pinv(this.unprojectionMatrix, this.projectionMatrix);
+		this.projectionMatrix = new FMatrixRMaj(unprojectionMatrix);
+		CommonOps_FDRM.transpose(this.projectionMatrix);
+		CommonOps_FDRM.pinv(this.unprojectionMatrix, this.projectionMatrix);
 		
 		/** adjustment is zero */
-		this.adjustment = new DMatrixRMaj(dimOrig, 1);
+		this.adjustment = new FMatrixRMaj(dimOrig, 1);
 	}
 	
 	

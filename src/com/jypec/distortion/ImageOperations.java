@@ -1,7 +1,7 @@
 package com.jypec.distortion;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.data.FMatrixRMaj;
+import org.ejml.dense.row.CommonOps_FDRM;
 import org.ejml.simple.SimpleMatrix;
 
 /**
@@ -15,13 +15,13 @@ public class ImageOperations {
 	 * @return a pair of integers, the firs one being the minimum value within the image, 
 	 * the second one being the maximum. 
 	 */
-	public static double[] minMaxVal(DMatrixRMaj h1) {
-		double[] minMax = new double[2];
+	public static float[] minMaxVal(FMatrixRMaj h1) {
+		float[] minMax = new float[2];
 		minMax[0] = Integer.MAX_VALUE;
 		minMax[1] = Integer.MIN_VALUE;
 		for (int i = 0; i < h1.getNumRows(); i++) {
 			for (int j = 0; j < h1.getNumCols(); j++) {
-				double sample = h1.get(i, j);
+				float sample = h1.get(i, j);
 				if (minMax[0] > sample) {
 					minMax[0] = sample;
 				}
@@ -37,9 +37,9 @@ public class ImageOperations {
 	 * @param h1
 	 * @return the average value of the samples in h1
 	 */
-	public static double averageValue(DMatrixRMaj h1) {
+	public static float averageValue(FMatrixRMaj h1) {
 		SimpleMatrix m = SimpleMatrix.wrap(h1);
-		return m.elementSum() / (double) m.getNumElements();
+		return (float) (m.elementSum() / (float) m.getNumElements());
 	}
 	
 	/**
@@ -47,18 +47,18 @@ public class ImageOperations {
 	 * @param avg precalculated average for faster computation (if null will calculate)
 	 * @return the variance of the samples of the given image
 	 */
-	public static double variance(DMatrixRMaj h1, Double avg) {
+	public static float variance(FMatrixRMaj h1, Float avg) {
 		if (avg == null) {
 			avg = averageValue(h1);
 		}
-		double acc = 0;
+		float acc = 0;
 		for (int j = 0; j < h1.getNumRows(); j++) {
 			for (int k = 0; k < h1.getNumCols(); k++) {
-				double val = (double) h1.get(j, k) - avg;
+				float val = (float) h1.get(j, k) - avg;
 				acc += val * val;
 			}
 		}
-		return acc / (double) h1.getNumElements();
+		return acc / (float) h1.getNumElements();
 	}
 	
 	/**
@@ -68,7 +68,7 @@ public class ImageOperations {
 	 * @param avg2 average of h2 used for speed up. If not available send null
 	 * @return the covariance of both images
 	 */
-	public static double covariance(DMatrixRMaj h1, DMatrixRMaj h2, Double avg1, Double avg2) {
+	public static float covariance(FMatrixRMaj h1, FMatrixRMaj h2, Float avg1, Float avg2) {
 		ImageComparisons.checkDimensions(h1, h2);
 		if (avg1 == null) {
 			avg1 = averageValue(h1);
@@ -76,14 +76,14 @@ public class ImageOperations {
 		if (avg2 == null) {
 			avg2 = averageValue(h2);
 		}
-		double acc = 0;
+		float acc = 0;
 		for (int i = 0; i < h1.getNumRows(); i++) {
 			for (int j = 0; j < h1.getNumCols(); j++) {
 				acc += (h1.get(i, j) - avg1) * (h2.get(i, j) - avg2);
 			}
 		}
 
-		return acc / (double) h1.getNumElements();
+		return acc / (float) h1.getNumElements();
 	}
 	
 	/**
@@ -91,8 +91,8 @@ public class ImageOperations {
 	 * @param avg average of h1, used to speed up calculations. if null, it will be calculated
 	 * @return the std of the samples of the given image
 	 */
-	public static double std(DMatrixRMaj h1, Double avg) {
-		return Math.sqrt(variance(h1, avg));
+	public static float std(FMatrixRMaj h1, float avg) {
+		return (float) Math.sqrt(variance(h1, avg));
 	}
 	
 	/**
@@ -101,10 +101,10 @@ public class ImageOperations {
 	 * @param h2
 	 * @return a matrix of size (h1.rows, 1) containing the mean diff of each row of h1 and h2
 	 */
-	public static DMatrixRMaj meanDiff(DMatrixRMaj h1, DMatrixRMaj h2) {
+	public static FMatrixRMaj meanDiff(FMatrixRMaj h1, FMatrixRMaj h2) {
 		ImageComparisons.checkDimensions(h1, h2);
 		
-		DMatrixRMaj res = new DMatrixRMaj(h1.getNumRows(), 1);
+		FMatrixRMaj res = new FMatrixRMaj(h1.getNumRows(), 1);
 		
 		for (int i = 0; i < h1.getNumRows(); i++) {
 			for (int j = 0; j < h1.getNumCols(); j++) {
@@ -112,7 +112,7 @@ public class ImageOperations {
 			}
 		}
 		
-		CommonOps_DDRM.divide(res, h1.getNumCols());
+		CommonOps_FDRM.divide(res, h1.getNumCols());
 		
 		return res;
 	}
@@ -122,8 +122,8 @@ public class ImageOperations {
 	 * @param h1
 	 * @return the power of the image (mean of the squared values)
 	 */
-	public static double power(DMatrixRMaj h1) {
-		double acc = 0;
+	public static float power(FMatrixRMaj h1) {
+		float acc = 0;
 		for (int i = 0; i < h1.getNumRows(); i++) {
 			for (int j = 0; j < h1.getNumCols(); j++) {
 				acc += h1.get(i, j) * h1.get(i, j);

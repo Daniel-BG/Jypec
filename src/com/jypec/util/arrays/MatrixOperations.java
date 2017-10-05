@@ -1,7 +1,7 @@
 package com.jypec.util.arrays;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.data.FMatrixRMaj;
+import org.ejml.dense.row.CommonOps_FDRM;
 import org.ejml.simple.SimpleMatrix;
 
 /**
@@ -14,15 +14,15 @@ public class MatrixOperations {
 	 * @param source
 	 * @return the min and max values found in the source
 	 */
-	public static double[] minMax(double[][] source) {
-		double[] minMax = new double[2];
+	public static float[] minMax(float[][] source) {
+		float[] minMax = new float[2];
 		int rows = source.length;
 		int cols = source[0].length;
 		minMax[0] = Integer.MAX_VALUE;
 		minMax[1] = Integer.MIN_VALUE;
 		for (int j = 0; j < rows; j++) {
 			for (int k = 0; k < cols; k++) {
-				double sample = source[j][k];
+				float sample = source[j][k];
 				if (minMax[0] > sample) {
 					minMax[0] = sample;
 				}
@@ -40,10 +40,10 @@ public class MatrixOperations {
 	 * @param cols
 	 * @return a matrix of the specified shape filled with ones
 	 */
-	public static DMatrixRMaj ones(int rows, int cols) {
-		SimpleMatrix m = SimpleMatrix.wrap(new DMatrixRMaj(rows, cols));
+	public static FMatrixRMaj ones(int rows, int cols) {
+		SimpleMatrix m = SimpleMatrix.wrap(new FMatrixRMaj(rows, cols));
 		m.set(1);
-		return m.matrix_F64();
+		return m.matrix_F32();
 	}
 	
 	
@@ -56,7 +56,7 @@ public class MatrixOperations {
 	 * @param summ if not null, return the summation here. Matrix is modified
 	 * @param mean if not null, return the mean here. Matrix is modified
 	 */
-	public static void generateCovarianceMatrix(DMatrixRMaj data, DMatrixRMaj cov, DMatrixRMaj summ, DMatrixRMaj mean) {
+	public static void generateCovarianceMatrix(FMatrixRMaj data, FMatrixRMaj cov, FMatrixRMaj summ, FMatrixRMaj mean) {
 		if (cov == null && summ == null && mean == null) {
 			return;
 		}
@@ -66,30 +66,30 @@ public class MatrixOperations {
 		
 		/** Summ is always required */
 		if (summ == null) {
-			summ = new DMatrixRMaj(dim);
+			summ = new FMatrixRMaj(dim);
 		}	
 		summ.reshape(dim, 1);
-        CommonOps_DDRM.mult(data, MatrixOperations.ones(samples, 1), summ);
+        CommonOps_FDRM.mult(data, MatrixOperations.ones(samples, 1), summ);
         
         /** Mean is required if mean or cov are required */
         if (mean == null) {
         	if (cov == null) {
         		return;
         	}
-        	mean = new DMatrixRMaj(dim);
+        	mean = new FMatrixRMaj(dim);
         }
         mean.set(summ);
-        CommonOps_DDRM.divide(mean, (double) data.getNumCols());
+        CommonOps_FDRM.divide(mean, (float) data.getNumCols());
         
         /** Calculate cov if asked for */
         if (cov == null) {
         	return;
         }
         cov.reshape(dim, dim);
-        CommonOps_DDRM.multTransB(data, data, cov);
-        DMatrixRMaj s2 = new DMatrixRMaj(dim, dim);
-        CommonOps_DDRM.multTransB(mean, summ, s2);
-        CommonOps_DDRM.subtract(cov, s2, cov);
+        CommonOps_FDRM.multTransB(data, data, cov);
+        FMatrixRMaj s2 = new FMatrixRMaj(dim, dim);
+        CommonOps_FDRM.multTransB(mean, summ, s2);
+        CommonOps_FDRM.subtract(cov, s2, cov);
 	}
 
 }

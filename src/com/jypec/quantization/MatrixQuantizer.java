@@ -20,9 +20,9 @@ public class MatrixQuantizer {
 	 * @param sampleLowerLimit 
 	 * @param sampleUpperLimit 
 	 * @param reconstructionOffset 
-	 * @see {@link Quantizer #Quantizer(int, int, int, double, double, double)}
+	 * @see {@link Quantizer #Quantizer(int, int, int, float, float, float)}
 	 */
-	public MatrixQuantizer(int exponent, int mantissa, int guard, double sampleLowerLimit, double sampleUpperLimit, double reconstructionOffset) {
+	public MatrixQuantizer(int exponent, int mantissa, int guard, float sampleLowerLimit, float sampleUpperLimit, float reconstructionOffset) {
 		this.quantizer = new Quantizer(exponent, mantissa, guard, sampleLowerLimit, sampleUpperLimit, reconstructionOffset); 
 	}
 	
@@ -35,7 +35,7 @@ public class MatrixQuantizer {
 	 * @param rows first dimension length of the matrix
 	 * @param cols second dimension length of the matrix
 	 */
-	public void quantize(double[][] input, IntegerMatrix output, int rowOffset, int colOffset, int rows, int cols) {
+	public void quantize(float[][] input, IntegerMatrix output, int rowOffset, int colOffset, int rows, int cols) {
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
 				output.setDataAt(this.quantizer.normalizeAndQuantize(input[rowOffset + i][colOffset + j]), rowOffset + i, colOffset + j);
@@ -52,7 +52,7 @@ public class MatrixQuantizer {
 	 * @param rows
 	 * @param cols
 	 */
-	public void dequantize(IntegerMatrix input, double[][] output, int rowOffset, int colOffset, int rows, int cols) {
+	public void dequantize(IntegerMatrix input, float[][] output, int rowOffset, int colOffset, int rows, int cols) {
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
 				output[rowOffset + i][colOffset + j] = this.quantizer.deQuantizeAndDenormalize(input.getDataAt(rowOffset + i, colOffset + j));

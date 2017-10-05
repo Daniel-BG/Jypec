@@ -2,7 +2,7 @@ package com.jypec.comdec;
 
 import java.io.IOException;
 
-import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.FMatrixRMaj;
 
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.data.CodingBlock;
@@ -46,7 +46,7 @@ public class Compressor {
 	public void compress(HyperspectralImageData srcImg, BitOutputStreamTree output) throws IOException {
 		/** Project all image values onto the reduced space */
 		Logger.getLogger().log("Applying dimensionality reduction");
-		DMatrixRMaj reduced = cp.dr.trainReduce(srcImg.toDoubleMatrix());
+		FMatrixRMaj reduced = cp.dr.trainReduce(srcImg.tofloatMatrix());
 		
 		/** create the wavelet transform, and coder we'll be using, which won't change over the bands */
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
@@ -65,9 +65,9 @@ public class Compressor {
 			
 			/** Apply the wavelet transform */
 			Logger.getLogger().log("Applying wavelet... ");
-			double[][] waveForm = MatrixTransforms.extractBand(reduced, i, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
+			float[][] waveForm = MatrixTransforms.extractBand(reduced, i, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
 			bdw.forwardTransform(waveForm, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
-			double[] minMax = MatrixOperations.minMax(waveForm);
+			float[] minMax = MatrixOperations.minMax(waveForm);
 			
 			/** get max and min from the resulting transform, and create the best data type possible */
 			ImageDataType targetType = new ImageDataType(cp.bits, true);
@@ -79,10 +79,10 @@ public class Compressor {
 			Logger.getLogger().log("\tApplying quantization to type: " + targetType + "...");
 			
 			/** custom quantizer for this band */
-			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.375);
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.375f);
 			
-			banditree.writeDouble(minMax[0]);
-			banditree.writeDouble(minMax[1]);
+			banditree.writeFloat(minMax[0]);
+			banditree.writeFloat(minMax[1]);
 			
 			
 			/** quantize the transform and save the quantization over the current band */

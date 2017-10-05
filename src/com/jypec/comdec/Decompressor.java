@@ -2,7 +2,7 @@ package com.jypec.comdec;
 
 import java.io.IOException;
 
-import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.FMatrixRMaj;
 
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.data.CodingBlock;
@@ -47,7 +47,7 @@ public class Decompressor {
 		cp.loadFrom(input);
 		
 		/** Uncompress the data stream */
-		double[][][] reduced = new double[cp.dr.getNumComponents()][lines][samples];
+		float[][][] reduced = new float[cp.dr.getNumComponents()][lines][samples];
 
 		EBDecoder decoder = new EBDecoder();
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
@@ -57,8 +57,8 @@ public class Decompressor {
 			Logger.getLogger().log("Extracting compressed band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]");
 			/** Get this band's max and min values, and use that to create the quantizer */
 			Logger.getLogger().log("Loading dequantizer...");
-			double bandMin = input.readDouble();
-			double bandMax = input.readDouble();
+			float bandMin = input.readFloat();
+			float bandMax = input.readFloat();
 			ImageDataType targetType = new ImageDataType(cp.bits, true);
 			if (cp.shaveMap.hasMappingForKey(i)) {
 				targetType.mutatePrecision(-cp.shaveMap.get(i));
@@ -76,8 +76,8 @@ public class Decompressor {
 			
 			/** dequantize the wave */
 			Logger.getLogger().log("Dequantizing...");
-			double[][] waveForm = reduced[i];
-			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, bandMin, bandMax, 0.375);
+			float[][] waveForm = reduced[i];
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, bandMin, bandMax, 0.375f);
 			mq.dequantize(hb, waveForm, 0, 0, lines, samples);
 			
 			/** Apply the reverse wavelet transform */
@@ -90,7 +90,7 @@ public class Decompressor {
 		ImageDataType srcDT = new ImageDataType(idt.getBitDepth(), idt.isSigned());
 		HyperspectralImageData srcImg = new HyperspectralImageData(null, srcDT, bands, lines, samples);
 		Logger.getLogger().log("Projecting back into original dimension...");
-		DMatrixRMaj result = cp.dr.boost(MatrixTransforms.getMatrix(reduced, cp.dr.getNumComponents(), lines, samples));
+		FMatrixRMaj result = cp.dr.boost(MatrixTransforms.getMatrix(reduced, cp.dr.getNumComponents(), lines, samples));
 		
 		srcImg.copyDataFrom(result);
 		

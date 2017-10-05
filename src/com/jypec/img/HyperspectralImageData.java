@@ -1,6 +1,6 @@
 package com.jypec.img;
 
-import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.FMatrixRMaj;
 
 import com.jypec.util.arrays.MatrixTransforms;
 
@@ -79,7 +79,7 @@ public class HyperspectralImageData {
 	 * @param line
 	 * @param sample
 	 */
-	public void setValueAt(double value, int band, int line, int sample) {
+	public void setValueAt(float value, int band, int line, int sample) {
 		this.data[band][line][sample] = this.dataType.valueToData(value);
 	}
 	
@@ -126,8 +126,8 @@ public class HyperspectralImageData {
 	 * @param sample
 	 * @return a pixel of the image at the given spatial position, with all spectral components
 	 */
-	public double[] getPixel(int line, int sample) {
-		double[] res = new double[this.getNumberOfBands()];
+	public float[] getPixel(int line, int sample) {
+		float[] res = new float[this.getNumberOfBands()];
 		for (int i = 0; i < this.getNumberOfBands(); i++) {
 			res[i] = this.getValueAt(i, line, sample);
 		}
@@ -147,7 +147,7 @@ public class HyperspectralImageData {
 	 * @param line
 	 * @param sample
 	 */
-	public void setPixel(double[] values, int line, int sample) {
+	public void setPixel(float[] values, int line, int sample) {
 		for (int i = 0; i < this.getNumberOfBands(); i++) {
 			this.setValueAt(values[i], i, line, sample);
 		}
@@ -178,7 +178,7 @@ public class HyperspectralImageData {
 	/**
 	 * @param source where to copy data from
 	 */
-	public void copyDataFrom(DMatrixRMaj source) {
+	public void copyDataFrom(FMatrixRMaj source) {
 		for (int i = 0; i < this.getNumberOfBands(); i++) {
 			for (int j = 0; j < this.getNumberOfLines(); j++) {
 				for (int k = 0; k < this.getNumberOfSamples(); k++) {
@@ -204,10 +204,10 @@ public class HyperspectralImageData {
 	}
 	
 	/**
-	 * @return the hyperspectral image data as a double matrix for better numerical processing
+	 * @return the hyperspectral image data as a float matrix for better numerical processing
 	 */
-	public DMatrixRMaj toDoubleMatrix() {
-		DMatrixRMaj res = new DMatrixRMaj(this.bands, this.lines * this.samples);
+	public FMatrixRMaj tofloatMatrix() {
+		FMatrixRMaj res = new FMatrixRMaj(this.bands, this.lines * this.samples);
 		for (int i = 0; i < bands; i++) {
 			for (int j = 0; j < lines; j++) {
 				for (int k = 0; k < samples; k++) {

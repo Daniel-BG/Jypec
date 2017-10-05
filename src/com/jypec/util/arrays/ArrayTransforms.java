@@ -15,9 +15,9 @@ public class ArrayTransforms {
 	 * @param s the signal to be packed
 	 * @param n the length of s
 	 */
-	public static void pack(double[] s, int n) {
+	public static void pack(float[] s, int n) {
 		// Pack
-		double[] tempBank = new double[n];
+		float[] tempBank = new float[n];
 		
 		for (int i = 0; i < n; i++) {
 			if (i%2 == 0) {
@@ -32,13 +32,13 @@ public class ArrayTransforms {
 	}
 	
 	/**
-	 * Reverts the process done by {@link #pack(double[], int)}, arranging the samples
+	 * Reverts the process done by {@link #pack(float[], int)}, arranging the samples
 	 * in their corresponding positions.
 	 * @param s the signal to be treated
 	 * @param n lenght of the signal
 	 */
-	public static void unpack(double[] s, int n) {
-		double[] tempBank = new double[n];
+	public static void unpack(float[] s, int n) {
+		float[] tempBank = new float[n];
 		
 		for (int i = 0; i < n; i++) {
 			if (i%2 == 0) {
@@ -59,7 +59,7 @@ public class ArrayTransforms {
 	 * @param dst
 	 * @param n
 	 */
-	public static void copy(double[] src, double[] dst, int n) {
+	public static void copy(float[] src, float[] dst, int n) {
 		for (int i = 0; i < n; i++) {
 			dst[i] = src[i];
 		}
@@ -73,7 +73,7 @@ public class ArrayTransforms {
 	 * @param odd
 	 * @param n
 	 */
-	public static void split(double[] src, double[] even, double[] odd, int n) {
+	public static void split(float[] src, float[] even, float[] odd, int n) {
 		for (int i = 0; i < n; i++) {
 			if (i % 2 == 0) {
 				even[i] = src[i];
@@ -81,30 +81,5 @@ public class ArrayTransforms {
 				odd[i] = src[i];
 			}
 		}
-	}
-	
-	
-	/**
-	 * @param d a double array
-	 * @return the same array casted to float
-	 */
-	public static float[] changeType(double[] d) {
-		float[] f = new float[d.length];
-		for (int i = 0; i < d.length; i++) {
-			f[i] = (float) d[i];
-		}
-		return f;
-	}
-	
-	/**
-	 * @param f a float array
-	 * @return the same array casted to double
-	 */
-	public static double[] changeType(float[] f) {
-		double[] d = new double[f.length];
-		for (int i = 0; i < f.length; i++) {
-			d[i] = (double) f[i];
-		}
-		return d;
 	}
 }

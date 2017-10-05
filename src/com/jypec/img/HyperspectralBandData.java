@@ -71,7 +71,7 @@ public class HyperspectralBandData implements IntegerMatrix {
 	 * @param line
 	 * @param sample
 	 */
-	private void setValueAt(double value, int line, int sample) {
+	private void setValueAt(float value, int line, int sample) {
 		this.hyimg.setValueAt(value, this.band, line, sample);
 	}
 	
@@ -125,10 +125,10 @@ public class HyperspectralBandData implements IntegerMatrix {
 	 * @param sampleOffset same as lineOffset but for samples
 	 * @param lines number of lines to be returned
 	 * @param samples number of samples to be returned
-	 * @return the internal information in double precision format for wave analysis
+	 * @return the internal information in float precision format for wave analysis
 	 */
-	public double[][] toWave(int lineOffset, int sampleOffset, int lines, int samples) {
-		double[][] wave = new double[lines][samples];
+	public float[][] toWave(int lineOffset, int sampleOffset, int lines, int samples) {
+		float[][] wave = new float[lines][samples];
 		
 		for (int i = 0; i < lines; i++) {
 			for (int j = 0; j  < samples; j++) {
@@ -145,7 +145,7 @@ public class HyperspectralBandData implements IntegerMatrix {
 	}
 
 	/**
-	 * Fill this image with the values from the double matrix. They are converted
+	 * Fill this image with the values from the float matrix. They are converted
 	 * to the data type of the encompassing image and then set into the inner array
 	 * @see HyperspectralImageData
 	 * @param waveForm from where to take the data
@@ -154,7 +154,7 @@ public class HyperspectralBandData implements IntegerMatrix {
 	 * @param lines number of lines in waveForm
 	 * @param samples number of samples in waveForm
 	 */
-	public void fromWave(double[][] waveForm, int lineOffset, int sampleOffset, int lines, int samples) {
+	public void fromWave(float[][] waveForm, int lineOffset, int sampleOffset, int lines, int samples) {
 		for (int i = 0; i < lines; i++) {
 			for (int j = 0; j  < samples; j++) {
 				this.setValueAt(waveForm[i][j], i, j);
@@ -182,7 +182,7 @@ public class HyperspectralBandData implements IntegerMatrix {
 	/**
 	 * @return the total number of data samples within the band
 	 */
-	public double getTotalNumberOfSamples() {
+	public float getTotalNumberOfSamples() {
 		return this.getNumberOfLines() * this.getNumberOfSamples();
 	}
 

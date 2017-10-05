@@ -73,9 +73,9 @@ public enum HeaderConstants {
 	 * 2 = Integer: 16-bit signed integer<br>
 	 * 3 = Long: 32-bit signed integer<br>
 	 * 4 = Floating-point: 32-bit single-precision<br>
-	 * 5 = Double-precision: 64-bit double-precision floating-point<br>
+	 * 5 = float-precision: 64-bit float-precision floating-point<br>
 	 * 6 = Complex: Real-imaginary pair of single-precision floating-point<br>
-	 * 9 = Double-precision complex: Real-imaginary pair of double precision
+	 * 9 = float-precision complex: Real-imaginary pair of float precision
 	 * floating-point<br>
 	 * 12 = Unsigned integer: 16-bit<br>
 	 * 13 = Unsigned long integer: 32-bit<br>

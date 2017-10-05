@@ -29,17 +29,17 @@ public class KernelBasedWaveletTransform implements Wavelet {
 	
 	
 	@Override
-	public void forwardTransform(double[] s, int n) {
+	public void forwardTransform(float[] s, int n) {
 		ArrayTransforms.copy(this.forward.transform(s, n), s, n);
 		ArrayTransforms.pack(s, n);
 	}
 
 	@Override
-	public void reverseTransform(double[] s, int n) {
+	public void reverseTransform(float[] s, int n) {
 		ArrayTransforms.unpack(s, n);
-		double[] lowpass = new double[n];
-		double[] highpass = new double[n];
-		double[] res = new double[n];
+		float[] lowpass = new float[n];
+		float[] highpass = new float[n];
+		float[] res = new float[n];
 		ArrayTransforms.split(s, lowpass, highpass, n);
 		for (int i = 0; i < n; i++) {
 			res[i] = this.reverseLowpass.apply(lowpass, n, i) + this.reverseHighpass.apply(highpass, n, i);
@@ -48,19 +48,19 @@ public class KernelBasedWaveletTransform implements Wavelet {
 	}
 
 
-	private double getLimit(double max, double min, double fp, double fn) {
-		double limit = 0;
+	private float getLimit(float max, float min, float fp, float fn) {
+		float limit = 0;
 		limit += max > 0 ? fp * max : 0;
 		limit += min < 0 ? fn * min : 0;
 		return limit;
 	}
 
 	@Override
-	public double maxResult(double min, double max) {
-		double hpp = this.reverseHighpass.positiveSum();
-		double hpn = this.reverseHighpass.negativeSum();
-		double lpp = this.reverseLowpass.positiveSum();
-		double lpn = this.reverseLowpass.negativeSum();
+	public float maxResult(float min, float max) {
+		float hpp = this.reverseHighpass.positiveSum();
+		float hpn = this.reverseHighpass.negativeSum();
+		float lpp = this.reverseLowpass.positiveSum();
+		float lpn = this.reverseLowpass.negativeSum();
 		
 		return Math.max(getLimit(max, min, hpp, hpn), getLimit(max, min, lpp, lpn));
 	}
@@ -68,11 +68,11 @@ public class KernelBasedWaveletTransform implements Wavelet {
 
 
 	@Override
-	public double minResult(double min, double max) {
-		double hpp = this.reverseHighpass.positiveSum();
-		double hpn = this.reverseHighpass.negativeSum();
-		double lpp = this.reverseLowpass.positiveSum();
-		double lpn = this.reverseLowpass.negativeSum();
+	public float minResult(float min, float max) {
+		float hpp = this.reverseHighpass.positiveSum();
+		float hpn = this.reverseHighpass.negativeSum();
+		float lpp = this.reverseLowpass.positiveSum();
+		float lpn = this.reverseLowpass.negativeSum();
 
 		//reverse the pn and pp since this goes the other way aroudn
 		return Math.min(getLimit(max, min, hpn, hpp), getLimit(max, min, lpn, lpp));

@@ -173,7 +173,7 @@ public class BitInputStream extends InputStream {
 	}
 	
 	/**
-	 * @return the next 64 bits of the inner BitStream as a Double precision number
+	 * @return the next 64 bits of the inner BitStream as a float precision number
 	 * @throws IOException 
 	 */
 	public double readDouble() throws IOException {
@@ -240,7 +240,7 @@ public class BitInputStream extends InputStream {
 	 * @return an array contaning the specified number of elements, read from the inner stream
 	 * @throws IOException 
 	 */
-	public double[] readDoubleArray(int length) throws IOException {
+	public double[] readfloatArray(int length) throws IOException {
 		double[] res = new double[length];
 		for (int i = 0; i < length; i++) {
 			res[i] = this.readDouble();

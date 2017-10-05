@@ -15,14 +15,14 @@ public interface BidimensionalWavelet {
 	 * @param width
 	 * @param height
 	 */
-	public void forwardTransform(double[][] s, int width, int height);
+	public void forwardTransform(float[][] s, int width, int height);
 
 	/**
-	 * Reverts the process made by {@link #forwardTransform(double[][], int, int)}
+	 * Reverts the process made by {@link #forwardTransform(float[][], int, int)}
 	 * @param s
 	 * @param width
 	 * @param height
 	 */
-	public void reverseTransform(double[][] s, int width, int height);
+	public void reverseTransform(float[][] s, int width, int height);
 	
 }

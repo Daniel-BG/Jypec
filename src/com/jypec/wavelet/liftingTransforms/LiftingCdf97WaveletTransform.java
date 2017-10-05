@@ -13,11 +13,11 @@ import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
  */
 public class LiftingCdf97WaveletTransform implements Wavelet {
 	
-	private static final double COEFF_PREDICT_1 = -1.586134342;
-	private static final double COEFF_PREDICT_2 = 0.8829110762; 
-	private static final double COEFF_UPDATE_1= -0.05298011854;
-	private static final double COEFF_UPDATE_2 = 0.4435068522;
-	private static final double COEFF_SCALE = 1/1.149604398;
+	private static final float COEFF_PREDICT_1 = -1.586134342f;
+	private static final float COEFF_PREDICT_2 = 0.8829110762f; 
+	private static final float COEFF_UPDATE_1= -0.05298011854f;
+	private static final float COEFF_UPDATE_2 = 0.4435068522f;
+	private static final float COEFF_SCALE = 1/1.149604398f;
 	
 	/**
 	 * Adds to each odd indexed sample its neighbors multiplied by the given coefficient
@@ -28,7 +28,7 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 	 * @param n the length of s
 	 * @param COEFF the prediction coefficient
 	 */
-	private void predict(double[] s, int n, double COEFF) {
+	private void predict(float[] s, int n, float COEFF) {
 		// Predict inner values
 		for (int i = 1; i < n - 1; i+=2) {
 			s[i] += COEFF * (s[i-1] + s[i+1]);
@@ -48,7 +48,7 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 	 * @param n the length of s
 	 * @param COEFF the updating coefficient
 	 */
-	private void update(double[]s, int n, double COEFF) {
+	private void update(float[]s, int n, float COEFF) {
 		// Update first coeff
 		if (n > 1) {
 			s[0] += 2*COEFF*s[1];
@@ -69,7 +69,7 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 	 * @param n the length of s
 	 * @param COEFF the coefficient applied
 	 */
-	private void scale(double[] s, int n, double COEFF) {
+	private void scale(float[] s, int n, float COEFF) {
 		for (int i = 0; i < n; i++) {
 			if (i%2 == 1) { 
 				s[i] *= COEFF;
@@ -81,7 +81,7 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 	
 	
 	@Override
-	public void forwardTransform(double[] s, int n) {
+	public void forwardTransform(float[] s, int n) {
 		//predict and update
 		predict(s, n, LiftingCdf97WaveletTransform.COEFF_PREDICT_1);		
 		update(s, n, LiftingCdf97WaveletTransform.COEFF_UPDATE_1);
@@ -94,7 +94,7 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 	}
 	
 	@Override
-	public void reverseTransform(double[] s, int n) {
+	public void reverseTransform(float[] s, int n) {
 		//unpack values
 		ArrayTransforms.unpack(s, n);
 		//unscale values
@@ -107,12 +107,12 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 	}
 
 	@Override
-	public double maxResult(double min, double max) {
+	public float maxResult(float min, float max) {
 		return new KernelCdf97WaveletTransform().maxResult(min, max);
 	}
 
 	@Override
-	public double minResult(double min, double max) {
+	public float minResult(float min, float max) {
 		return new KernelCdf97WaveletTransform().minResult(min, max);
 	}
 	

@@ -10,7 +10,7 @@ package com.jypec.wavelet.kernelTransforms;
  */
 public abstract class Kernel {
 	
-	protected double[] coefficients;
+	protected float[] coefficients;
 	private int lenght;
 	
 	/**
@@ -19,7 +19,7 @@ public abstract class Kernel {
 	 * E.g: for building the kernel {2, 1, 0, 1, 2} send the vector {0, 1, 2}.
 	 * @param coefficients
 	 */
-	public Kernel(double[] coefficients) {
+	public Kernel(float[] coefficients) {
 		this.setUp(coefficients);
 	}
 	
@@ -28,7 +28,7 @@ public abstract class Kernel {
 	 * @param coefficients
 	 * @param scaling
 	 */
-	public Kernel(double[] coefficients, double scaling) {
+	public Kernel(float[] coefficients, float scaling) {
 		this.setUp(coefficients);
 		for (int i = 0; i < this.getSymmetricLength(); i++) {
 			this.coefficients[i] *= scaling;
@@ -39,7 +39,7 @@ public abstract class Kernel {
 	 * Set up internal variables
 	 * @param coefficients
 	 */
-	private void setUp(double[] coefficients) {
+	private void setUp(float[] coefficients) {
 		this.coefficients = coefficients;
 		this.lenght = this.coefficients.length*2 - 1;
 	}
@@ -52,12 +52,12 @@ public abstract class Kernel {
 	 * @param where position where to apply it
 	 * @return the convolved value 
 	 */
-	public double apply(double[] s, int n, int where) {
-		double res = 0;
+	public float apply(float[] s, int n, int where) {
+		float res = 0;
 		int limit = this.getSymmetricLength();
 		for (int i = -limit + 1; i < limit; i++) {
 			//get the current coefficient
-			double coeff = this.getCoefficient(i);
+			float coeff = this.getCoefficient(i);
 			//get the signal index where to apply it. Wrap around if index is not within limits
 			int index = where + i;
 			while (index < 0 || index >= n) {
@@ -90,7 +90,7 @@ public abstract class Kernel {
 	 * @param i
 	 * @return the coefficient at the specified position
 	 */
-	public double getSymmetricCoefficient(int i) {
+	public float getSymmetricCoefficient(int i) {
 		return this.coefficients[i];
 	}
 	
@@ -98,7 +98,7 @@ public abstract class Kernel {
 	 * @param i
 	 * @return the coefficient at the specified position
 	 */
-	public double getCoefficient(int i) {
+	public float getCoefficient(int i) {
 		if (i < 0) {
 			i = -i;
 		}
@@ -123,23 +123,23 @@ public abstract class Kernel {
 	/**
 	 * @return a copy of the positive-indexed coefficients in this kernel
 	 */
-	public double[] getSymmetricCoefficients() {
+	public float[] getSymmetricCoefficients() {
 		return this.coefficients.clone();
 	}
 	
 	/**
 	 * @return factor which must be used to normalize the result in case of transforming arrays of only 1 value
 	 */
-	public double cornerCaseFactor() {
-		return 1.0;
+	public float cornerCaseFactor() {
+		return 1.0f;
 	}
 	
 	/**
 	 * @return the sum of all positive coefficients within the kernel
 	 * this result is always >= 0
 	 */
-	public double positiveSum() {
-		double acc = 0;
+	public float positiveSum() {
+		float acc = 0;
 		for (int i = 0; i < this.lenght; i++) {
 			if (this.coefficients[i] > 0) {
 				acc += this.coefficients[i] * i == 0 ? 1 : 2;
@@ -152,8 +152,8 @@ public abstract class Kernel {
 	 * @return the sum of all negative coefficients within the kernel
 	 * this result is always <= 0
 	 */
-	public double negativeSum() {
-		double acc = 0;
+	public float negativeSum() {
+		float acc = 0;
 		for (int i = 0; i < this.lenght; i++) {
 			if (this.coefficients[i] < 0) {
 				acc += this.coefficients[i] * i == 0 ? 1 : 2;

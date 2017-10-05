@@ -25,8 +25,8 @@ public class KernelApplier {
 	 * @param n
 	 * @return the new transformed signal. The original one remains unchanged
 	 */
-	public double[] transform(double[] s, int n) {
-		double[] transformed = new double[n];
+	public float[] transform(float[] s, int n) {
+		float[] transformed = new float[n];
 		for (int i = 0; i < n; i++) {
 			if (i % 2 == 0) {
 				transformed[i] = this.lowpass.apply(s, n, i);

@@ -153,7 +153,7 @@ public class BitOutputStream extends OutputStream {
 	}
 	
 	/**
-	 * @param d double to be written into the inner BitStream
+	 * @param d float to be written into the inner BitStream
 	 * @throws IOException 
 	 */
 	public void writeDouble(double d) throws IOException {

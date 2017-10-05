@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
-import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.FMatrixRMaj;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -65,12 +65,12 @@ public class TestPCARecovery {
 	@Test
 	public void testPCARecovery() {
 		PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
-		pca.setPrecision(Precision.DOUBLE);
+		pca.setPrecision(Precision.float);
 		pca.setNumComponents(eigenSize);
 		
-		double[] inputData = new double[sampleSize*numSamples];
+		float[] inputData = new float[sampleSize*numSamples];
 		TestHelpers.randomGaussianFillArray(inputData, sampleSize*numSamples, r, 1000, 0);
-		DMatrixRMaj mat = new DMatrixRMaj(sampleSize, numSamples);
+		FMatrixRMaj mat = new FMatrixRMaj(sampleSize, numSamples);
 		mat.setData(inputData);
 		
 		pca.train(mat);
@@ -79,7 +79,7 @@ public class TestPCARecovery {
 		BitInputStream input;
 		
 		PrincipalComponentAnalysis pcaRec = new PrincipalComponentAnalysis();
-		pcaRec.setPrecision(Precision.DOUBLE);
+		pcaRec.setPrecision(Precision.float);
 		
 		try {
 			pca.saveTo(bost);
@@ -95,8 +95,8 @@ public class TestPCARecovery {
 		
 		
 		for (int i = 0; i < pca.getNumComponents(); i++) {
-			DMatrixRMaj orig = pca.getUnProjectionMatrix();
-			DMatrixRMaj rec = pcaRec.getUnProjectionMatrix();
+			FMatrixRMaj orig = pca.getUnProjectionMatrix();
+			FMatrixRMaj rec = pcaRec.getUnProjectionMatrix();
 			
 			assertArrayEquals(orig.data, rec.data, 0.0);
 		}

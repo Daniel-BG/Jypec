@@ -20,35 +20,35 @@ public class TestBitStreamReaderWriter {
 
 	private int testSampleSize = 100;
 	
-	/** Test if doubles are written and read by BitStreamDataReaderWriter */
+	/** Test if floats are written and read by BitStreamDataReaderWriter */
 	@Test
-	public void testDoubles() {
+	public void testfloats() {
 		ByteArrayOutputStream bais = new ByteArrayOutputStream();
 		BitOutputStream output = new BitOutputStream(bais);
 		BitInputStream input;
 
 		Random r = new Random();
-		double[] data = new double[this.testSampleSize];
-		double[] defData = {0d, 1d, -1d, Double.MAX_VALUE, Double.MIN_VALUE, Double.NaN,
-				Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.MIN_NORMAL};
+		float[] data = new float[this.testSampleSize];
+		float[] defData = {0d, 1d, -1d, float.MAX_VALUE, float.MIN_VALUE, float.NaN,
+				float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY, float.MIN_NORMAL};
 
 		for (int i = 0; i < this.testSampleSize; i++) {
 			if (i < defData.length)
 				data[i] = defData[i];
 			else
-				data[i] = r.nextDouble();
+				data[i] = r.nextfloat();
 		}
 		
 		try {
 			for (int i = 0; i < this.testSampleSize; i++) {
-				output.writeDouble(data[i]);
+				output.writefloat(data[i]);
 			}
 			
 			input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
 			
 			for (int i = 0; i < this.testSampleSize; i++) {
-				Double d = input.readDouble();
-				assertTrue("Failed when recovering: " + data[i] + " " + d, Double.compare(d, data[i]) == 0);
+				float d = input.readfloat();
+				assertTrue("Failed when recovering: " + data[i] + " " + d, float.compare(d, data[i]) == 0);
 			}
 			output.close();
 			input.close();

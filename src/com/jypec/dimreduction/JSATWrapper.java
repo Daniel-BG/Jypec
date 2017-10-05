@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.FMatrixRMaj;
 
 import jsat.SimpleDataSet;
 import jsat.classifiers.DataPoint;
@@ -25,7 +25,7 @@ public class JSATWrapper {
 	 * @param source
 	 * @return the data set consisting of the matrix's vectors
 	 */
-	public static SimpleDataSet toDataSet(DMatrixRMaj source) {
+	public static SimpleDataSet toDataSet(FMatrixRMaj source) {
 		List<DataPoint> points = new ArrayList<DataPoint>();
 		for (int i = 0; i < source.getNumCols(); i++) {
 			double[] array = new double[source.getNumRows()];
@@ -42,10 +42,10 @@ public class JSATWrapper {
 	
 	/**
 	 * @param source
-	 * @return a DMatrixRMaj whose columns are the samples of <code>source</code>
+	 * @return a FMatrixRMaj whose columns are the samples of <code>source</code>
 	 */
-	public static DMatrixRMaj toDMatrixRMaj(SimpleDataSet source) {
-		return toDMatrixRMaj(source.getDataMatrixView(), true);
+	public static FMatrixRMaj toFMatrixRMaj(SimpleDataSet source) {
+		return toFMatrixRMaj(source.getDataMatrixView(), true);
 	}
 	
 	/**
@@ -54,19 +54,19 @@ public class JSATWrapper {
 	 * @param transpose if the matrix returned should be a transpose of the original.
 	 * @return the EJML matrix
 	 */
-	public static DMatrixRMaj toDMatrixRMaj(Matrix m, boolean transpose) {
-		DMatrixRMaj result;
+	public static FMatrixRMaj toFMatrixRMaj(Matrix m, boolean transpose) {
+		FMatrixRMaj result;
 		if (transpose) {
-			result = new DMatrixRMaj(m.cols(), m.rows()); //invert dimensions since the order is reversed
+			result = new FMatrixRMaj(m.cols(), m.rows()); //invert dimensions since the order is reversed
 		} else {
-			result = new DMatrixRMaj(m.rows(), m.cols()); //invert dimensions since the order is reversed
+			result = new FMatrixRMaj(m.rows(), m.cols()); //invert dimensions since the order is reversed
 		}
 		for (int i = 0; i < result.getNumRows(); i++) {
 			for (int j = 0; j < result.getNumCols(); j++) {
 				if (transpose) {
-					result.set(i, j, m.get(j, i));
+					result.set(i, j, (float) m.get(j, i));
 				} else {
-					result.set(i, j, m.get(i, j));
+					result.set(i, j, (float) m.get(i, j));
 				}
 			}
 		}

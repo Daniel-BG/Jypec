@@ -19,7 +19,7 @@ public class TestHelpers {
 	 * @param std standard deviation for the gaussian function
 	 * @param mean mean for the gaussian function
 	 */
-	public static void randomGaussianFillMatrix(double[][] dst, int rLim, int cLim, Random r, double std, double mean) {
+	public static void randomGaussianFillMatrix(float[][] dst, int rLim, int cLim, Random r, float std, float mean) {
 		for (int k = 0; k < rLim; k++) {
 			for (int j = 0; j < cLim; j++) {
 				dst[k][j] = r.nextGaussian() * std + mean;
@@ -35,7 +35,7 @@ public class TestHelpers {
 	 * @param std standard deviation
 	 * @param mean mean for the gaussian function
 	 */
-	public static void randomGaussianFillArray(double[] dst, int dim, Random r, double std, double mean) {
+	public static void randomGaussianFillArray(float[] dst, int dim, Random r, float std, float mean) {
 		for (int k = 0; k < dim; k++) {
 			dst[k] = r.nextGaussian() * std + mean;
 		}
@@ -74,7 +74,7 @@ public class TestHelpers {
 		
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				double val = r.nextGaussian() * magnitudeLimit;
+				float val = r.nextGaussian() * magnitudeLimit;
 				int res = (int) val;
 				if (res < -magnitudeLimit)
 					res = -magnitudeLimit;

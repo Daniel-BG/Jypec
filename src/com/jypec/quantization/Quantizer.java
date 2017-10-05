@@ -1,7 +1,7 @@
 package com.jypec.quantization;
 
 /**
- * This class quantizes samples (from doubles to integers in sign-magnitude form)
+ * This class quantizes samples (from floats to integers in sign-magnitude form)
  * And dequantizes samples.
  * 
  * Made following chapter 10.5 of David Taubman and Michael Marcellin's "Jpeg2000 Image Compression Fundamentals"
@@ -22,13 +22,13 @@ public class Quantizer {
 	/** Quantizer configuration values */
 	private int exponent, guard;
 	/** Guard used to ensure samples stay in bounds */
-	private double lowerGuard, upperGuard;
+	private float lowerGuard, upperGuard;
 	/** Quantity that decides the size of the intervals that map to a single integer */
-	private double delta;
+	private float delta;
 	/** Used to change the input sample's range to the interval [-1/2, 1/2] before applying the quantizer */
-	private double sampleLowerLimit, sampleIntervalLength;
+	private float sampleLowerLimit, sampleIntervalLength;
 	/** Offset used when dequantizing samples */
-	private double reconstructionOffset;
+	private float reconstructionOffset;
 	/** Maximum magnitude in the sign-magnitude representation*/
 	private int maxMagnitude;
 	
@@ -44,7 +44,7 @@ public class Quantizer {
 	 * @param reconstructionOffset offset used when reconstructing the values. Usually 0.5 is used to round to the nearest integer, but other values to take
 	 * into account the distribution of the differences to the nearest integer might be used such as 0.375
 	 */
-	public Quantizer(int exponent, int mantissa, int guard, double sampleLowerLimit, double sampleUpperLimit, double reconstructionOffset) {
+	public Quantizer(int exponent, int mantissa, int guard, float sampleLowerLimit, float sampleUpperLimit, float reconstructionOffset) {
 		//validity checks
 		if (exponent < 0 || exponent >= MAX_EXPONENT) {
 			throw new IllegalArgumentException("Exponent not in the allowed range");
@@ -67,10 +67,10 @@ public class Quantizer {
 		this.signMask = 0x1 << this.getNecessaryBitPlanes();
 		this.maxMagnitude = this.signMask - 1;
 		if (this.guard == 0) {
-			this.lowerGuard = -0.5;
-			this.upperGuard = 0.5;
+			this.lowerGuard = -0.5f;
+			this.upperGuard = 0.5f;
 		} else {
-			this.upperGuard = (double) (0x1 << (this.guard - 1));
+			this.upperGuard = (float) (0x1 << (this.guard - 1));
 			this.lowerGuard = -this.upperGuard;
 		}
 		this.sampleLowerLimit = sampleLowerLimit;
@@ -78,9 +78,9 @@ public class Quantizer {
 		this.reconstructionOffset = reconstructionOffset;
 		//set up delta
 		long inverseExpFactor = 1l << exponent;
-		double expFactor = 1.0 / ((double) inverseExpFactor);
-		double trueMantissa = (double) mantissa / (double) MAX_MANTISSA;
-		this.delta = expFactor * (1.0 + trueMantissa);
+		float expFactor = 1.0f / ((float) inverseExpFactor);
+		float trueMantissa = (float) mantissa / (float) MAX_MANTISSA;
+		this.delta = expFactor * (1.0f + trueMantissa);
 	}
 	
 	/**
@@ -90,9 +90,9 @@ public class Quantizer {
 	 * normalized to the interval [-0.5, 0.5] using the quantizer setup values
 	 * @param canBeNegative indicates if the sample can take negative values, in which case the normlization
 	 * process skips centering around zero
-	 * @return the quantized value after normalization, see {@link #quantize(double)} for more information
+	 * @return the quantized value after normalization, see {@link #quantize(float)} for more information
 	 */
-	public int normalizeAndQuantize(double input) {
+	public int normalizeAndQuantize(float input) {
 		//normalize
 		input -= this.sampleLowerLimit;
 		input /= this.sampleIntervalLength;
@@ -106,7 +106,7 @@ public class Quantizer {
 	 * @return the quantized value in sign-magnitude format according to this quantizer's setup. 
 	 * {@link #getNecessaryBitPlanes()} returns the number of magnitude bits that this value uses 
 	 */
-	private int quantize(double input) {
+	private int quantize(float input) {
 		//clamp to the guard bit interval
 		input = Math.max(Math.min(input, this.upperGuard), this.lowerGuard);
 		//get the sign before butchering the input
@@ -114,7 +114,7 @@ public class Quantizer {
 		//round the input up
 		input = Math.abs(input);
 		input /= this.delta;
-		int transformedInput = Math.min(this.maxMagnitude, (int) Math.floor(input)); //use min just in case the guards rounded up the doubles
+		int transformedInput = Math.min(this.maxMagnitude, (int) Math.floor(input)); //use min just in case the guards rounded up the floats
 		//join sign and magnitude together
 		return transformedInput | (sign << this.getNecessaryBitPlanes());
 	}
@@ -124,7 +124,7 @@ public class Quantizer {
 	 * @param input the quantized value
 	 * @return the unquantized value
 	 */
-	private double deQuantize(int input) {
+	private float deQuantize(int input) {
 		//base case
 		if (input == 0) {
 			return 0;
@@ -132,7 +132,7 @@ public class Quantizer {
 		//reconstruct
 		int sign = input & this.signMask;
 		input &= ~this.signMask;
-		double result = (double) input + this.reconstructionOffset;
+		float result = (float) input + this.reconstructionOffset;
 		result *= this.delta;
 		if (sign != 0) {
 			result = -result;
@@ -145,8 +145,8 @@ public class Quantizer {
 	 * @param input
 	 * @return the dequantized value using {@link #deQuantize(int)} then denormalized to this quantizer's interval
 	 */
-	public double deQuantizeAndDenormalize(int input) {
-		double dequantized = this.deQuantize(input);
+	public float deQuantizeAndDenormalize(int input) {
+		float dequantized = this.deQuantize(input);
 		dequantized += 0.5;
 		dequantized *= this.sampleIntervalLength;
 		dequantized += this.sampleLowerLimit;
