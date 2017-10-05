@@ -54,10 +54,4 @@ public class BidimensionalArrayIntegerMatrix implements IntegerMatrix {
 		return this.columns;
 	}
 
-
-	@Override
-	public int[][] extractInnerMatrix() {
-		return this.data;
-	}
-
 }

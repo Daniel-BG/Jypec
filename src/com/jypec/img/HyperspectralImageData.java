@@ -2,8 +2,6 @@ package com.jypec.img;
 
 import org.ejml.data.DMatrixRMaj;
 
-import com.jypec.util.arrays.MatrixTransforms;
-
 /**
  * Class to give a little more functionality to a 3-dimensional matrix representation of a hyperspectral image
  * @author Daniel
@@ -11,12 +9,13 @@ import com.jypec.util.arrays.MatrixTransforms;
  */
 public class HyperspectralImageData {
 
-	private int[][][] data;
+	private int[] data;
 	private ImageDataType dataType;
 	private int depth;
 	private int bands;
 	private int lines;
 	private int samples;
+	private int bandElements;
 	
 	
 	/**
@@ -27,9 +26,9 @@ public class HyperspectralImageData {
 	 * @param lines number of lines in a band (height of the spatial dimension (vertical number of samples))
 	 * @param samples number of samples in a line (width of the spatial dimension (horizontal number of samples))
 	 */
-	public HyperspectralImageData (int[][][] data, ImageDataType dataType, int bands, int lines, int samples) {
+	public HyperspectralImageData (int[] data, ImageDataType dataType, int bands, int lines, int samples) {
 		if (data == null) {
-			this.data = new int[bands][lines][samples];
+			this.data = new int[bands*lines*samples];
 		} else {
 			this.data = data;
 		}
@@ -38,6 +37,7 @@ public class HyperspectralImageData {
 		this.bands = bands;
 		this.lines = lines;
 		this.samples = samples;
+		this.bandElements = this.lines * this.samples;
 	}
 	
 	/**
@@ -47,7 +47,7 @@ public class HyperspectralImageData {
 	 * @return the data at the specified position, no questions asked
 	 */
 	public int getDataAt(int band, int line, int sample) {
-		return this.data[band][line][sample];
+		return this.data[band*bandElements + line*samples + sample];
 	}
 	
 	/**
@@ -68,7 +68,7 @@ public class HyperspectralImageData {
 	 * @param sample
 	 */
 	public void setDataAt(int value, int band, int line, int sample) {
-		this.data[band][line][sample] = value; 
+		this.data[band*bandElements + line*samples + sample] = value; 
 	}
 	
 	/**
@@ -80,7 +80,7 @@ public class HyperspectralImageData {
 	 * @param sample
 	 */
 	public void setValueAt(double value, int band, int line, int sample) {
-		this.data[band][line][sample] = this.dataType.valueToData(value);
+		this.data[band*bandElements + line*samples + sample] = this.dataType.valueToData(value);
 	}
 	
 	/**
@@ -111,14 +111,6 @@ public class HyperspectralImageData {
 	 */
 	public int getNumberOfSamples() {
 		return this.samples;
-	}
-
-	/**
-	 * @param band
-	 * @return the pointer to the raw data of the given band
-	 */
-	protected int[][] getDataReferenceToBand(int band) {
-		return this.data[band];
 	}
 
 	/**
@@ -172,7 +164,7 @@ public class HyperspectralImageData {
 			throw new IllegalArgumentException("The image to copy from must have the same type and dimensions as this one");
 		}
 		
-		MatrixTransforms.copy(source.data, this.data, this.bands, this.lines, this.samples);
+		System.arraycopy(source.data, 0, this.data, 0, this.bands*this.lines*this.samples);
 	}
 	
 	/**
@@ -216,6 +208,14 @@ public class HyperspectralImageData {
 			}
 		}
 		return res;
+	}
+
+	/**
+	 * WARNING: this deletes the internal data to free up memory. Be use you know what you are doing
+	 * before using this method
+	 */
+	public void deleteData() {
+		this.data = null;
 	}
 
 

@@ -31,9 +31,4 @@ public interface IntegerMatrix {
 	 * @return the number of columns of this matrix
 	 */
 	public int getColumns();
-	
-	/**
-	 * @return the raw array that stores the data used in this object
-	 */
-	public int[][] extractInnerMatrix();
 }

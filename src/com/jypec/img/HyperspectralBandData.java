@@ -139,11 +139,6 @@ public class HyperspectralBandData implements IntegerMatrix {
 		return wave;
 	}
 
-	@Override
-	public int[][] extractInnerMatrix() {
-		return this.hyimg.getDataReferenceToBand(this.band);
-	}
-
 	/**
 	 * Fill this image with the values from the double matrix. They are converted
 	 * to the data type of the encompassing image and then set into the inner array

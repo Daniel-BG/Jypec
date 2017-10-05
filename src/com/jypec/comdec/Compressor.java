@@ -44,9 +44,16 @@ public class Compressor {
 	 * @throws IOException 
 	 */
 	public void compress(HyperspectralImageData srcImg, BitOutputStreamTree output) throws IOException {
+		/** Get some values we are gonna need */
+		int numLines = srcImg.getNumberOfLines();
+		int numSamples = srcImg.getNumberOfSamples();
+		DMatrixRMaj srcImgDMRM = srcImg.toDoubleMatrix();
+		srcImg.deleteData();
+		
 		/** Project all image values onto the reduced space */
 		Logger.getLogger().log("Applying dimensionality reduction");
-		DMatrixRMaj reduced = cp.dr.trainReduce(srcImg.toDoubleMatrix());
+		DMatrixRMaj reduced = cp.dr.trainReduce(srcImgDMRM);
+		srcImgDMRM = null; //not needed anymore. allow GC to discard it
 		
 		/** create the wavelet transform, and coder we'll be using, which won't change over the bands */
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
@@ -65,8 +72,8 @@ public class Compressor {
 			
 			/** Apply the wavelet transform */
 			Logger.getLogger().log("Applying wavelet... ");
-			double[][] waveForm = MatrixTransforms.extractBand(reduced, i, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
-			bdw.forwardTransform(waveForm, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
+			double[][] waveForm = MatrixTransforms.extractBand(reduced, i, numLines, numSamples);
+			bdw.forwardTransform(waveForm, numLines, numSamples);
 			double[] minMax = MatrixOperations.minMax(waveForm);
 			
 			/** get max and min from the resulting transform, and create the best data type possible */
@@ -86,8 +93,8 @@ public class Compressor {
 			
 			
 			/** quantize the transform and save the quantization over the current band */
-			HyperspectralBandData hb = HyperspectralBandData.generateRogueBand(targetType, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
-			mq.quantize(waveForm, hb, 0, 0, srcImg.getNumberOfLines(), srcImg.getNumberOfSamples());
+			HyperspectralBandData hb = HyperspectralBandData.generateRogueBand(targetType, numLines, numSamples);
+			mq.quantize(waveForm, hb, 0, 0, numLines, numSamples);
 			
 			/** Now divide into blocks and encode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
