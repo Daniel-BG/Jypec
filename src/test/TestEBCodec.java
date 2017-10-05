@@ -54,7 +54,7 @@ public class TestEBCodec {
 		CodingBlock blockOut = new CodingBlock(height, width, depth, band);
 		EBDecoder decoder = new EBDecoder();
 		
-		BitInputStream input = bost.bis;
+		BitInputStream input = bost.getBis();
 		try {
 			decoder.decode(input, blockOut);
 		} catch (IOException e) {

@@ -46,7 +46,7 @@ public class TestComParametersRecovery {
 			try {
 				cp.saveTo(bost);
 				bost.paddingFlush();
-				input = bost.bis;
+				input = bost.getBis();
 				cpr.loadFrom(input);
 				
 				assertTrue("Compressor parameters do not equal each other", cp.equals(cpr));

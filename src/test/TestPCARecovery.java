@@ -84,7 +84,7 @@ public class TestPCARecovery {
 		try {
 			pca.saveTo(bost);
 			bost.paddingFlush();
-			input = bost.bis;
+			input = bost.getBis();
 			pcaRec = (PrincipalComponentAnalysis) DimensionalityReduction.loadFrom(input);
 			
 			input.close();

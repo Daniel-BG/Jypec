@@ -1,5 +1,6 @@
 package com.jypec.util.bits;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -14,58 +15,120 @@ import java.util.List;
  * Extends the {@link BitOutputStream} functionality, restricting parent
  * {@link OutputStream} usage, but allowing the creation of a tree-like structure
  * which organizes the bits in bins. The internal bit-buffers can then 
- * be dumped via {@link #dumpInBitOutputStream(BitOutputStream)}
+ * be dumped via {@link #dumpInBitOutputStream(BitOutputStream)} <br><br>
+ * If you want this to behave like {@link BitOutputStream}, construct using
+ * {@link #BitOutputStreamTree(OutputStream)} and ignore tree methods
  * @author Daniel
  *
  */
 public class BitOutputStreamTree extends BitOutputStream {
 	
+	/** This allows this BOST to behave as a BitOutputStream to allow,
+	 * amongst others, direct output to {@link FileOutputStream} */
+	private OutputStream destination;
+	/** Parent BOST for tree traversal purposes */
 	private BitOutputStreamTree parent;
+	/** List of children for tree traversal purposes */
 	private List<BitOutputStreamTree> children;
-	private BitPipe bitPipe;
-	private String name;
+	/** True if this BOST's {@link #addChild(String)} should spawn
+	 * a new BOST, or false for returning <code>this</code> instead,
+	 * which ignores the tree structure in favor of a more optimized code */
 	private boolean spawnChildren;
+	/** Name of the node for tagging the tree structure */
+	private String name;
+	
+	/** Internal BitPipe, used if <code>destination == null</code> to store
+	 * the bits output. Its contents can be emptied via {@link #bis} or a 
+	 * call to {@link #dumpInBitOutputStream(BitOutputStream)} */
+	private BitPipe bitPipe;
+	/** Internal {@link BitInputStream} for outputting the bits sent here */
+	private BitInputStream bis;
+	
+	
+	/********************************/
+	/**	CONSTRUCTORS/INITIALIZERS	*/
+	/********************************/
+	private BitOutputStreamTree(OutputStream destination, String name, boolean spawnChildren) {
+		super(destination);
+		this.name = name;
+		if (destination == null) { //do not bother creating if we are not using it
+			this.bitPipe = new BitPipe();
+			this.createBis();
+		}
+		this.spawnChildren = spawnChildren;
+	}
+
+	/**
+	 * Build a bstn
+	 * @param name the name of this tree
+	 * @param spawnChildren if this tree should spawn children (less efficient)
+	 */
+	public BitOutputStreamTree(String name, boolean spawnChildren) {
+		this(null, name, spawnChildren);
+	}
 	
 	/**
-	 * Read bits from here (you read what has been written by {@link #bos})
-	 * Native {@link InputStream} methods will not work since there is no
-	 * underlying {@link InputStream}. Use only those provided
-	 * by {@link BitInputStream}
+	 * same as calling {@link #BitOutputStreamTree(null, false)}
 	 */
-	public final BitInputStream bis = new BitInputStream(null) {
-		private int lastBitsRead = 0;
-		
-		@Override
-        public int readBitAsInt() throws IOException {
-			int bit = bitPipe.getBitAsInt();
-			this.lastBitsRead <<= 1;
-			this.lastBitsRead += bit;
-			return bit;
-		}
-
-        @Override
-        public byte readByte() throws IOException {
-        	return (byte) this.readNBitNumber(8);
-        }
-        
-    	@Override
-    	public int getLastReadBits() {
-    		return this.lastBitsRead;
-    	}
-    	
-    	@Override
-    	public int available() {
-    		return bitPipe.getNumberOfBits();
-    	}
-    	
-    	@Override
-    	public void close() {
-    		//nothing
-    	}
-	};
+	public BitOutputStreamTree() {
+		this(null, null, false);
+	}
 	
+	/**
+	 * Use this constructor when you want this {@link BitOutputStreamTree} to 
+	 * behave exactly as a {@link BitOutputStream}
+	 * @param destination
+	 */
+	public BitOutputStreamTree(OutputStream destination) {
+		this(destination, null, false);
+	}
+	
+	private void createBis() {
+		this.bis = new BitInputStream(null) {
+			private int lastBitsRead = 0;
+			
+			@Override
+	        public int readBitAsInt() throws IOException {
+				int bit = bitPipe.getBitAsInt();
+				this.lastBitsRead <<= 1;
+				this.lastBitsRead += bit;
+				return bit;
+			}
+
+	        @Override
+	        public byte readByte() throws IOException {
+	        	return (byte) this.readNBitNumber(8);
+	        }
+	        
+	    	@Override
+	    	public int getLastReadBits() {
+	    		return this.lastBitsRead;
+	    	}
+	    	
+	    	@Override
+	    	public int available() {
+	    		return bitPipe.getNumberOfBits();
+	    	}
+	    	
+	    	@Override
+	    	public void close() {
+	    		//nothing
+	    	}
+		};
+	}
+	/********************************/
+	
+	
+	/******************************/
+	/** BIT OUTPUT STREAM METHODS */
+	/********************************/
 	@Override
 	public void writeBit(int bit) throws IOException {
+		if (this.destination != null) {
+			super.writeBit(bit);
+			return;
+		}
+		
 		if (hasChildren()) {
 			throw new IllegalStateException("You shouldn't add bits to a tree node if it has children, since it is traversed in preorder and this would break it");
 		}
@@ -74,11 +137,21 @@ public class BitOutputStreamTree extends BitOutputStream {
 
 	@Override
 	public void writeByte(byte i) throws IOException {
+		if (this.destination != null) {
+			super.writeByte(i);
+			return;
+		}
+		
 		this.writeNBitNumber(i & 0xff, 8);
 	}
 	
 	@Override
 	public void paddingFlush() throws IOException {
+		if (this.destination != null) {
+			super.paddingFlush();
+			return;
+		}
+		
 		int bufferSize = this.getBitsOutput() % 8;
 		//flush remaining bits padding with zeroes
 		if (bufferSize > 0) {
@@ -87,39 +160,23 @@ public class BitOutputStreamTree extends BitOutputStream {
 	}
 	
 	@Override
-	public void close() {
-		//pass
+	public void close() throws IOException {
+		if (this.destination != null) {
+			super.close();
+		}
 	}
+	/********************************/
+
 	
-	
-	/**
-	 * Build a bstn
-	 * @param name the name of this tree
-	 * @param spawnChildren if this tree should spawn children (less efficient)
-	 */
-	public BitOutputStreamTree(String name, boolean spawnChildren) {
-		super(null);
-		this.name = name;
-		this.bitPipe = new BitPipe();
-		this.spawnChildren = spawnChildren;
-	}
-	
-	/**
-	 * same as calling {@link #BitOutputStreamTree(null, false)}
-	 */
-	public BitOutputStreamTree() {
-		this(null, false);
-	}
-	
-	
+	/********************************/
+	/**		TREE METHODS			*/
+	/********************************/
 	/**
 	 * @return the name of this node
 	 */
 	public String getName() {
 		return this.name;
 	}
-	
-	
 	
 	/**
 	 * @return true if this is the root of the tree
@@ -194,13 +251,21 @@ public class BitOutputStreamTree extends BitOutputStream {
 	 * @return the number of bits stored in this node
 	 */
 	public int getNodeBits() {
-		return this.bitPipe.getNumberOfBits();
+		if (this.destination == null) {
+			return this.bitPipe.getNumberOfBits();
+		} else {
+			return this.getBitsOutput();
+		}
 	}
 	
 	/**
 	 * @return the number of bits stored in this tree (recursively looking in subtrees)
 	 */
 	public int getTreeBits() {
+		if (this.destination != null) {
+			return this.getBitsOutput();
+		}
+		
 		int count = this.bitPipe.getNumberOfBits();
 		if (this.hasChildren()) {
 			for (BitOutputStreamTree bstn: this.children) {
@@ -209,7 +274,6 @@ public class BitOutputStreamTree extends BitOutputStream {
 		}
 		return count;
 	}
-	
 	
 	/**
 	 * @param target where to dump this tree's data (in PREORDER!)
@@ -225,7 +289,6 @@ public class BitOutputStreamTree extends BitOutputStream {
 			}
 		}
 	}
-	
 	
 	/**
 	 * @param indent
@@ -243,5 +306,19 @@ public class BitOutputStreamTree extends BitOutputStream {
 		}
 		return res;
 	}
+	
+	/**
+	 * Read bits from here (you read what has been written with the parent {@link BitOutputStreamTree})
+	 * Native {@link InputStream} methods will not work since there is no
+	 * underlying {@link InputStream}. Use only those provided
+	 * by {@link BitInputStream}<br><br>
+	 * This object will only work if this {@link BitOutputStreamTree} was not
+	 * constructed with {@link #BitOutputStreamTree(OutputStream)}
+	 * @return the internal {@link BitInputStream} <br>
+	 */
+	public BitInputStream getBis() {
+		return this.bis;
+	}
+	/********************************/
 
 }
