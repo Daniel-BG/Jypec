@@ -52,6 +52,7 @@ public class Compressor {
 		
 		/** Project all image values onto the reduced space */
 		Logger.getLogger().log("Applying dimensionality reduction");
+		cp.dr.setPercentTraining(cp.percentTraining);
 		FMatrixRMaj reduced = cp.dr.trainReduce(srcImgDMRM);
 		srcImgDMRM = null; //not needed anymore. allow GC to discard it
 		

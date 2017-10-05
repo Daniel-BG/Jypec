@@ -40,9 +40,14 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	public VectorQuantizationPrincipalComponentAnalysis() {
 		super(DimensionalityReductionAlgorithm.DRA_VQPCA);
 	}
+	
+	@Override
+	public FMatrixRMaj preprocess(FMatrixRMaj source) {
+		return source; //we cannot reduce the source in VQPCA
+	}
 
 	@Override
-	public void train(FMatrixRMaj source) {
+	public void doTrain(FMatrixRMaj source) {
 		/** Initialization */
 		Logger.getLogger().log("Initializing VQPCA...");
 		SimpleDataSet dataSet = JSATWrapper.toDataSet(source);
@@ -63,6 +68,7 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 			Logger.getLogger().log("Cluster #" + i + " has size: " + l.size());
 			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
 			pca.setNumComponents(dimProj);
+			pca.setPercentTraining(percentTraining);
 			pca.train(JSATWrapper.toFMatrixRMaj(new SimpleDataSet(l)));
 			pcas.add(pca);
 		}

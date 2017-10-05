@@ -27,6 +27,8 @@ public class ComParameters {
 	public LowKeyHashMap<Integer, Integer> shaveMap;
 	/** Dimensionality reduction algorithm */
 	public DimensionalityReduction dr;
+	/** from 0-1, percent of samples used for training */
+	public double percentTraining = 1;
 
 	/**
 	 * @param args read the compression parameters from the input arguments 
@@ -37,6 +39,9 @@ public class ComParameters {
 		}
 		if (args.requestBits) {
 			this.bits = args.bits;
+		}
+		if (args.requestTrainingReduction) {
+			this.percentTraining = args.percentTraining;
 		}
 		this.shaveMap = args.shaves;
 		this.dr = DimensionalityReduction.loadFrom(args);

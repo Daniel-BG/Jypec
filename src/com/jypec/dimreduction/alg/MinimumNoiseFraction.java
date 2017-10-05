@@ -58,26 +58,34 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
 
 	//https://www.researchgate.net/profile/Angelo_Palombo/publication/224354550_Experimental_Approach_to_the_Selection_of_the_Components_in_the_Minimum_Noise_Fraction/links/02bfe51064486871c4000000.pdf
 	@Override
-	public void train(FMatrixRMaj data) {
+	public void doTrain(FMatrixRMaj data) {
+		if (this.reductionInTrainingRequested()) {
+			data = MatrixTransforms.getSubSet(data, percentTraining);
+		}
+		
 		//initialize values
 		dimOrig = data.getNumRows();
 		//find out data and noise. The data is NOT zero-meaned,
 		//while the noise is assumed to be
+		Logger.getLogger().log("Estimating noise...");
 		FMatrixRMaj noise = extractNoise(data);
 		//CommonOps_FDRM.subtract(data, noise, data);
 		
 		/**Create data covariance matrix */
+		Logger.getLogger().log("Getting data covariance...");
 		adjustment = new FMatrixRMaj(dimOrig, 1);
 		FMatrixRMaj sigma = new FMatrixRMaj(dimOrig, dimOrig);
 		MatrixOperations.generateCovarianceMatrix(data, sigma, null, adjustment);
 		/*********************************/
         
         /**Create noise covariance matrix */
+		Logger.getLogger().log("Getting noise covariance...");
         FMatrixRMaj sigmaNoise = new FMatrixRMaj(dimOrig, dimOrig);
         CommonOps_FDRM.multTransB(noise, noise, sigmaNoise);
         /**********************************/
         
         //decompose sigma noise as noise = U*W*U^t
+        Logger.getLogger().log("Applying SVD to noise...");
         SingularValueDecomposition_F32<FMatrixRMaj> svd = DecompositionFactory_FDRM.svd(dimOrig, dimOrig, true, false, false);
         Logger.getLogger().log("Decomposition yielded: " + svd.decompose(sigmaNoise));
         FMatrixRMaj B = svd.getU(null, false);
@@ -94,13 +102,14 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
         CommonOps_FDRM.multTransA(A, sigmaNoise, tmp);
         CommonOps_FDRM.mult(tmp, A, tmp2);
         */
-       
+        Logger.getLogger().log("Removing noise...");
         FMatrixRMaj sigmaTemp = new FMatrixRMaj(dimOrig, dimOrig);
         FMatrixRMaj sigmaTransformed = new FMatrixRMaj(dimOrig, dimOrig);
         CommonOps_FDRM.multTransA(A, sigma, sigmaTemp);
         CommonOps_FDRM.mult(sigmaTemp, A, sigmaTransformed);
         
         //decompose sigma temp as noise = U*W*U^t
+        Logger.getLogger().log("Applying SVD to noiseless data...");
         svd = DecompositionFactory_FDRM.svd(dimOrig, dimOrig, true, true, false);
         Logger.getLogger().log("Decomposition yielded: " + svd.decompose(sigmaTransformed));
         FMatrixRMaj D = svd.getU(null, false);

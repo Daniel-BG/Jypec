@@ -43,6 +43,8 @@ public class JypecCLI {
 	public static final String OPTION_VERBOSE = "verbose";
 	/** Flag to show the compression tree*/
 	public static final String OPTION_TREE = "tree";
+	/** Used for specifying if training is to be done with less samples than reducing */
+	public static final String OPTION_TRAINING_REDUCTION = "train_reduction";
 	
 	/* Options for jypec */
 	private static Options jypecOptions;
@@ -129,6 +131,14 @@ public class JypecCLI {
 				.longOpt(OPTION_SHAVE)
 				.build();
 		
+		Option trainingReduction = Option
+				.builder("t")
+				.desc("Percentage (from 0 to 1) of samples used for training")
+				.hasArg()
+				.argName("percentage")
+				.longOpt(OPTION_TRAINING_REDUCTION)
+				.build();
+		
 		jypecOptions = new Options();
 		
 		jypecOptions.addOption(bits);
@@ -148,6 +158,7 @@ public class JypecCLI {
 		jypecOptions.addOption(essentialHeader);
 		jypecOptions.addOption(verbose);
 		jypecOptions.addOption(tree);
+		jypecOptions.addOption(trainingReduction);
 	}
 	
 	

@@ -19,9 +19,14 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	public DeletingDimensionalityReduction() {
 		super(DimensionalityReductionAlgorithm.DRA_DELETING_DIMENSIONALITY_REDUCTION);
 	}
+	
+	@Override
+	public FMatrixRMaj preprocess(FMatrixRMaj source) {
+		return source;
+	}
 
 	@Override
-	public void train(FMatrixRMaj source) {
+	public void doTrain(FMatrixRMaj source) {
 		//no training needed. If unset just preserve dimension
 		if (dimProj == -1)
 			this.dimProj = source.getNumRows();

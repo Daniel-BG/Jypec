@@ -56,6 +56,10 @@ public class InputArguments {
 	public boolean verbose;
 	/** Band shaves */
 	public LowKeyHashMap<Integer, Integer> shaves;
+	/** Percent of samples used for training */
+	public double percentTraining;
+	/** True if the training is done with less samples than the reduction */
+	public boolean requestTrainingReduction;
 	
 	
 	/**
@@ -89,6 +93,10 @@ public class InputArguments {
 		if (args.requestWavelet = line.hasOption(JypecCLI.OPTION_WAVELET)) {
 			args.passes = Integer.parseInt(line.getOptionValue(JypecCLI.OPTION_WAVELET));
 		}
+		if (args.requestTrainingReduction = line.hasOption(JypecCLI.OPTION_TRAINING_REDUCTION)) {
+			args.percentTraining = Double.parseDouble(line.getOptionValue(JypecCLI.OPTION_TRAINING_REDUCTION));
+		}
+		
 		args.shaves = new LowKeyHashMap<Integer, Integer>();
 		if (line.hasOption(JypecCLI.OPTION_SHAVE)) {
 			String[] values = line.getOptionValues(JypecCLI.OPTION_SHAVE);

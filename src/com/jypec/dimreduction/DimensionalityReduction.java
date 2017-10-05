@@ -13,6 +13,7 @@ import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.dimreduction.alg.SingularValueDecomposition;
 import com.jypec.dimreduction.alg.VectorQuantizationPrincipalComponentAnalysis;
 import com.jypec.dimreduction.alg.VertexComponentAnalysis;
+import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
 
@@ -45,6 +46,8 @@ public abstract class DimensionalityReduction {
 	
 	private DimensionalityReductionAlgorithm dra;
 	protected int dimProj = -1;
+	protected double percentTraining = PERCENT_FULL;
+	private static final double PERCENT_FULL = 1;
 	
 	/**
 	 * @param dra indicates the type of reduction being made
@@ -74,7 +77,31 @@ public abstract class DimensionalityReduction {
 	 * <br>
 	 * samples are assumed to be the <b>columns</b> of source
 	 */
-	public abstract void train(FMatrixRMaj source);
+	public final void train(FMatrixRMaj source) {
+		FMatrixRMaj res = this.preprocess(source);
+		this.doTrain(res);
+	}
+	
+	
+	/**
+	 * Do the actual training after potentially reducing
+	 * the number of input data with {@link #preprocess(FMatrixRMaj)}
+	 * @param source
+	 */
+	public abstract void doTrain(FMatrixRMaj source);
+	
+	
+	/**
+	 * @param source
+	 * @return a potentially reduced version of the source, so that
+	 * {@link #doTrain(FMatrixRMaj)} has a easier time training
+	 */
+	public FMatrixRMaj preprocess(FMatrixRMaj source) {
+		if (this.reductionInTrainingRequested()) {
+			return MatrixTransforms.getSubSet(source, percentTraining);
+		}
+		return source;
+	}
 	
 	
 	/**
@@ -186,6 +213,25 @@ public abstract class DimensionalityReduction {
 	 */
 	public final void setNumComponents(int numComponents) {
 		this.dimProj = numComponents;
+	}
+	
+	
+	/**
+	 * @param percentTraining the percent of samples used for training
+	 */
+	public final void setPercentTraining(double percentTraining) {
+		if (percentTraining < 0 || percentTraining > PERCENT_FULL) {
+			throw new IllegalArgumentException("Percent of training must be between 0 and 1");
+		}
+		this.percentTraining = percentTraining;
+	}
+	
+	/**
+	 * @return true if this dim reduction is supposed to reduce the input dataset size
+	 * before training
+	 */
+	public final boolean reductionInTrainingRequested() {
+		return this.percentTraining != PERCENT_FULL;
 	}
 
 	/**

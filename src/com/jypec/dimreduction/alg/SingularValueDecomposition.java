@@ -4,9 +4,11 @@ import org.ejml.data.FMatrixRMaj;
 import org.ejml.dense.row.CommonOps_FDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_FDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition_F32;
+
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.arrays.ArraySortingIndexComparator;
 import com.jypec.util.arrays.MatrixOperations;
+import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.debug.Logger;
 
 /**
@@ -29,7 +31,11 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 	}
 
 	@Override
-	public void train(FMatrixRMaj data) {
+	public void doTrain(FMatrixRMaj data) {
+		if (this.reductionInTrainingRequested()) {
+			data = MatrixTransforms.getSubSet(data, percentTraining);
+		}
+		
 		Logger.getLogger().log("Taking samples...");
 		dimOrig = data.getNumRows();
 		
@@ -37,6 +43,7 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 		FMatrixRMaj newData = new FMatrixRMaj(data);
 		adjustment = new FMatrixRMaj(dimOrig, 1);
 		if (center) {
+			Logger.getLogger().log("Centering data...");
 			MatrixOperations.generateCovarianceMatrix(data, null, null, adjustment);
 			for (int i = 0; i < data.getNumRows(); i++) {
 				for (int j = 0; j < data.getNumRows(); j++) {
@@ -50,6 +57,7 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 		
 		/** apply SVD and get the V matrix. We do not compute W
 		 * (and probably can't since it is of size samples * samples) */
+		Logger.getLogger().log("Applying SVD...");
 		CommonOps_FDRM.transpose(newData);
 		SingularValueDecomposition_F32<FMatrixRMaj> svd = DecompositionFactory_FDRM.svd(newData.getNumRows(), newData.getNumCols(), false, true, false);
 		Logger.getLogger().log("Decomposition yielded: " + svd.decompose(newData));
@@ -57,6 +65,7 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 		FMatrixRMaj W = svd.getW(null);
 		
 		/** extract projection and unprojection matrices */
+		Logger.getLogger().log("Extracting projection matrix...");
 		projectionMatrix = new FMatrixRMaj(V);
 		CommonOps_FDRM.transpose(projectionMatrix);
 		descendingOrder(W, projectionMatrix);

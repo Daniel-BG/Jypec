@@ -28,7 +28,7 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 	}
 
 	@Override
-	public void train(FMatrixRMaj source) {
+	public void doTrain(FMatrixRMaj source) {
 		/** get metadata */
 		dimOrig = source.getNumRows();
 
@@ -110,6 +110,7 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 		}
 		
 		/** extract endmembers */
+		Logger.getLogger().log("Extracting endmembers...");
 		FMatrixRMaj xSubSet = new FMatrixRMaj(dimProj, dimProj);
 		for (int i = 0; i < dimProj; i++) {
 			for (int j = 0; j < dimProj; j++) {
@@ -118,6 +119,7 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 		}
 		
 		/** get mixing matrix, which is the reverse projection matrix */
+		Logger.getLogger().log("Computing mixing / unmixing matrices...");
 		FMatrixRMaj m = new FMatrixRMaj(dimOrig, dimProj);
 		CommonOps_FDRM.multTransA(ud, xSubSet, m);
 		this.unprojectionMatrix = m;

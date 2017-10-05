@@ -14,6 +14,7 @@ import org.ejml.interfaces.decomposition.EigenDecomposition_F32;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.Pair;
 import com.jypec.util.arrays.MatrixOperations;
+import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.debug.Logger;
 
 /**
@@ -34,7 +35,11 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
     }
 
 	@Override
-	public void train(FMatrixRMaj data) {
+	public void doTrain(FMatrixRMaj data) {
+		if (this.reductionInTrainingRequested()) {
+			data = MatrixTransforms.getSubSet(data, percentTraining);
+		}
+		
 		Logger.getLogger().log("Taking samples...");
 		dimOrig = data.getNumRows();
 		
