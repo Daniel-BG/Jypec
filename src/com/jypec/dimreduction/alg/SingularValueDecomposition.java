@@ -1,17 +1,16 @@
 package com.jypec.dimreduction.alg;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
-
+import org.ejml.data.FMatrixRMaj;
+import org.ejml.dense.row.CommonOps_FDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_FDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F32;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.arrays.ArraySortingIndexComparator;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.debug.Logger;
 
 /**
- * Overrides the {@link #train(DMatrixRMaj)} method in {@link PrincipalComponentAnalysis} 
+ * Overrides the {@link #train(FMatrixRMaj)} method in {@link PrincipalComponentAnalysis} 
  * to use singular value decomposition instead of generating the covariance matrix.
  * This method is slower (probably because of the SVD implementation) but in some cases
  * has better numerical convergence
@@ -30,18 +29,18 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 	}
 
 	@Override
-	public void train(DMatrixRMaj data) {
+	public void train(FMatrixRMaj data) {
 		Logger.getLogger().log("Taking samples...");
 		dimOrig = data.getNumRows();
 		
 		/** substract mean from data and normalize with the square root of the number of samples */
-		DMatrixRMaj newData = new DMatrixRMaj(data);
-		adjustment = new DMatrixRMaj(dimOrig, 1);
+		FMatrixRMaj newData = new FMatrixRMaj(data);
+		adjustment = new FMatrixRMaj(dimOrig, 1);
 		if (center) {
 			MatrixOperations.generateCovarianceMatrix(data, null, null, adjustment);
 			for (int i = 0; i < data.getNumRows(); i++) {
 				for (int j = 0; j < data.getNumRows(); j++) {
-					double val = newData.get(i, j) - adjustment.get(i);
+					float val = newData.get(i, j) - adjustment.get(i);
 					val /= data.getNumCols(); //normalize
 					newData.set(i, j, val);
 				}
@@ -51,19 +50,19 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 		
 		/** apply SVD and get the V matrix. We do not compute W
 		 * (and probably can't since it is of size samples * samples) */
-		CommonOps_DDRM.transpose(newData);
-		SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(newData.getNumRows(), newData.getNumCols(), false, true, false);
+		CommonOps_FDRM.transpose(newData);
+		SingularValueDecomposition_F32<FMatrixRMaj> svd = DecompositionFactory_FDRM.svd(newData.getNumRows(), newData.getNumCols(), false, true, false);
 		Logger.getLogger().log("Decomposition yielded: " + svd.decompose(newData));
-		DMatrixRMaj V = svd.getV(null, false);
-		DMatrixRMaj W = svd.getW(null);
+		FMatrixRMaj V = svd.getV(null, false);
+		FMatrixRMaj W = svd.getW(null);
 		
 		/** extract projection and unprojection matrices */
-		projectionMatrix = new DMatrixRMaj(V);
-		CommonOps_DDRM.transpose(projectionMatrix);
+		projectionMatrix = new FMatrixRMaj(V);
+		CommonOps_FDRM.transpose(projectionMatrix);
 		descendingOrder(W, projectionMatrix);
 		projectionMatrix.reshape(dimProj, dimOrig);
-		unprojectionMatrix = new DMatrixRMaj(projectionMatrix);
-		CommonOps_DDRM.transpose(unprojectionMatrix);
+		unprojectionMatrix = new FMatrixRMaj(projectionMatrix);
+		CommonOps_FDRM.transpose(unprojectionMatrix);
 	}
 
 	
@@ -83,8 +82,8 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 	}
 	
 	
-	private static void descendingOrder(DMatrixRMaj W, DMatrixRMaj V) {
-		Double[] diag = new Double[W.getNumCols()];
+	private static void descendingOrder(FMatrixRMaj W, FMatrixRMaj V) {
+		Float[] diag = new Float[W.getNumCols()];
 		for (int i = 0; i < W.getNumCols(); i++) {
 			diag[i] = W.get(i, i);
 		}
@@ -101,8 +100,8 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 				
 				//swap rows
 				for (int j = 0; j < V.getNumCols(); j++) {
-					double viidx = V.get(iidx, j);
-					double vnidx = V.get(nidx, j);
+					float viidx = V.get(iidx, j);
+					float vnidx = V.get(nidx, j);
 					V.set(iidx, j, vnidx);
 					V.set(nidx, j, viidx);
 				}

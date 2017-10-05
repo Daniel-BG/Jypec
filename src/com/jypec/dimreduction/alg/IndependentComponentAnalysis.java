@@ -1,7 +1,7 @@
 package com.jypec.dimreduction.alg;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.data.FMatrixRMaj;
+import org.ejml.dense.row.CommonOps_FDRM;
 
 import com.jypec.dimreduction.JSATWrapper;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
@@ -27,16 +27,16 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 	}
 
 	@Override
-	public void train(DMatrixRMaj source) {		
+	public void train(FMatrixRMaj source) {		
 		dimOrig = source.getNumRows();
 		/** Get mean first, since we will be centering the data around zero */
-		adjustment = new DMatrixRMaj(this.dimOrig, 1);
+		adjustment = new FMatrixRMaj(this.dimOrig, 1);
 		MatrixOperations.generateCovarianceMatrix(source, null, null, adjustment); //calculate mean instead of doing more reflection hacks
 		
 		/** Transform source to JSAT notation */
-		DMatrixRMaj adjustmentSubstract = new DMatrixRMaj(source.getNumRows(), source.getNumCols());
-		CommonOps_DDRM.mult(adjustment, MatrixOperations.ones(1, source.getNumCols()), adjustmentSubstract);
-		CommonOps_DDRM.subtract(source, adjustmentSubstract, adjustmentSubstract);
+		FMatrixRMaj adjustmentSubstract = new FMatrixRMaj(source.getNumRows(), source.getNumCols());
+		CommonOps_FDRM.mult(adjustment, MatrixOperations.ones(1, source.getNumCols()), adjustmentSubstract);
+		CommonOps_FDRM.subtract(source, adjustmentSubstract, adjustmentSubstract);
 		SimpleDataSet dataSet = JSATWrapper.toDataSet(adjustmentSubstract);
 		
 		/** Perform ICA */
@@ -49,8 +49,8 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 		Matrix unmixing = (Matrix) JSATWrapper.getField(fica, "unmixing");
 		
 		/** Get data in a readable way */
-		this.projectionMatrix = JSATWrapper.toDMatrixRMaj(unmixing, true);
-		this.unprojectionMatrix = JSATWrapper.toDMatrixRMaj(mixing, true);
+		this.projectionMatrix = JSATWrapper.toFMatrixRMaj(unmixing, true);
+		this.unprojectionMatrix = JSATWrapper.toFMatrixRMaj(mixing, true);
 	}
 	
 

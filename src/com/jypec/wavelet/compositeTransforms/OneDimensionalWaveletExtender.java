@@ -23,13 +23,13 @@ public class OneDimensionalWaveletExtender implements BidimensionalWavelet {
 	
 	
 	@Override
-	public void forwardTransform(double[][] s, int width, int height) {
+	public void forwardTransform(float[][] s, int width, int height) {
 		//transform along one axis
 		for (int i = 0; i < height; i++) {
 			this.baseWavelet.forwardTransform(s[i], width);
 		}
 		//transpose and transform along the other axis
-		double[][] tmp = new double[width][height];
+		float[][] tmp = new float[width][height];
 		MatrixTransforms.transpose(s, tmp, width, height);
 		for (int j = 0; j < width; j++) {
 			this.baseWavelet.forwardTransform(tmp[j], height);
@@ -39,13 +39,13 @@ public class OneDimensionalWaveletExtender implements BidimensionalWavelet {
 	}
 
 	@Override
-	public void reverseTransform(double[][] s, int width, int height) {
+	public void reverseTransform(float[][] s, int width, int height) {
 		//transform along one axis
 		for (int i = 0; i < height; i++) {
 			this.baseWavelet.reverseTransform(s[i], width);
 		}
 		//transpose and transform along the other axis
-		double[][] tmp = new double[width][height];
+		float[][] tmp = new float[width][height];
 		MatrixTransforms.transpose(s, tmp, width, height);
 		for (int j = 0; j < width; j++) {
 			this.baseWavelet.reverseTransform(tmp[j], height);

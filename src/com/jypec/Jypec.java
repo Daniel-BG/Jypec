@@ -5,7 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.FMatrixRMaj;
 
 import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
@@ -70,12 +70,12 @@ public class Jypec {
 		
 		/** Show some stats */
 		if (args.showCompressionStats && args.verbose) {
-			int orsize = hi.getData().getBitSize();
-			int redsize = output.getBitsOutput();
+			long orsize = hi.getData().getBitSize();
+			long redsize = output.getBitsOutput();
 			Logger.getLogger().log("Original size is: " + orsize);
 			Logger.getLogger().log("Compressed size is: " + redsize);
-			Logger.getLogger().log("Compression rate: " + (double) orsize / (double) redsize);
-			Logger.getLogger().log("Bpppb: " + redsize / (double) (hi.getData().getTotalNumberOfSamples()));
+			Logger.getLogger().log("Compression rate: " + (float) orsize / (float) redsize);
+			Logger.getLogger().log("Bpppb: " + redsize / (float) (hi.getData().getTotalNumberOfSamples()));
 		}
 	}
 
@@ -122,10 +122,10 @@ public class Jypec {
 		}
 		
 		//output metrics
-		DMatrixRMaj fdm = first.getData().toDoubleMatrix();
-		double dynRange = first.getData().getDataType().getDynamicRange();
+		FMatrixRMaj fdm = first.getData().tofloatMatrix();
+		float dynRange = first.getData().getDataType().getDynamicRange();
 		first = null; //allow garbage collector to work here
-		DMatrixRMaj sdm = second.getData().toDoubleMatrix();
+		FMatrixRMaj sdm = second.getData().tofloatMatrix();
 		Logger.getLogger().log("RAW PSNR is: " + ImageComparisons.rawPSNR(fdm, sdm, dynRange));
 		Logger.getLogger().log("Normalized PSNR is: " + ImageComparisons.normalizedPSNR(fdm, sdm));
 		Logger.getLogger().log("powerSNR is: " + ImageComparisons.powerSNR(fdm, sdm));

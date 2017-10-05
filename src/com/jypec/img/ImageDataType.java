@@ -126,7 +126,7 @@ public class ImageDataType {
 	 * @param value
 	 * @return the bit representation of the given value according to this data Type
 	 */
-	public int valueToData(double value) {
+	public int valueToData(float value) {
 		int val = (int) value;
 		
 		if (this.signed) {
@@ -212,7 +212,7 @@ public class ImageDataType {
 		
 		int absMax = Math.max(Math.abs(newMaxVal), Math.abs(newMinVal));
 		boolean signed = newMinVal < 0;
-		int bits = extra + (int) Math.ceil(MathOperations.logBase(absMax, 2d));
+		int bits = extra + (int) Math.ceil(MathOperations.logBase(absMax, 2f));
 
 		return new ImageDataType(bits, signed);
 	}
@@ -251,7 +251,7 @@ public class ImageDataType {
 			return ImageDataType.UNSIGNED_FOUR_BYTE;
 			
 		case 4: //float 32 bit
-		case 5: //double 64 bit
+		case 5: //float 64 bit
 		case 6: //complex pair of 32 bits
 		case 9: //complex pair of 64 bits
 		case 14: //signed 64 bit long

@@ -52,7 +52,7 @@ public class TestWaveletTransform {
 	@Test
 	public void testIndexOutOfBounds() {
 		for (int i = 1; i < 100; i++) {
-			double[] s = new double[i];
+			float[] s = new float[i];
 			testWavelet.forwardTransform(s, i);
 			testWavelet.reverseTransform(s, i);
 		}
@@ -66,8 +66,8 @@ public class TestWaveletTransform {
 	public void testSignalRecovered() {
 		Random r = new Random();
 		for (int i = 1; i < 200; i++) {
-			double[] s = new double[i];
-			double[] res = new double[i];
+			float[] s = new float[i];
+			float[] res = new float[i];
 			TestHelpers.randomGaussianFillArray(s, s.length, r, 1000, 0);
 			ArrayTransforms.copy(s, res, s.length);
 			
@@ -87,8 +87,8 @@ public class TestWaveletTransform {
 		OneDimensionalWaveletExtender biTestWavelet = new OneDimensionalWaveletExtender(testWavelet);
 		Random r = new Random();
 		for (int i = 1; i < 50; i++) {
-			double[][] s = new double[i][i*2];
-			double[][] res = new double[i][i*2];
+			float[][] s = new float[i][i*2];
+			float[][] res = new float[i][i*2];
 			TestHelpers.randomGaussianFillMatrix(s, i, i*2, r, 1000, 0);
 			MatrixTransforms.copy(s, res, i, i*2);
 			

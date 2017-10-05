@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.data.FMatrixRMaj;
+import org.ejml.dense.row.CommonOps_FDRM;
 
 import com.jypec.arithco.predict.PredictiveArithmeticCodec;
 import com.jypec.arithco.predict.functions.Basic1DPredictiveFunction;
@@ -31,7 +31,7 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	private int dimOrig;			//number of components in the original space
 	private int numClusters;		//number of clusters to split the original space into
 	private int[] classification;	//classes of the training points
-	private DMatrixRMaj trainedWith;//check that we reduce the same matrix we trained with, Otherwise the algorithm wont work
+	private FMatrixRMaj trainedWith;//check that we reduce the same matrix we trained with, Otherwise the algorithm wont work
 	private ArrayList<PrincipalComponentAnalysis> pcas;
 	
 	/**
@@ -42,7 +42,7 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	}
 
 	@Override
-	public void train(DMatrixRMaj source) {
+	public void train(FMatrixRMaj source) {
 		/** Initialization */
 		Logger.getLogger().log("Initializing VQPCA...");
 		SimpleDataSet dataSet = JSATWrapper.toDataSet(source);
@@ -55,49 +55,50 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 		this.classification = new int[source.getNumCols()];
 		KClusterer clusterer = new ElkanKMeans();
 		clusterer.cluster(dataSet, this.numClusters, null, this.classification);
-		List<List<DataPoint>> list = ClustererBase.createClusterListFromAssignmentArray(this.classification, dataSet);
 		
 		/** Perform PCA for each cluster */
-		Logger.getLogger().log("Performing " + list.size() + " PCAs");
-		for (List<DataPoint> l: list) {
+		Logger.getLogger().log("Performing " + this.numClusters + " PCAs");
+		for (int i = 0; i < this.numClusters; i++) {
+			List<DataPoint> l = ClustererBase.getDatapointsFromCluster(i, classification, dataSet, null);
+			Logger.getLogger().log("Cluster #" + i + " has size: " + l.size());
 			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
 			pca.setNumComponents(dimProj);
-			pca.train(JSATWrapper.toDMatrixRMaj(new SimpleDataSet(l)));
+			pca.train(JSATWrapper.toFMatrixRMaj(new SimpleDataSet(l)));
 			pcas.add(pca);
 		}
 	}
 
 	@Override
-	public DMatrixRMaj reduce(DMatrixRMaj source) {
+	public FMatrixRMaj reduce(FMatrixRMaj source) {
 		if (source != this.trainedWith) {
 			System.err.println("The matrix to be reduced must be the same one this was trained with. Won't work otherwise. "
 					+ "Note that this is only a shallow chech for object equality, same contents with different objects will print this");
 		}
 		/** initialize stuff */
-		DMatrixRMaj res = new DMatrixRMaj(this.dimProj, source.getNumCols());
+		FMatrixRMaj res = new FMatrixRMaj(this.dimProj, source.getNumCols());
 		
 		/** Reduce each sample with its cluster's PCA */
 		for (int i = 0; i < source.getNumCols(); i++) {
 			PrincipalComponentAnalysis pca = this.pcas.get(this.classification[i]);
-			DMatrixRMaj col = CommonOps_DDRM.extractColumn(source, i, null);
+			FMatrixRMaj col = CommonOps_FDRM.extractColumn(source, i, null);
 			col = pca.reduce(col);
-			CommonOps_DDRM.insert(col, res, 0, i);
+			CommonOps_FDRM.insert(col, res, 0, i);
 		}
 		
 		return res;
 	}
 
 	@Override
-	public DMatrixRMaj boost(DMatrixRMaj source) {
+	public FMatrixRMaj boost(FMatrixRMaj source) {
 		/** Initialize stuff */
-		DMatrixRMaj res = new DMatrixRMaj(this.dimOrig, source.getNumCols());
+		FMatrixRMaj res = new FMatrixRMaj(this.dimOrig, source.getNumCols());
 
 		/** Boost each sample with its cluster's pca */
 		for (int i = 0; i < source.getNumCols(); i++) {
 			PrincipalComponentAnalysis pca = this.pcas.get(this.classification[i]);
-			DMatrixRMaj col = CommonOps_DDRM.extractColumn(source, i, null);
+			FMatrixRMaj col = CommonOps_FDRM.extractColumn(source, i, null);
 			col = pca.boost(col);
-			CommonOps_DDRM.insert(col, res, 0, i);
+			CommonOps_FDRM.insert(col, res, 0, i);
 		}
 		
 		return res;
@@ -111,12 +112,12 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
     	bw.addChild("num clusters").writeInt(this.numClusters);
     	
     	/** arith code the cluster indices */
-    	int cbits = bw.getTreeBits();
+    	long cbits = bw.getTreeBits();
     	PredictiveArithmeticCodec pac = new PredictiveArithmeticCodec(new Basic1DPredictiveFunction());
     	pac.code(this.classification, numClusters, bw.addChild("class classification"));
     	cbits = bw.getTreeBits() - cbits;
     	if (cbits % 8 != 0) {
-    		bw.addChild("padding").writeNBitNumber(0, 8 - (cbits % 8)); //padding
+    		bw.addChild("padding").writeNBitNumber(0, 8 - (int) (cbits % 8)); //padding
     	}
     	
     	/** write each pca */

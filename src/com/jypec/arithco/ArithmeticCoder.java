@@ -204,7 +204,7 @@ public class ArithmeticCoder {
 		}
 	}
 	
-	private int cbits;
+	private long cbits;
 	
 	/** this whole function is basically a hack to get the number of garbage bits 
 	 * that will be later decoded, so that they can be put right now, and de decoder
@@ -220,7 +220,7 @@ public class ArithmeticCoder {
 		}
 		ByteArrayInputStream bais = new ByteArrayInputStream(adbaos.toByteArray());
 		BitInputStream bis = new BitInputStream(bais);
-		int bitsWritten = bos.getRoot().getTreeBits() - cbits;
+		int bitsWritten = (int) (bos.getRoot().getTreeBits() - cbits);
 		this.ad.decode(bis);
 		int bitsRead = bis.getBitsInput();
 		int garbage = this.ad.getGarbageBits();

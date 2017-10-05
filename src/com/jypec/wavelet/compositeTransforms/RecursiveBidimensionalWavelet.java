@@ -25,7 +25,7 @@ public class RecursiveBidimensionalWavelet implements BidimensionalWavelet {
 
 
 	@Override
-	public void forwardTransform(double[][] s, int width, int height) {
+	public void forwardTransform(float[][] s, int width, int height) {
 		int[] widths = Stepper.getStepSizes(width, this.steps);
 		int[] heights = Stepper.getStepSizes(height, this.steps);
 		for (int i = 0; i < steps; i++) {
@@ -34,7 +34,7 @@ public class RecursiveBidimensionalWavelet implements BidimensionalWavelet {
 	}
 
 	@Override
-	public void reverseTransform(double[][] s, int width, int height) {
+	public void reverseTransform(float[][] s, int width, int height) {
 		int[] widths = Stepper.getStepSizes(width, this.steps);
 		int[] heights = Stepper.getStepSizes(height, this.steps);
 		for (int i = steps - 1; i >= 0; i--) {

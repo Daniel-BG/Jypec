@@ -107,7 +107,10 @@ public class BitOutputStreamTree extends BitOutputStream {
 	    	
 	    	@Override
 	    	public int available() {
-	    		return bitPipe.getNumberOfBits();
+	    		if (bitPipe.getNumberOfBits() > (long) Integer.MAX_VALUE) {
+	    			return Integer.MAX_VALUE;
+	    		}
+	    		return (int) bitPipe.getNumberOfBits();
 	    	}
 	    	
 	    	@Override
@@ -152,7 +155,7 @@ public class BitOutputStreamTree extends BitOutputStream {
 			return;
 		}
 		
-		int bufferSize = this.getBitsOutput() % 8;
+		int bufferSize = (int) this.getBitsOutput() % 8;
 		//flush remaining bits padding with zeroes
 		if (bufferSize > 0) {
 			this.writeNBitNumber(0, 8 - bufferSize);
@@ -250,7 +253,7 @@ public class BitOutputStreamTree extends BitOutputStream {
 	/**
 	 * @return the number of bits stored in this node
 	 */
-	public int getNodeBits() {
+	public long getNodeBits() {
 		if (this.destination == null) {
 			return this.bitPipe.getNumberOfBits();
 		} else {
@@ -261,12 +264,12 @@ public class BitOutputStreamTree extends BitOutputStream {
 	/**
 	 * @return the number of bits stored in this tree (recursively looking in subtrees)
 	 */
-	public int getTreeBits() {
+	public long getTreeBits() {
 		if (this.destination != null) {
 			return this.getBitsOutput();
 		}
 		
-		int count = this.bitPipe.getNumberOfBits();
+		long count = this.bitPipe.getNumberOfBits();
 		if (this.hasChildren()) {
 			for (BitOutputStreamTree bstn: this.children) {
 				count += bstn.getTreeBits();

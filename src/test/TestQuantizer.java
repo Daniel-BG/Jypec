@@ -20,11 +20,11 @@ public class TestQuantizer {
 	@Test
 	public void testQuantizerCornerCases() {
 		Quantizer q = new Quantizer(16, 0, 1, 0.0, 65536.0, 0.5);
-		double error = 1.0;
+		float error = 1.0;
 		
-		double[] valuesToTest = new double[]{0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0, 512.0, 1024.0, 2048.0, 4096.0, 8192.0, 16384.0, 32768.0, 65536.0};
+		float[] valuesToTest = new float[]{0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0, 512.0, 1024.0, 2048.0, 4096.0, 8192.0, 16384.0, 32768.0, 65536.0};
 		
-		for (double d: valuesToTest) {
+		for (float d: valuesToTest) {
 			assertEquals(d, q.deQuantizeAndDenormalize(q.normalizeAndQuantize(d)), error);	
 		}
 	}
@@ -36,9 +36,9 @@ public class TestQuantizer {
 	public void testQuantizerBruteForce() {
 		Random r = new Random(1);
 		for (int j = 0; j < 400; j++) {
-			double upperLimit = r.nextDouble() * 65536;
-			double lowerLimit = - r.nextDouble() * 65536;
-			double offset = r.nextDouble();
+			float upperLimit = r.nextfloat() * 65536;
+			float lowerLimit = - r.nextfloat() * 65536;
+			float offset = r.nextfloat();
 			int e = r.nextInt(29) + 1;
 			int m = r.nextInt(0x1 << 11);
 			Quantizer q = new Quantizer(e, m, 1, lowerLimit, upperLimit, offset);
@@ -47,10 +47,10 @@ public class TestQuantizer {
 			int max = 0x1 << bits;
 			
 			//maximum expected error
-			double expectedError = 2 * (upperLimit - lowerLimit) / (double) max;
+			float expectedError = 2 * (upperLimit - lowerLimit) / (float) max;
 
 			for (int i = 0; i < 1000; i++) {
-				double test = r.nextDouble() * (upperLimit - lowerLimit) + lowerLimit;
+				float test = r.nextfloat() * (upperLimit - lowerLimit) + lowerLimit;
 				assertEquals("Failed with ([ll,lh], e, m, test) -> ([" + lowerLimit + "," +  upperLimit+ "]," + e + "," + m + "," + test + ") (expected error = " + expectedError + ")", 
 						test, q.deQuantizeAndDenormalize(q.normalizeAndQuantize(test)), expectedError);
 			}

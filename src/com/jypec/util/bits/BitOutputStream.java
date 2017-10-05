@@ -47,7 +47,7 @@ public class BitOutputStream extends OutputStream {
 	private OutputStream stream;
 	private int buffer;
 	private int bufferSize;
-	private int bitsOutput;
+	private long bitsOutput;
 	
 	/**
 	 * Create a bit output wrapper around the given outputstream
@@ -153,7 +153,7 @@ public class BitOutputStream extends OutputStream {
 	}
 	
 	/**
-	 * @param d double to be written into the inner BitStream
+	 * @param d float to be written into the inner BitStream
 	 * @throws IOException 
 	 */
 	public void writeDouble(double d) throws IOException {
@@ -318,7 +318,7 @@ public class BitOutputStream extends OutputStream {
 	/**
 	 * @return the number of bits output so far
 	 */
-	public int getBitsOutput() {
+	public long getBitsOutput() {
 		return this.bitsOutput;
 	}
 

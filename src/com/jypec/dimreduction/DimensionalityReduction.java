@@ -3,7 +3,7 @@ package com.jypec.dimreduction;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.FMatrixRMaj;
 
 import com.jypec.cli.InputArguments;
 import com.jypec.dimreduction.alg.DeletingDimensionalityReduction;
@@ -55,26 +55,26 @@ public abstract class DimensionalityReduction {
 	
 	
 	/**
-	 * Wrapper to call {@link #train(DMatrixRMaj)} then {@link #reduce(DMatrixRMaj)}
+	 * Wrapper to call {@link #train(FMatrixRMaj)} then {@link #reduce(FMatrixRMaj)}
 	 * @param source
 	 * @return the reduced matrix after training with source
 	 */
-	public DMatrixRMaj trainReduce(DMatrixRMaj source) {
+	public FMatrixRMaj trainReduce(FMatrixRMaj source) {
 		this.train(source);
 		return this.reduce(source);
 	}
 	
 	/**
 	 * Train this dimensionality reduction with the given matrix, to analize and then
-	 * be able to {@link #reduce(DMatrixRMaj, DMatrixRMaj)} it (or others)
+	 * be able to {@link #reduce(FMatrixRMaj, FMatrixRMaj)} it (or others)
 	 * to a lower dimension space
 	 * @param source the source matrix. Samples will be analyzed and
 	 * based on similarities, will later be reduced without the loss of significant information,
-	 * with calls to {@link #reduce(DMatrixRMaj, DMatrixRMaj)}.
+	 * with calls to {@link #reduce(FMatrixRMaj, FMatrixRMaj)}.
 	 * <br>
 	 * samples are assumed to be the <b>columns</b> of source
 	 */
-	public abstract void train(DMatrixRMaj source);
+	public abstract void train(FMatrixRMaj source);
 	
 	
 	/**
@@ -83,7 +83,7 @@ public abstract class DimensionalityReduction {
 	 * @param source the source matrix
 	 * @return the source matrix projected into the smaller dimension space
 	 */
-	public abstract DMatrixRMaj reduce(DMatrixRMaj source);
+	public abstract FMatrixRMaj reduce(FMatrixRMaj source);
 	
 	
 	
@@ -93,7 +93,7 @@ public abstract class DimensionalityReduction {
 	 * @param source the source matrix (in the reduced dimension space)
 	 * @return the original matrix in the original space
 	 */
-	public abstract DMatrixRMaj boost(DMatrixRMaj source);
+	public abstract FMatrixRMaj boost(FMatrixRMaj source);
 	
 	
 	/**
@@ -117,7 +117,7 @@ public abstract class DimensionalityReduction {
 	
 	
 	/**
-	 * Loads the necessary data from the BitStream so as to be able to {@link #boost(DMatrixRMaj)}
+	 * Loads the necessary data from the BitStream so as to be able to {@link #boost(FMatrixRMaj)}
 	 * an matrix into its original space. The given BitStream must've been filled with 
 	 * {@link #saveTo(BitStreamDataReaderWriter)}
 	 * @param bw The BitStream handler that encapsulates the BitStream
@@ -192,7 +192,7 @@ public abstract class DimensionalityReduction {
 	 * @param img where to get the max value from
 	 * @return the maximum value that the reduced matrix can have on its samples
 	 */
-	public double getMaxValue(DMatrixRMaj img) {
+	public float getMaxValue(FMatrixRMaj img) {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -200,7 +200,7 @@ public abstract class DimensionalityReduction {
 	 * @param img where to get the min value from
 	 * @return the minimum value that the reduced matrix can have on its samples
 	 */
-	public double getMinValue(DMatrixRMaj img){
+	public float getMinValue(FMatrixRMaj img){
 		throw new UnsupportedOperationException();
 	}
 

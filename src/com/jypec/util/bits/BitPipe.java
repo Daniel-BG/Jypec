@@ -20,7 +20,7 @@ public class BitPipe {
 	//and bits left in the input (to be filled)
 	private int outputLeft, inputLeft;
 	//current size (number of bits stored)
-	private int size;
+	private long size;
 		
 	
 	/**
@@ -130,7 +130,7 @@ public class BitPipe {
 	/**
 	 * @return the number of bits stored in this pipe
 	 */
-	public int getNumberOfBits() {
+	public long getNumberOfBits() {
 		return this.size;
 	}
 	

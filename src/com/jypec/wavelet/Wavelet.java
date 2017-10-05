@@ -18,15 +18,15 @@ public interface Wavelet {
 	 * @param s the signal that is to be transformed
 	 * @param n the length of the wavelet transform
 	 */
-	public void forwardTransform(double[] s, int n);
+	public void forwardTransform(float[] s, int n);
 	
 	/**
-	 * Reverses the transform applied by {@link #forwardTransform(double[])} and recovers
+	 * Reverses the transform applied by {@link #forwardTransform(float[])} and recovers
 	 * the original signal.
 	 * @param s
 	 * @param n the length of the wavelet transform
 	 */
-	public void reverseTransform(double[] s, int n);
+	public void reverseTransform(float[] s, int n);
 	
 	/**
 	 * @param min
@@ -34,7 +34,7 @@ public interface Wavelet {
 	 * @return the maximum value that this wavelet will output when fed
 	 * values in the given range
 	 */
-	public double maxResult(double min, double max);
+	public float maxResult(float min, float max);
 	
 	/**
 	 * @param min
@@ -42,6 +42,6 @@ public interface Wavelet {
 	 * @return the minimum value that this wavelet will output when fed
 	 * values in the given range
 	 */
-	public double minResult(double min, double max);
+	public float minResult(float min, float max);
 	
 }

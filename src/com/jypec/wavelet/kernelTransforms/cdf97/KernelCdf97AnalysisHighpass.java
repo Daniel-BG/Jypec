@@ -12,11 +12,11 @@ public class KernelCdf97AnalysisHighpass extends Kernel{
 	 * Create the kernel
 	 */
 	public KernelCdf97AnalysisHighpass() {
-		super(new double[]{
-				1.11508705,
-				-0.591271763114,
-				-0.057543526229,
-				0.091271763114
+		super(new float[]{
+				1.11508705f,
+				-0.591271763114f,
+				-0.057543526229f,
+				0.091271763114f
 		});
 	}
 

@@ -58,10 +58,10 @@ public class ParameterReaderWriter {
 	 * @throws IOException 
 	 */
 	public final int compress(BitOutputStreamTree brw) throws IOException {
-		int cbits = brw.getBitsOutput();
+		long cbits = brw.getBitsOutput();
 		this.compressParameterType(brw.addChild("type"));
 		this.compressData(brw.addChild("data"));
-		return brw.getBitsOutput() - cbits;
+		return (int) (brw.getBitsOutput() - cbits);
 	}
 	
 	private final void compressParameterType(BitOutputStreamTree brw) throws IOException {

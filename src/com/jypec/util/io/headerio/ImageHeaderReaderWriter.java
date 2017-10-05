@@ -128,7 +128,7 @@ public class ImageHeaderReaderWriter {
 	 * @throws IOException 
 	 */
 	public static int saveToCompressedStream(ImageHeaderData ihd, BitOutputStreamTree bstn, boolean essential) throws IOException {
-		int bits = bstn.getTreeBits();
+		long bits = bstn.getTreeBits();
 		bstn.writeByte(CODE_JYPEC_HEADER);
 		for (Entry<HeaderConstants, Object> e: ihd.entrySet()) {
 			ParameterReaderWriter prw = new ParameterReaderWriter(e.getKey());
@@ -141,7 +141,7 @@ public class ImageHeaderReaderWriter {
 		
 		bits = bstn.getTreeBits() - bits;
 		if (bits % 8 == 0) {
-			return bits / 8;
+			return (int) bits / 8;
 		} else {
 			throw new IllegalStateException("The number of bits saved is not a multiple of 8. Padding bits must be missing somewhere");
 		}

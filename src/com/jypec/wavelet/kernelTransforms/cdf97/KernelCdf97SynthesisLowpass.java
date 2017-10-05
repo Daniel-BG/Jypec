@@ -9,8 +9,8 @@ import com.jypec.wavelet.kernelTransforms.ReversedKernel;
 public class KernelCdf97SynthesisLowpass extends ReversedKernel {
 
 	@Override
-	public double cornerCaseFactor() {
-		return 0.5;
+	public float cornerCaseFactor() {
+		return 0.5f;
 	}
 
 	/**

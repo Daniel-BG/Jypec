@@ -2,7 +2,7 @@ package com.jypec.dimreduction.alg;
 
 import java.io.IOException;
 
-import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.FMatrixRMaj;
 
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.util.bits.BitInputStream;
@@ -21,15 +21,15 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public void train(DMatrixRMaj source) {
+	public void train(FMatrixRMaj source) {
 		//no training needed. If unset just preserve dimension
 		if (dimProj == -1)
 			this.dimProj = source.getNumRows();
 	}
 
 	@Override
-	public DMatrixRMaj reduce(DMatrixRMaj src) {
-		DMatrixRMaj res = new DMatrixRMaj(this.dimProj, src.getNumCols());
+	public FMatrixRMaj reduce(FMatrixRMaj src) {
+		FMatrixRMaj res = new FMatrixRMaj(this.dimProj, src.getNumCols());
 		
 		for (int i = 0; i < this.dimProj; i++) {
 			for (int j = 0; j < src.getNumCols(); j++) {
@@ -41,8 +41,8 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public DMatrixRMaj boost(DMatrixRMaj src) {
-		DMatrixRMaj dst = new DMatrixRMaj(this.dimProj, src.getNumCols());
+	public FMatrixRMaj boost(FMatrixRMaj src) {
+		FMatrixRMaj dst = new FMatrixRMaj(this.dimProj, src.getNumCols());
 		for (int i = 0; i < this.dimProj; i++) {
 			for (int j = 0; j < src.getNumCols(); j++) {
 				dst.set(i, j, src.get(i, j));
