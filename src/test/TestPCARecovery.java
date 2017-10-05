@@ -14,7 +14,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.jypec.dimreduction.DimensionalityReduction;
-import com.jypec.dimreduction.ProjectingDimensionalityReduction.Precision;
 import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
@@ -65,7 +64,6 @@ public class TestPCARecovery {
 	@Test
 	public void testPCARecovery() {
 		PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
-		pca.setPrecision(Precision.float);
 		pca.setNumComponents(eigenSize);
 		
 		float[] inputData = new float[sampleSize*numSamples];
@@ -79,7 +77,6 @@ public class TestPCARecovery {
 		BitInputStream input;
 		
 		PrincipalComponentAnalysis pcaRec = new PrincipalComponentAnalysis();
-		pcaRec.setPrecision(Precision.float);
 		
 		try {
 			pca.saveTo(bost);
@@ -98,7 +95,7 @@ public class TestPCARecovery {
 			FMatrixRMaj orig = pca.getUnProjectionMatrix();
 			FMatrixRMaj rec = pcaRec.getUnProjectionMatrix();
 			
-			assertArrayEquals(orig.data, rec.data, 0.0);
+			assertArrayEquals(orig.data, rec.data, 0.0f);
 		}
 		
 	}

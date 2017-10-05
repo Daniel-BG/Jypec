@@ -22,7 +22,7 @@ public class TestHelpers {
 	public static void randomGaussianFillMatrix(float[][] dst, int rLim, int cLim, Random r, float std, float mean) {
 		for (int k = 0; k < rLim; k++) {
 			for (int j = 0; j < cLim; j++) {
-				dst[k][j] = r.nextGaussian() * std + mean;
+				dst[k][j] = (float) r.nextGaussian() * std + mean;
 			}
 		}
 	}
@@ -37,7 +37,7 @@ public class TestHelpers {
 	 */
 	public static void randomGaussianFillArray(float[] dst, int dim, Random r, float std, float mean) {
 		for (int k = 0; k < dim; k++) {
-			dst[k] = r.nextGaussian() * std + mean;
+			dst[k] = (float) r.nextGaussian() * std + mean;
 		}
 	}
 	
@@ -74,7 +74,7 @@ public class TestHelpers {
 		
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				float val = r.nextGaussian() * magnitudeLimit;
+				float val = (float) r.nextGaussian() * magnitudeLimit;
 				int res = (int) val;
 				if (res < -magnitudeLimit)
 					res = -magnitudeLimit;

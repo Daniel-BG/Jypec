@@ -29,26 +29,26 @@ public class TestBitStreamReaderWriter {
 
 		Random r = new Random();
 		float[] data = new float[this.testSampleSize];
-		float[] defData = {0d, 1d, -1d, float.MAX_VALUE, float.MIN_VALUE, float.NaN,
-				float.NEGATIVE_INFINITY, float.POSITIVE_INFINITY, float.MIN_NORMAL};
+		float[] defData = {0f, 1f, -1f, Float.MAX_VALUE, Float.MIN_VALUE, Float.NaN,
+				Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.MIN_NORMAL};
 
 		for (int i = 0; i < this.testSampleSize; i++) {
 			if (i < defData.length)
 				data[i] = defData[i];
 			else
-				data[i] = r.nextfloat();
+				data[i] = r.nextFloat();
 		}
 		
 		try {
 			for (int i = 0; i < this.testSampleSize; i++) {
-				output.writefloat(data[i]);
+				output.writeFloat(data[i]);
 			}
 			
 			input = new BitInputStream(new ByteArrayInputStream(bais.toByteArray()));
 			
 			for (int i = 0; i < this.testSampleSize; i++) {
-				float d = input.readfloat();
-				assertTrue("Failed when recovering: " + data[i] + " " + d, float.compare(d, data[i]) == 0);
+				float d = input.readFloat();
+				assertTrue("Failed when recovering: " + data[i] + " " + d, Float.compare(d, data[i]) == 0);
 			}
 			output.close();
 			input.close();

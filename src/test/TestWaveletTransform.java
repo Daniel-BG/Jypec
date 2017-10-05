@@ -74,7 +74,7 @@ public class TestWaveletTransform {
 			testWavelet.forwardTransform(s, i);
 			testWavelet.reverseTransform(s, i);
 			
-			assertArrayEquals(s, res, 0.0001);
+			assertArrayEquals(s, res, 0.01f);
 		}
 	}
 	
@@ -96,7 +96,7 @@ public class TestWaveletTransform {
 			biTestWavelet.reverseTransform(res, i, i);
 			
 			for (int k = 0; k < i; k++) {
-				assertArrayEquals(s[k], res[k], 0.0001);
+				assertArrayEquals(s[k], res[k], 0.01f);
 			}
 		}
 	}
