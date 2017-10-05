@@ -83,7 +83,9 @@ public class ImageHeaderReaderWriter {
 				 * for the data to start to be read
 				 */
 				horizon = (int) prw.getData();
-			} else { //otherwise save it. Do not save the offset since it'll probably change
+			} else if (prw.getHeaderConstant() == HeaderConstants.HEADER_UNKNOWN) { //otherwise save it. Do not save the offset since it'll probably change
+				//ignore
+			} else {
 				ihd.put(prw.getHeaderConstant(), prw.getData());
 			}
 		}

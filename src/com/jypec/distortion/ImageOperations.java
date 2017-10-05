@@ -116,5 +116,21 @@ public class ImageOperations {
 		
 		return res;
 	}
+	
+	
+	/**
+	 * @param h1
+	 * @return the power of the image (mean of the squared values)
+	 */
+	public static double power(DMatrixRMaj h1) {
+		double acc = 0;
+		for (int i = 0; i < h1.getNumRows(); i++) {
+			for (int j = 0; j < h1.getNumCols(); j++) {
+				acc += h1.get(i, j) * h1.get(i, j);
+			}
+		}
+		acc /= h1.getNumElements();
+		return acc;
+	}
 
 }

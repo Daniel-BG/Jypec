@@ -123,10 +123,12 @@ public class Jypec {
 		
 		//output metrics
 		DMatrixRMaj fdm = first.getData().toDoubleMatrix();
-		DMatrixRMaj sdm = second.getData().toDoubleMatrix();
 		double dynRange = first.getData().getDataType().getDynamicRange();
+		first = null; //allow garbage collector to work here
+		DMatrixRMaj sdm = second.getData().toDoubleMatrix();
 		Logger.getLogger().log("RAW PSNR is: " + ImageComparisons.rawPSNR(fdm, sdm, dynRange));
 		Logger.getLogger().log("Normalized PSNR is: " + ImageComparisons.normalizedPSNR(fdm, sdm));
+		Logger.getLogger().log("powerSNR is: " + ImageComparisons.powerSNR(fdm, sdm));
 		Logger.getLogger().log("SNR is: " + ImageComparisons.SNR(fdm, sdm));
 		Logger.getLogger().log("MSE is: " + ImageComparisons.MSE(fdm, sdm));
 		Logger.getLogger().log("maxSE is: " + ImageComparisons.maxSE(fdm, sdm));

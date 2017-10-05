@@ -155,8 +155,11 @@ public enum HeaderConstants {
 	HEADER_Z_PLOT_RANGE,
 	/** X and Y axis titles for z_plots */
 	HEADER_Z_PLOT_TITLES, 
+	/** Spetial constant that indicates unknown parameter */
+	HEADER_UNKNOWN,
 	/** Spetial constant that indicates compressed header termination */
 	HEADER_TERMINATION;
+	
 	
 	//create reverse dictionary
 	private static HashMap<String, HeaderConstants> stringValueTranslator;
@@ -267,6 +270,8 @@ public enum HeaderConstants {
 			return "z plot range";
 		case HEADER_Z_PLOT_TITLES:
 			return "z plot titles";
+		case HEADER_UNKNOWN:
+			return "unknown header";
 		case HEADER_TERMINATION: //no string representation
 			return null;
 		default:
@@ -277,14 +282,11 @@ public enum HeaderConstants {
 	
 	/**
 	 * @param s
-	 * @return the HeaderConstant which corresponds to the given string
+	 * @return the HeaderConstant which corresponds to the given string, which could be of type UNKNOWN
 	 */
 	public static HeaderConstants fromString(String s) {
-		HeaderConstants result = HeaderConstants.stringValueTranslator.get(s);
-		if (result == null) {
-			throw new IllegalArgumentException("There is no header constant with the name: " + s);
-		}
-		return result;
+		HeaderConstants hc = HeaderConstants.stringValueTranslator.get(s); 
+		return hc == null ? HeaderConstants.HEADER_UNKNOWN : hc;
 	}
 
 	/**
@@ -367,6 +369,7 @@ public enum HeaderConstants {
 		case HEADER_SENSOR_TYPE:
 		case HEADER_SOLAR_IRRADIANCE:
 		case HEADER_WAVELENGTH_UNITS://can be enum'd
+		case HEADER_UNKNOWN:
 			return new StringValueCompressorDecompressor();
 		case HEADER_TERMINATION:
 			return new NullValueCompressorDecompressor();
@@ -424,6 +427,7 @@ public enum HeaderConstants {
 		case HEADER_Z_PLOT_AVG:
 		case HEADER_Z_PLOT_RANGE:
 		case HEADER_Z_PLOT_TITLES:
+		case HEADER_UNKNOWN:
 			return false;
 		/** Even though some are only needed for the uncompressed version, we need them 
 		 * in the compressed one to be able to recover the original */

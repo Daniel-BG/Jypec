@@ -48,6 +48,17 @@ public class ImageComparisons {
 		return 10 * Math.log10(var / mse);
 	}
 	
+	/**
+	 * @param h1
+	 * @param h2
+	 * @return the signal noise ratio between the given images
+	 */
+	public static double powerSNR(DMatrixRMaj h1, DMatrixRMaj h2) {
+		double pow = ImageOperations.power(h1);
+		double mse = MSE(h1, h2);
+		return 10 * Math.log10(pow / mse);
+	}
+	
 	private static double PSNR (double mse, double max) {
 		if (mse == 0d) {
 			return Double.POSITIVE_INFINITY;
