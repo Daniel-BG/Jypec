@@ -21,6 +21,8 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		//static initializations
+		Logger.getLogger().setBaseLine();
 	    //create the parser
 	    CommandLineParser parser = new DefaultParser();
 	    try {
@@ -28,6 +30,7 @@ public class Main {
 	        CommandLine line = parser.parse( JypecCLI.getOptions(), args );
 	        InputArguments iArgs = InputArguments.parseFrom(line);
 	        Logger.getLogger().setLogging(iArgs.verbose);
+	        Logger.getLogger().log("Executing args: " + String.join(" ", args));
 	        //go through options
 	        if (iArgs.compress) {
 	        	Jypec.compress(iArgs);

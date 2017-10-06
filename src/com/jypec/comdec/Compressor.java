@@ -72,7 +72,7 @@ public class Compressor {
 			Logger.getLogger().log("Compressing band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]: ");
 			
 			/** Apply the wavelet transform */
-			Logger.getLogger().log("Applying wavelet... ");
+			Logger.getLogger().log("\tApplying wavelet... ");
 			float[][] waveForm = MatrixTransforms.extractBand(reduced, i, numLines, numSamples);
 			bdw.forwardTransform(waveForm, numLines, numSamples);
 			float[] minMax = MatrixOperations.minMax(waveForm);

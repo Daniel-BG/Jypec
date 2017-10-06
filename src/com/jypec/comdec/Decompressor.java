@@ -56,7 +56,7 @@ public class Decompressor {
 		for (int i = 0; i < cp.dr.getNumComponents(); i++) {
 			Logger.getLogger().log("Extracting compressed band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]");
 			/** Get this band's max and min values, and use that to create the quantizer */
-			Logger.getLogger().log("Loading dequantizer...");
+			Logger.getLogger().log("\tLoading dequantizer...");
 			float bandMin = input.readFloat();
 			float bandMax = input.readFloat();
 			ImageDataType targetType = new ImageDataType(cp.bits, true);
@@ -67,15 +67,14 @@ public class Decompressor {
 			HyperspectralBandData hb = HyperspectralBandData.generateRogueBand(targetType, lines, samples);
 			/** Now divide into blocks and decode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
-			Logger.getLogger().log("Decoding " + blocker.size() + "blocks");
+			Logger.getLogger().log("\tDecoding " + blocker.size() + "blocks");
 			for (CodingBlock block: blocker) {			
 				block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
 				decoder.decode(input, block);
 			}
-			Logger.getLogger().log("");
 			
 			/** dequantize the wave */
-			Logger.getLogger().log("Dequantizing...");
+			Logger.getLogger().log("\tDequantizing...");
 			float[][] waveForm = reduced[i];
 			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, bandMin, bandMax, 0.375f);
 			mq.dequantize(hb, waveForm, 0, 0, lines, samples);

@@ -10,6 +10,7 @@ import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.util.bits.BitInputStream;
+import com.jypec.util.debug.Logger;
 import com.jypec.util.io.headerio.ImageHeaderReaderWriter;
 import com.jypec.util.io.headerio.enums.BandOrdering;
 import com.jypec.util.io.headerio.enums.ByteOrdering;
@@ -44,12 +45,9 @@ public class HyperspectralImageReader {
 	public static HyperspectralImage read(String dataPath, String headerPath) throws IOException {
 		/** Load header */
 		ImageHeaderData header = new ImageHeaderData();
-		BitInputStream bis;
-		if (headerPath != null) {
-			bis = new BitInputStream(new FileInputStream(headerPath));
-		} else {
-			bis = new BitInputStream(new FileInputStream(dataPath));
-		}
+		String realHeaderPath = headerPath != null ? headerPath : dataPath;
+		BitInputStream bis = new BitInputStream(new FileInputStream(realHeaderPath)); 
+		Logger.getLogger().log("Reading image header: " + realHeaderPath);
 		int offset = ImageHeaderReaderWriter.loadFromStream(bis, header);
 		if (headerPath != null) {
 			offset = 0;
@@ -58,9 +56,11 @@ public class HyperspectralImageReader {
 		/** Load image data */
 		HyperspectralImageData data;
 		if (header.wasCompressed()) {	//load compressed
+			Logger.getLogger().log("Image was compressed. Uncompressing from: " + dataPath);
 			Decompressor d = new Decompressor();
 			data = d.decompress(header, bis);
 		} else {						//load uncompressed
+			Logger.getLogger().log("Image was not compressed. Reading raw data: " + dataPath);
 			int bands = (int) header.get(HeaderConstants.HEADER_BANDS);
 			int lines = (int) header.get(HeaderConstants.HEADER_LINES);
 			int samples = (int) header.get(HeaderConstants.HEADER_SAMPLES);

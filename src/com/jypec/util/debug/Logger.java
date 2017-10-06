@@ -34,6 +34,7 @@ public class Logger {
 	private long sttime;
 	private int secondFractionPrecision;
 	private Precision precision;
+	private int baseLine = 0;
 	
 	
 	/**
@@ -70,8 +71,8 @@ public class Logger {
 		}
 		
 		//get stack size and print dots to represent it
-		int stackSize = Thread.currentThread().getStackTrace().length - 2;
-		for (int i = stackSize; i >= 0; i--) {
+		int stackSize = Thread.currentThread().getStackTrace().length;
+		for (int i = stackSize; i > baseLine; i--) {
 			System.out.print(".");
 		}
 		
@@ -152,6 +153,15 @@ public class Logger {
 			break;
 		}
 		return res;
+	}
+
+	/**
+	 * Set the current stack depth as the baseline depth, so its indentation
+	 * is zero in the loggin messages, and higher depths get a dot <code>.</code> 
+	 * in front of the message for each function in the stack
+	 */
+	public void setBaseLine() {
+		this.baseLine  = Thread.currentThread().getStackTrace().length;
 	}
 	
 }

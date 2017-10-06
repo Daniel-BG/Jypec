@@ -27,7 +27,7 @@ public class ImageHeaderReaderWriter {
 	private static final byte CODE_JYPEC_HEADER = (byte) 0xff;
 	
 
-	private static final String DATA_PATTERN = "^([^=\\n\\r]+?)\\s+=\\s+([^\\{].*?|\\{.*?\\})$";
+	private static final String DATA_PATTERN = "^([^=\\n\\r]+?)\\s+=\\s+([^\\{].*?|\\{.*?\\})\\s*$";
 
 	/**
 	 * Checks whether the data is compressed or uncompressed then 
@@ -72,8 +72,8 @@ public class ImageHeaderReaderWriter {
 			//split into individual parts and create the parameter
 			Matcher m = Pattern.compile(DATA_PATTERN, Pattern.MULTILINE | Pattern.DOTALL).matcher(s);
 			m.find(); //should always work since s is this pattern, we only use this to split it
-			ParameterReaderWriter prw = new ParameterReaderWriter(m.group(1));
-			prw.parseData(m.group(2));
+			ParameterReaderWriter prw = new ParameterReaderWriter(m.group(1).trim());
+			prw.parseData(m.group(2).trim());
 			//if it is the offset, set the new horizon
 			if (prw.getHeaderConstant() == HeaderConstants.HEADER_OFFSET) {
 				/** 
