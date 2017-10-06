@@ -3,94 +3,37 @@ package com.jypec.img;
 import org.ejml.data.FMatrixRMaj;
 
 /**
- * Class to give a little more functionality to a 3-dimensional matrix representation of a hyperspectral image
+ * Parent class for hyperspectral image data.
+ * Goves a little more functionality to a representation of a hyperspectral image.
+ * Subclass to store the data in different formats, which might suit some
+ * needs better than others.
  * @author Daniel
- *
  */
-public class HyperspectralImageData {
+public abstract class HyperspectralImageData {
 
-	private int[] data;
-	private ImageDataType dataType;
-	private int depth;
-	private int bands;
-	private int lines;
-	private int samples;
-	private int bandElements;
-	
+	protected int bands;
+	protected int lines;
+	protected int samples;
+	protected int bandElements;
+	protected ImageDataType dataType;
+	protected int depth;
 	
 	/**
-	 * Create a hyperspectral image with the given data, or an empty image if data is null
-	 * @param data the data that comprises the image, or null if it shall be initialized to zero
-	 * @param dataType the type of data that forms the image
-	 * @param bands number of bands in the image (spectral dimension)
-	 * @param lines number of lines in a band (height of the spatial dimension (vertical number of samples))
-	 * @param samples number of samples in a line (width of the spatial dimension (horizontal number of samples))
+	 * Create hyperspectral image data
+	 * @param type 
+	 * @param bands
+	 * @param lines
+	 * @param samples
 	 */
-	public HyperspectralImageData (int[] data, ImageDataType dataType, int bands, int lines, int samples) {
-		if (data == null) {
-			this.data = new int[bands*lines*samples];
-		} else {
-			this.data = data;
-		}
-		this.dataType = dataType;
-		this.depth = dataType.getBitDepth();
+	public HyperspectralImageData(ImageDataType type, int bands, int lines, int samples) {
 		this.bands = bands;
 		this.lines = lines;
 		this.samples = samples;
 		this.bandElements = this.lines * this.samples;
+		this.dataType = type;
+		this.depth = dataType.getBitDepth();
 	}
 	
-	/**
-	 * @param band
-	 * @param line
-	 * @param sample
-	 * @return the data at the specified position, no questions asked
-	 */
-	public int getDataAt(int band, int line, int sample) {
-		return this.data[band*bandElements + line*samples + sample];
-	}
-	
-	/**
-	 * @param band
-	 * @param line
-	 * @param sample
-	 * @return the value that the inner data represents at that position
-	 */
-	public int getValueAt(int band, int line, int sample) {
-		return this.dataType.dataToValue(this.getDataAt(band, line, sample));
-	}
-	
-	/**
-	 * Set the given value at the given position
-	 * @param value value to be set
-	 * @param band
-	 * @param line
-	 * @param sample
-	 */
-	public void setDataAt(int value, int band, int line, int sample) {
-		this.data[band*bandElements + line*samples + sample] = value; 
-	}
-	
-	/**
-	 * Sets the value given in the given position, restricting it to this image's range
-	 * and coding it in this image's data type
-	 * @param value the new value to set
-	 * @param band 
-	 * @param line
-	 * @param sample
-	 */
-	public void setValueAt(float value, int band, int line, int sample) {
-		this.data[band*bandElements + line*samples + sample] = this.dataType.valueToData(value);
-	}
-	
-	/**
-	 * return a band of this image. Modifications to this band will affect the original data, since it is referenced, not copied
-	 * @param band the returned band's index
-	 * @return the requested band
-	 */
-	public HyperspectralBandData getBand(int band) {
-		return new HyperspectralBandData(this, band, this.depth, this.lines, this.samples);
-	}
 	
 	/**
 	 * @return the number of bands in this image
@@ -112,37 +55,13 @@ public class HyperspectralImageData {
 	public int getNumberOfSamples() {
 		return this.samples;
 	}
-
-	/**
-	 * @param line
-	 * @param sample
-	 * @return a pixel of the image at the given spatial position, with all spectral components
-	 */
-	public float[] getPixel(int line, int sample) {
-		float[] res = new float[this.getNumberOfBands()];
-		for (int i = 0; i < this.getNumberOfBands(); i++) {
-			res[i] = this.getValueAt(i, line, sample);
-		}
-		return res;
-	}
-
+	
+	
 	/**
 	 * @return the data type of this image
 	 */
 	public ImageDataType getDataType() {
 		return this.dataType;
-	}
-
-	/**
-	 * Set a whole sample (pixel) for this image
-	 * @param values
-	 * @param line
-	 * @param sample
-	 */
-	public void setPixel(float[] values, int line, int sample) {
-		for (int i = 0; i < this.getNumberOfBands(); i++) {
-			this.setValueAt(values[i], i, line, sample);
-		}
 	}
 	
 	/**
@@ -157,31 +76,8 @@ public class HyperspectralImageData {
 	}
 	
 	/**
-	 * @param source where to copy data from
-	 */
-	public void copyDataFrom(HyperspectralImageData source) {
-		if (!this.sizeAndTypeEquals(source)) {
-			throw new IllegalArgumentException("The image to copy from must have the same type and dimensions as this one");
-		}
-		
-		System.arraycopy(source.data, 0, this.data, 0, this.bands*this.lines*this.samples);
-	}
-	
-	/**
-	 * @param source where to copy data from
-	 */
-	public void copyDataFrom(FMatrixRMaj source) {
-		for (int i = 0; i < this.getNumberOfBands(); i++) {
-			for (int j = 0; j < this.getNumberOfLines(); j++) {
-				for (int k = 0; k < this.getNumberOfSamples(); k++) {
-					this.setValueAt(source.get(i, j*this.getNumberOfSamples() + k), i, j, k);
-				}
-			}
-		}
-	}
-
-	/**
-	 * @return the size in bits of this data
+	 * @return the size in bits of this data. Note that this might not be the number of
+	 * bits it occupies in memory
 	 */
 	public long getBitSize() {
 		return (long) bands * (long) lines * (long) samples * (long) depth;
@@ -196,27 +92,82 @@ public class HyperspectralImageData {
 	}
 	
 	/**
-	 * @return the hyperspectral image data as a float matrix for better numerical processing
+	 * return a band of this image. Modifications to this band will affect the original data, since it is referenced, not copied
+	 * @param band the returned band's index
+	 * @return the requested band
 	 */
-	public FMatrixRMaj tofloatMatrix() {
-		FMatrixRMaj res = new FMatrixRMaj(this.bands, this.lines * this.samples);
-		for (int i = 0; i < bands; i++) {
-			for (int j = 0; j < lines; j++) {
-				for (int k = 0; k < samples; k++) {
-					res.set(i, j*samples + k, this.getValueAt(i, j, k));
-				}
-			}
-		}
-		return res;
+	public HyperspectralBandData getBand(int band) {
+		return new HyperspectralBandData(this, band, this.depth, this.lines, this.samples);
 	}
-
+	
+	
+	
+	/**
+	 * @param band
+	 * @param line
+	 * @param sample
+	 * @return the data at the specified position, no questions asked
+	 */
+	public abstract int getDataAt(int band, int line, int sample);
+	
+	
+	/**
+	 * @param band
+	 * @param line
+	 * @param sample
+	 * @return the value that the inner data represents at that position
+	 */
+	public abstract int getValueAt(int band, int line, int sample);
+	
+	/**
+	 * Set the given value at the given position
+	 * @param value value to be set
+	 * @param band
+	 * @param line
+	 * @param sample
+	 */
+	public abstract void setDataAt(int value, int band, int line, int sample);
+	
+	/**
+	 * Sets the value given in the given position, restricting it to this image's range
+	 * and coding it in this image's data type
+	 * @param value the new value to set
+	 * @param band 
+	 * @param line
+	 * @param sample
+	 */
+	public abstract void setValueAt(float value, int band, int line, int sample);
+	
+	/**
+	 * @param line
+	 * @param sample
+	 * @return a pixel of the image at the given spatial position, with all spectral components
+	 */
+	public abstract float[] getPixel(int line, int sample);
+	
+	/**
+	 * Set a whole sample (pixel) for this image
+	 * @param values
+	 * @param line
+	 * @param sample
+	 */
+	public abstract void setPixel(float[] values, int line, int sample);
+	
+	/**
+	 * @param source where to copy data from
+	 */
+	public abstract void copyDataFrom(FMatrixRMaj source);
+	
+	/**
+	 * @return the hyperspectral image data as a float matrix for better numerical processing.
+	 * Note that, depending on implementation, modifications to the matrix returned might 
+	 * reflect on this object
+	 */
+	public abstract FMatrixRMaj tofloatMatrix();
+	
 	/**
 	 * WARNING: this deletes the internal data to free up memory. Be use you know what you are doing
 	 * before using this method
 	 */
-	public void deleteData() {
-		this.data = null;
-	}
-
-
+	public abstract void free();
 }

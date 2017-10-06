@@ -42,7 +42,7 @@ public class HyperspectralBandData implements IntegerMatrix {
 	 * @return a band with no image attached
 	 */
 	public static HyperspectralBandData generateRogueBand (ImageDataType type, int lines, int samples) {
-		return new HyperspectralImageData(null, type, 1, lines, samples).getBand(0);
+		return new HyperspectralImageIntegerData(type, 1, lines, samples).getBand(0); //be integer since it is for coding
 	}
 	
 	@Override
@@ -66,7 +66,7 @@ public class HyperspectralBandData implements IntegerMatrix {
 	
 	/**
 	 * sets the given value at the given position
-	 * @see HyperspectralImageData
+	 * @see HyperspectralImageIntegerData
 	 * @param value value to set
 	 * @param line
 	 * @param sample
@@ -142,7 +142,7 @@ public class HyperspectralBandData implements IntegerMatrix {
 	/**
 	 * Fill this image with the values from the float matrix. They are converted
 	 * to the data type of the encompassing image and then set into the inner array
-	 * @see HyperspectralImageData
+	 * @see HyperspectralImageIntegerData
 	 * @param waveForm from where to take the data
 	 * @param lineOffset starting line for filling the data in
 	 * @param sampleOffset starting sample for filling the data in

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+
 import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.util.io.headerio.enums.BandOrdering;

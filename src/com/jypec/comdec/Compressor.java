@@ -48,7 +48,7 @@ public class Compressor {
 		int numLines = srcImg.getNumberOfLines();
 		int numSamples = srcImg.getNumberOfSamples();
 		FMatrixRMaj srcImgDMRM = srcImg.tofloatMatrix();
-		srcImg.deleteData();
+		srcImg.free();
 		
 		/** Project all image values onto the reduced space */
 		Logger.getLogger().log("Applying dimensionality reduction");

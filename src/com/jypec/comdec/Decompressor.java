@@ -9,6 +9,7 @@ import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HeaderConstants;
 import com.jypec.img.HyperspectralBandData;
 import com.jypec.img.HyperspectralImageData;
+import com.jypec.img.HyperspectralImageFloatData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
@@ -87,7 +88,7 @@ public class Decompressor {
 		
 		/** Undo PCA dimensionality reduction */
 		ImageDataType srcDT = new ImageDataType(idt.getBitDepth(), idt.isSigned());
-		HyperspectralImageData srcImg = new HyperspectralImageData(null, srcDT, bands, lines, samples);
+		HyperspectralImageData srcImg = new HyperspectralImageFloatData(srcDT, bands, lines, samples);
 		Logger.getLogger().log("Projecting back into original dimension...");
 		FMatrixRMaj result = cp.dr.boost(MatrixTransforms.getMatrix(reduced, cp.dr.getNumComponents(), lines, samples));
 		

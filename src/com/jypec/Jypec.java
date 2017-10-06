@@ -46,7 +46,7 @@ public class Jypec {
 		checkCompressArguments(args);
 		
 		/** load the image, and compression parameters */
-		HyperspectralImage hi = HyperspectralImageReader.read(args.input, args.inputHeader);
+		HyperspectralImage hi = HyperspectralImageReader.read(args.input, args.inputHeader, true);
 		ComParameters cp = new ComParameters(args);
 		
 		/** create the compressor */
@@ -97,7 +97,7 @@ public class Jypec {
 		checkDecompressArguments(args);
 		
 		/** Read input image, decompressing if compressed format is found */
-		HyperspectralImage hi = HyperspectralImageReader.read(args.input);
+		HyperspectralImage hi = HyperspectralImageReader.read(args.input, false);
 		
 		/** Save the result */
 		HyperspectralImageWriter.write(hi, args);
@@ -112,8 +112,8 @@ public class Jypec {
 	 */
 	public static void compare(InputArguments args) throws IOException {
 		//read both images
-		HyperspectralImage first = HyperspectralImageReader.read(args.input, args.inputHeader);
-		HyperspectralImage second = HyperspectralImageReader.read(args.output, args.outputHeader);
+		HyperspectralImage first = HyperspectralImageReader.read(args.input, args.inputHeader, true);
+		HyperspectralImage second = HyperspectralImageReader.read(args.output, args.outputHeader, true);
 		
 		//check that they are the same size and stuff
 		if (!first.getData().sizeAndTypeEquals(second.getData())) {
