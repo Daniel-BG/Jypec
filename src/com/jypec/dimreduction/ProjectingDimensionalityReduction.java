@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.ejml.data.FMatrixRMaj;
 import org.ejml.dense.row.CommonOps_FDRM;
 
-import com.jypec.util.arrays.MatrixOperations;
+import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
 
@@ -62,10 +62,7 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	
 	@Override
 	public FMatrixRMaj reduce(FMatrixRMaj img) {
-		FMatrixRMaj ones = MatrixOperations.ones(1, img.getNumCols());
-		FMatrixRMaj sub = new FMatrixRMaj(img.getNumRows(), img.getNumCols());
-		CommonOps_FDRM.mult(adjustment, ones, sub);
-		CommonOps_FDRM.subtract(img, sub, img);
+		EJMLExtensions.subColumnVector(img, adjustment);
 		FMatrixRMaj res = new FMatrixRMaj(dimProj, img.getNumCols());
 		CommonOps_FDRM.mult(projectionMatrix, img, res);
 		return res;
@@ -75,10 +72,7 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	public FMatrixRMaj boost(FMatrixRMaj src) {
 		FMatrixRMaj res = new FMatrixRMaj(dimOrig, src.getNumCols());
 		CommonOps_FDRM.mult(unprojectionMatrix, src, res);
-		FMatrixRMaj ones = MatrixOperations.ones(1, res.getNumCols());
-		FMatrixRMaj add = new FMatrixRMaj(res.getNumRows(), res.getNumCols());
-		CommonOps_FDRM.mult(adjustment, ones, add);
-		CommonOps_FDRM.add(res, add, res);
+		EJMLExtensions.addColumnVector(res, adjustment);
 		return res;
 	}
 	

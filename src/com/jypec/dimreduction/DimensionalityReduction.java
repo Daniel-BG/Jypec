@@ -13,7 +13,7 @@ import com.jypec.dimreduction.alg.PrincipalComponentAnalysis;
 import com.jypec.dimreduction.alg.SingularValueDecomposition;
 import com.jypec.dimreduction.alg.VectorQuantizationPrincipalComponentAnalysis;
 import com.jypec.dimreduction.alg.VertexComponentAnalysis;
-import com.jypec.util.arrays.MatrixTransforms;
+import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
 
@@ -98,7 +98,7 @@ public abstract class DimensionalityReduction {
 	 */
 	public FMatrixRMaj preprocess(FMatrixRMaj source) {
 		if (this.reductionInTrainingRequested()) {
-			return MatrixTransforms.getSubSet(source, percentTraining);
+			return EJMLExtensions.getSubSet(source, percentTraining);
 		}
 		return source;
 	}

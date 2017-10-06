@@ -88,11 +88,10 @@ public class Decompressor {
 		
 		/** Undo PCA dimensionality reduction */
 		ImageDataType srcDT = new ImageDataType(idt.getBitDepth(), idt.isSigned());
-		HyperspectralImageData srcImg = new HyperspectralImageFloatData(srcDT, bands, lines, samples);
 		Logger.getLogger().log("Projecting back into original dimension...");
 		FMatrixRMaj result = cp.dr.boost(MatrixTransforms.getMatrix(reduced, cp.dr.getNumComponents(), lines, samples));
 		
-		srcImg.copyDataFrom(result);
+		HyperspectralImageData srcImg = new HyperspectralImageFloatData(result, srcDT, bands, lines, samples);
 		
 		
 		

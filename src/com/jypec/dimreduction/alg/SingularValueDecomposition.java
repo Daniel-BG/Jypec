@@ -7,8 +7,7 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition_F32;
 
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.arrays.ArraySortingIndexComparator;
-import com.jypec.util.arrays.MatrixOperations;
-import com.jypec.util.arrays.MatrixTransforms;
+import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.debug.Logger;
 
 /**
@@ -33,7 +32,7 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 	@Override
 	public void doTrain(FMatrixRMaj data) {
 		if (this.reductionInTrainingRequested()) {
-			data = MatrixTransforms.getSubSet(data, percentTraining);
+			data = EJMLExtensions.getSubSet(data, percentTraining);
 		}
 		
 		Logger.getLogger().log("Taking samples...");
@@ -44,7 +43,7 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 		adjustment = new FMatrixRMaj(dimOrig, 1);
 		if (center) {
 			Logger.getLogger().log("Centering data...");
-			MatrixOperations.generateCovarianceMatrix(data, null, null, adjustment);
+			EJMLExtensions.generateCovarianceMatrix(data, null, null, adjustment);
 			for (int i = 0; i < data.getNumRows(); i++) {
 				for (int j = 0; j < data.getNumRows(); j++) {
 					float val = newData.get(i, j) - adjustment.get(i);

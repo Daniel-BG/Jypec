@@ -7,7 +7,7 @@ import org.ejml.dense.row.CommonOps_FDRM;
 import org.ejml.dense.row.NormOps_FDRM;
 
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
-import com.jypec.util.arrays.MatrixOperations;
+import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.debug.Logger;
 
 /**
@@ -45,7 +45,7 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 		//y(:, j) = x(:, j)/(x(:, j)^tu)
 		Logger.getLogger().log("Getting mean...");
 		FMatrixRMaj u = new FMatrixRMaj(dimProj, 1);
-		MatrixOperations.generateCovarianceMatrix(x, null, null, u);
+		EJMLExtensions.generateCovarianceMatrix(x, null, null, u);
 		
 		Logger.getLogger().log("Projective projection onto mean");
 		FMatrixRMaj y = new FMatrixRMaj(x);			//y is the result of projecting onto the mean

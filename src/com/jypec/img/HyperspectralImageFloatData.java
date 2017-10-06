@@ -26,6 +26,22 @@ public class HyperspectralImageFloatData extends HyperspectralImageData {
 		this.data = new FMatrixRMaj(bands, this.bandElements);
 	}
 
+	/**
+	 * Build a {@link HyperspectralImageFloatData} with the given matrix as data
+	 * @param data
+	 * @param type
+	 * @param bands
+	 * @param lines
+	 * @param samples
+	 */
+	public HyperspectralImageFloatData(FMatrixRMaj data, ImageDataType type, int bands, int lines, int samples) {
+		super(type, bands, lines, samples);
+		if (data.numRows != bands || data.numCols != lines * samples) {
+			throw new IllegalArgumentException("Dimensions do not match between the given data and the given dimensions");
+		}
+		this.data = data;
+	}
+
 	@Override
 	public int getDataAt(int band, int line, int sample) {
 		return this.dataType.valueToData(data.get(band*this.bandElements + line*this.samples + sample));

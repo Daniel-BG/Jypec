@@ -112,54 +112,5 @@ public class MatrixTransforms {
 		return res;
 	}
 	
-	/**
-	 * Does the inverse square root of all the elements in the diagonal. Use only with diagonal matrices
-	 * @param source
-	 */
-	public static void inverseSquareRoot(FMatrixRMaj source) {
-		if (source.getNumCols() != source.getNumRows()) {
-			throw new IllegalArgumentException("Only works on square matrices");
-		}
-		
-		for (int i = 0; i < source.getNumCols(); i++) {
-			float val = source.get(i, i);
-			if (Math.abs(val) < 0.1e-30) {
-				source.set(i, i, 0);
-			} else  {
-				source.set(i, i, (float) (1.0 / Math.sqrt(val)));
-			}
-		}
-		
-	}
-	
-	
-	/**
-	 * Gets a subset of the given matrix
-	 * @param source from where to take samples
-	 * @param probability probability that one sample from source will make it to the 
-	 * returned dataset. e.g: if probability = 0.1 -> 1 out of 10 samples will be output
-	 * @return the subset of the input, which could be empty if <code>probability</code> 
-	 * is too low
-	 */
-	public static FMatrixRMaj getSubSet(FMatrixRMaj source, double probability) {
-		if (probability < 0 || probability > 1) {
-			throw new IllegalArgumentException("Probability must be between 0 and 1");
-		}
-		if (probability == 1) {
-			return source;
-		}
-		int samples = (int) (source.getNumCols() * probability);
-		FMatrixRMaj result = new FMatrixRMaj(source.getNumRows(), samples);
-		for (int i = 0; i < samples; i++) {
-			double which = ((double) i) * source.getNumCols() / (double) samples;
-			int index = (int) Math.round(which); //should be between 0 and source.numcols - 1
-			for (int j = 0; j < source.getNumRows(); j++) {
-				result.set(j, i, source.get(j, index));
-			}
-		}
-		
-		return result;
-	}
-	
 	
 }

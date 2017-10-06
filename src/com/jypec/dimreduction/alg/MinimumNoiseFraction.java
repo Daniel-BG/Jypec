@@ -6,8 +6,7 @@ import org.ejml.dense.row.factory.DecompositionFactory_FDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition_F32;
 
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
-import com.jypec.util.arrays.MatrixOperations;
-import com.jypec.util.arrays.MatrixTransforms;
+import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.debug.Logger;
 
 /**
@@ -60,7 +59,7 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
 	@Override
 	public void doTrain(FMatrixRMaj data) {
 		if (this.reductionInTrainingRequested()) {
-			data = MatrixTransforms.getSubSet(data, percentTraining);
+			data = EJMLExtensions.getSubSet(data, percentTraining);
 		}
 		
 		//initialize values
@@ -75,7 +74,7 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
 		Logger.getLogger().log("Getting data covariance...");
 		adjustment = new FMatrixRMaj(dimOrig, 1);
 		FMatrixRMaj sigma = new FMatrixRMaj(dimOrig, dimOrig);
-		MatrixOperations.generateCovarianceMatrix(data, sigma, null, adjustment);
+		EJMLExtensions.generateCovarianceMatrix(data, sigma, null, adjustment);
 		/*********************************/
         
         /**Create noise covariance matrix */
@@ -92,7 +91,7 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
         FMatrixRMaj lambda = svd.getW(null);
         
         FMatrixRMaj A = new FMatrixRMaj(dimOrig, dimOrig);
-        MatrixTransforms.inverseSquareRoot(lambda);
+        EJMLExtensions.inverseSquareRoot(lambda);
         CommonOps_FDRM.mult(B, lambda, A);
         
         

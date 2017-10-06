@@ -13,8 +13,7 @@ import org.ejml.interfaces.decomposition.EigenDecomposition_F32;
 
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.Pair;
-import com.jypec.util.arrays.MatrixOperations;
-import com.jypec.util.arrays.MatrixTransforms;
+import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.debug.Logger;
 
 /**
@@ -37,7 +36,7 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
 	@Override
 	public void doTrain(FMatrixRMaj data) {
 		if (this.reductionInTrainingRequested()) {
-			data = MatrixTransforms.getSubSet(data, percentTraining);
+			data = EJMLExtensions.getSubSet(data, percentTraining);
 		}
 		
 		Logger.getLogger().log("Taking samples...");
@@ -47,7 +46,7 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
 
 		adjustment = new FMatrixRMaj(dimOrig, 1);
 		FMatrixRMaj s = new FMatrixRMaj(dimOrig, dimOrig);
-		MatrixOperations.generateCovarianceMatrix(data, s, null, adjustment);
+		EJMLExtensions.generateCovarianceMatrix(data, s, null, adjustment);
         
 		/** Extract eigenvalues, order and keep the most significant */
 		Logger.getLogger().log("Extracting eigenvalues...");

@@ -145,11 +145,11 @@ public class IOUtilities {
 	public static int getRightBytes(int bytes, ByteBuffer bb) {
 		switch(bytes) {
 		case 1:
-			return bb.get();
+			return bb.get() & 0xff;
 		case 2:
-			return bb.getShort();
+			return bb.getShort() & 0xffff;
 		case 3:
-			return (bb.get() << 16) | bb.getShort();
+			return ((bb.get() << 16) | bb.getShort()) & 0xffffff;
 		case 4:
 			return bb.getInt();
 		default:

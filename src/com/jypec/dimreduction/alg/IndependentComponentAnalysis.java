@@ -5,8 +5,7 @@ import org.ejml.dense.row.CommonOps_FDRM;
 
 import com.jypec.dimreduction.JSATWrapper;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
-import com.jypec.util.arrays.MatrixOperations;
-import com.jypec.util.arrays.MatrixTransforms;
+import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.debug.Logger;
 
 import jsat.SimpleDataSet;
@@ -31,18 +30,18 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 	@Override
 	public void doTrain(FMatrixRMaj source) {	
 		if (this.reductionInTrainingRequested()) {
-			source = MatrixTransforms.getSubSet(source, percentTraining);
+			source = EJMLExtensions.getSubSet(source, percentTraining);
 		}
 		
 		dimOrig = source.getNumRows();
 		/** Get mean first, since we will be centering the data around zero */
 		adjustment = new FMatrixRMaj(this.dimOrig, 1);
-		MatrixOperations.generateCovarianceMatrix(source, null, null, adjustment); //calculate mean instead of doing more reflection hacks
+		EJMLExtensions.generateCovarianceMatrix(source, null, null, adjustment); //calculate mean instead of doing more reflection hacks
 		
 		/** Transform source to JSAT notation */
 		Logger.getLogger().log("Transforming data to JSAT format...");
 		FMatrixRMaj adjustmentSubstract = new FMatrixRMaj(source.getNumRows(), source.getNumCols());
-		CommonOps_FDRM.mult(adjustment, MatrixOperations.ones(1, source.getNumCols()), adjustmentSubstract);
+		CommonOps_FDRM.mult(adjustment, EJMLExtensions.ones(1, source.getNumCols()), adjustmentSubstract);
 		CommonOps_FDRM.subtract(source, adjustmentSubstract, adjustmentSubstract);
 		SimpleDataSet dataSet = JSATWrapper.toDataSet(adjustmentSubstract);
 		
