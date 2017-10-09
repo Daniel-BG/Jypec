@@ -7,11 +7,13 @@ import java.io.PrintWriter;
 
 import org.ejml.data.FMatrixRMaj;
 
+import com.jypec.analysis.Analyzer;
 import com.jypec.cli.InputArguments;
 import com.jypec.comdec.ComParameters;
 import com.jypec.comdec.Compressor;
 import com.jypec.distortion.ImageComparisons;
 import com.jypec.img.HyperspectralImage;
+import com.jypec.img.HyperspectralImageData;
 import com.jypec.util.JypecException;
 import com.jypec.util.bits.BitOutputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
@@ -143,6 +145,65 @@ public class Jypec {
 		Logger.getLogger().log("maxSE is: " + ImageComparisons.maxSE(fdm, sdm));
 		Logger.getLogger().log("MSR is: " + ImageComparisons.MSR(fdm, sdm));
 		Logger.getLogger().log("SSIM is: " + ImageComparisons.SSIM(fdm, sdm, dynRange));
+	}
+
+	/**
+	 * Analyze the input image
+	 * @param args program arguments
+	 * @throws IOException 
+	 */
+	public static void analyze(InputArguments args) throws IOException {
+		HyperspectralImage image = HyperspectralImageReader.read(args.input, args.inputHeader, true);
+		HyperspectralImageData hid = image.getData();
+		
+		int blacks = 0;
+		int aberrated = 0;
+		double totalAberration = 0;
+		
+		Logger.getLogger().log("Analyzing image...");
+		@SuppressWarnings("unused")
+		float[] cp = null, pp = null, np = null; //current previous and next pixel
+		for (int i = 0; i < hid.getNumberOfLines(); i++) {
+			if (i % (hid.getNumberOfLines() / 10) == 0 && i > 0) {
+				Logger.getLogger().log(10 * i / (hid.getNumberOfLines() / 10) + "% done");
+			}
+			
+			
+			for (int j = 0; j < hid.getNumberOfSamples(); j++) {
+				if (j == 0) {
+					cp = hid.getPixel(i, j);
+					np = hid.getPixel(i, j+1);
+					pp = null;
+				} else if (j == hid.getNumberOfSamples() - 1) {
+					pp = cp;
+					cp = np;
+					np = null;
+				} else {
+					pp = cp;
+					cp = np;
+					np = hid.getPixel(i,  j+1);
+				}
+				
+				if (Analyzer.isBlack(cp)) {
+					blacks++;
+				}
+				
+				double aberration = Analyzer.hasAberration(cp);
+				if (aberration > 0) {
+					aberrated++;
+					totalAberration += aberration;
+				}
+
+			}
+		}
+		
+		int total = hid.getNumberOfLines() * hid.getNumberOfSamples();
+		float percentBlack = (float) blacks / (float) total * 100;
+		float percentAberr = (float) aberrated / (float) total * 100;
+		
+		Logger.getLogger().log("Number of black pixels: " + blacks + "/" + total + " [" + percentBlack + "%]");
+		Logger.getLogger().log("Number of aberrations: " + aberrated + "/" + total + " [" + percentAberr + "%]");
+		Logger.getLogger().log("Total aberration: " + totalAberration);
 	}
 
 }

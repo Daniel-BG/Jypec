@@ -38,6 +38,8 @@ public class Main {
 	        	Jypec.decompress(iArgs);
 	        } else if (iArgs.compare) {
 	        	Jypec.compare(iArgs);
+	        } else if (iArgs.analyze) {
+	        	Jypec.analyze(iArgs);
 	        } else if (iArgs.help){
 	        	printHelp();
 	        } else {

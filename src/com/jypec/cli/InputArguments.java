@@ -60,6 +60,8 @@ public class InputArguments {
 	public double percentTraining;
 	/** True if the training is done with less samples than the reduction */
 	public boolean requestTrainingReduction;
+	/** True if we are supposed to analyze the input image */
+	public boolean analyze;
 	
 	
 	/**
@@ -83,6 +85,7 @@ public class InputArguments {
 		args.essentialHeader = line.hasOption(JypecCLI.OPTION_OUTPUT_ESSENTIAL_HEADER);
 		args.verbose = line.hasOption(JypecCLI.OPTION_VERBOSE);
 		args.showTree = line.hasOption(JypecCLI.OPTION_TREE);
+		args.analyze = line.hasOption(JypecCLI.OPTION_ANALYZE);
 		
 		if (args.requestReduction = line.hasOption(JypecCLI.OPTION_REDUCTION)) {
 			args.reductionArgs = line.getOptionValues(JypecCLI.OPTION_REDUCTION);

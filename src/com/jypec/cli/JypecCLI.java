@@ -45,6 +45,8 @@ public class JypecCLI {
 	public static final String OPTION_TREE = "tree";
 	/** Used for specifying if training is to be done with less samples than reducing */
 	public static final String OPTION_TRAINING_REDUCTION = "train_reduction";
+	/** Flag to indicate if we want to analyze a single image */
+	public static final String OPTION_ANALYZE = "analyze";
 	
 	/* Options for jypec */
 	private static Options jypecOptions;
@@ -55,12 +57,12 @@ public class JypecCLI {
 		Option compress			= new Option("c", OPTION_COMPRESS, false, "compress the input image");
 		Option decompress		= new Option("d", OPTION_DECOMPRESS, false, "decompress the input image");
 		Option compare			= new Option("k", OPTION_COMPARE, false, "compare the input and output images"); //k for kompare
-		Option verbose			= new Option("v", OPTION_VERBOSE, false, "be verbose when processing"); //k for kompare
+		Option analyze			= new Option("a", OPTION_ANALYZE, false, "analyze the input image");
+		Option verbose			= new Option("v", OPTION_VERBOSE, false, "be verbose when processing");
 		Option compressionStats = new Option(null, OPTION_SHOW_COMPRESSION_STATS, false, "show compression stats");
 		Option noHeaderOutput 	= new Option(null, OPTION_NO_HEADER_OUTPUT, false, "do not output the header");
 		Option essentialHeader 	= new Option(null, OPTION_OUTPUT_ESSENTIAL_HEADER, false, "output only essential information, cut all extra");
 		Option tree 			= new Option(null, OPTION_TREE, false, "output the compression tree");
-		
 		
 		/* input output files */
 		Option input = Option
@@ -86,7 +88,6 @@ public class JypecCLI {
 				.desc("output file")
 				.hasArg()
 				.longOpt(OPTION_OUTPUT)
-				.required()
 				.build();
 		
 		Option outputHeader = Option
@@ -159,6 +160,7 @@ public class JypecCLI {
 		jypecOptions.addOption(verbose);
 		jypecOptions.addOption(tree);
 		jypecOptions.addOption(trainingReduction);
+		jypecOptions.addOption(analyze);
 	}
 	
 	
