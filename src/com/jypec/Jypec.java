@@ -144,5 +144,5 @@ public class Jypec {
 		Logger.getLogger().log("MSR is: " + ImageComparisons.MSR(fdm, sdm));
 		Logger.getLogger().log("SSIM is: " + ImageComparisons.SSIM(fdm, sdm, dynRange));
 	}
-	
+
 }

@@ -32,8 +32,17 @@ import smile.clustering.KMeans;
  */
 public class VectorQuantizationPrincipalComponentAnalysis extends DimensionalityReduction {
 	
-	private enum Library {JSAT, SMILE};
-	private Library library = Library.SMILE;
+	/**
+	 * Library to do vector quantizaiton with
+	 * @author Daniel
+	 */
+	public enum Library {
+		/** JSAT library */
+		JSAT, 
+		/** SMILE library */
+		SMILE
+	};
+	private Library library;
 
 	private int dimOrig;			//number of components in the original space
 	private int numClusters;		//number of clusters to split the original space into
@@ -233,13 +242,29 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	public void setNumClusters(int numClusters) {
 		this.numClusters = numClusters;
 	}
+	
+	/**
+	 * @param library the library to use 
+	 */
+	public void setLibrary(Library library) {
+		this.library = library;
+	}
 
 	@Override
 	protected void doLoadFrom(String[] args) {
 		int dimensions = Integer.parseInt(args[0]);
 		int clusters = Integer.parseInt(args[1]);
+		if (args.length < 3) {
+			this.setLibrary(Library.SMILE);
+		} else {
+			Library library = Library.valueOf(args[2].toUpperCase());
+			this.setLibrary(library);
+		}
 		this.setNumComponents(dimensions);
 		this.setNumClusters(clusters);
+		
 	}
+
+
 
 }

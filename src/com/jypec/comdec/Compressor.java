@@ -55,7 +55,6 @@ public class Compressor {
 		cp.dr.setPercentTraining(cp.percentTraining);
 		FMatrixRMaj reduced = cp.dr.trainReduce(srcImgDMRM);
 		srcImgDMRM = null; //not needed anymore. allow GC to discard it
-		FMatrixRMaj boosted = cp.dr.boost(reduced);
 		
 		/** create the wavelet transform, and coder we'll be using, which won't change over the bands */
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
