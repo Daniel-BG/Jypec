@@ -34,7 +34,7 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
     }
 
 	@Override
-	public void doTrain(FMatrixRMaj data) {
+	public boolean doTrain(FMatrixRMaj data) {
 		if (this.reductionInTrainingRequested()) {
 			data = EJMLExtensions.getSubSet(data, percentTraining);
 		}
@@ -51,10 +51,15 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
 		/** Extract eigenvalues, order and keep the most significant */
 		Logger.getLogger().log("Extracting eigenvalues...");
         EigenDecomposition_F32<FMatrixRMaj> dec = DecompositionFactory_FDRM.eig(s.getNumElements(), true, true);
-        dec.decompose(s);
+        boolean res = dec.decompose(s);
+        if (!res) {
+        	Logger.getLogger().log("Decomposition failed");
+        	return false;
+        }
+        
 
         List<Pair<Float, FMatrixRMaj>> list = new ArrayList<Pair<Float, FMatrixRMaj>>();
-        for (int i = 0; i < s.getNumCols(); i++) {
+        for (int i = 0; i < dec.getNumberOfEigenvalues(); i++) {
         	Complex_F32 val = dec.getEigenvalue(i);
         	FMatrixRMaj vec = dec.getEigenVector(i);
         	list.add(new Pair<Float, FMatrixRMaj>(val.real, vec));
@@ -78,6 +83,8 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
         
         unprojectionMatrix = new FMatrixRMaj(projectionMatrix);
         CommonOps_FDRM.transpose(unprojectionMatrix);
+        
+        return true;
 	}
 	
 	

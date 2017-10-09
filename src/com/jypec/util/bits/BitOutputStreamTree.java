@@ -51,6 +51,7 @@ public class BitOutputStreamTree extends BitOutputStream {
 	private BitOutputStreamTree(OutputStream destination, String name, boolean spawnChildren) {
 		super(destination);
 		this.name = name;
+		this.destination = destination;
 		if (destination == null) { //do not bother creating if we are not using it
 			this.bitPipe = new BitPipe();
 			this.createBis();

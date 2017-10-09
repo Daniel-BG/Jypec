@@ -28,7 +28,7 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 	}
 
 	@Override
-	public void doTrain(FMatrixRMaj source) {	
+	public boolean doTrain(FMatrixRMaj source) {	
 		if (this.reductionInTrainingRequested()) {
 			source = EJMLExtensions.getSubSet(source, percentTraining);
 		}
@@ -59,6 +59,8 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 		/** Get data in a readable way */
 		this.projectionMatrix = JSATWrapper.toFMatrixRMaj(unmixing, true);
 		this.unprojectionMatrix = JSATWrapper.toFMatrixRMaj(mixing, true);
+		
+		return true;
 	}
 	
 

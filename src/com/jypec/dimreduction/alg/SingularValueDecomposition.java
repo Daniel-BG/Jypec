@@ -30,7 +30,7 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 	}
 
 	@Override
-	public void doTrain(FMatrixRMaj data) {
+	public boolean doTrain(FMatrixRMaj data) {
 		if (this.reductionInTrainingRequested()) {
 			data = EJMLExtensions.getSubSet(data, percentTraining);
 		}
@@ -59,7 +59,12 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 		Logger.getLogger().log("Applying SVD...");
 		CommonOps_FDRM.transpose(newData);
 		SingularValueDecomposition_F32<FMatrixRMaj> svd = DecompositionFactory_FDRM.svd(newData.getNumRows(), newData.getNumCols(), false, true, false);
-		Logger.getLogger().log("Decomposition yielded: " + svd.decompose(newData));
+		boolean result = svd.decompose(newData);
+		if (!result) {
+			Logger.getLogger().log("Could not decompose");
+			return false;
+		}
+		
 		FMatrixRMaj V = svd.getV(null, false);
 		FMatrixRMaj W = svd.getW(null);
 		
@@ -71,6 +76,8 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 		projectionMatrix.reshape(dimProj, dimOrig);
 		unprojectionMatrix = new FMatrixRMaj(projectionMatrix);
 		CommonOps_FDRM.transpose(unprojectionMatrix);
+		
+		return true;
 	}
 
 	

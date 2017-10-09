@@ -53,7 +53,12 @@ public class Jypec {
 		Compressor c = new Compressor(cp);
 		
 		/** Create the output stream and save the compressed result */
-		BitOutputStreamTree bstn = new BitOutputStreamTree("root", args.showTree);
+		BitOutputStreamTree bstn;
+		if (args.showTree) {
+			bstn = new BitOutputStreamTree("root", args.showTree);
+		} else { //in this case dump while compressing to avoid memory overhead
+			bstn = new BitOutputStreamTree(new FileOutputStream(new File(args.output)));
+		}
 		ImageHeaderReaderWriter.saveToCompressedStream(hi.getHeader(), bstn.addChild("header"), args.essentialHeader);
 		c.compress(hi.getData(), bstn.addChild("body"));
 		if (args.showTree) {
@@ -62,21 +67,25 @@ public class Jypec {
 			out.println(res);
 			out.flush();
 			out.close();
-		}
-		BitOutputStream output = new BitOutputStream(new FileOutputStream(new File(args.output)));
-		bstn.dumpInBitOutputStream(output);
-		bstn.close();
-		
+		}		
 		
 		/** Show some stats */
 		if (args.showCompressionStats && args.verbose) {
 			long orsize = hi.getData().getBitSize();
-			long redsize = output.getBitsOutput();
+			long redsize = bstn.getTreeBits(); // output.getBitsOutput();
 			Logger.getLogger().log("Original size is: " + orsize);
 			Logger.getLogger().log("Compressed size is: " + redsize);
 			Logger.getLogger().log("Compression rate: " + (float) orsize / (float) redsize);
 			Logger.getLogger().log("Bpppb: " + redsize / (float) (hi.getData().getTotalNumberOfSamples()));
 		}
+		
+		/** close output streams and dump data if needed */
+		if (args.showTree) { //if the tree was shown we need to dump the results now
+			Logger.getLogger().log("Saving compressed data...");
+			BitOutputStream output = new BitOutputStream(new FileOutputStream(new File(args.output)));
+			bstn.dumpInBitOutputStream(output);
+		}
+		bstn.close();
 	}
 
 	

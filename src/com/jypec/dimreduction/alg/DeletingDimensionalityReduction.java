@@ -26,10 +26,12 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	public void doTrain(FMatrixRMaj source) {
+	public boolean doTrain(FMatrixRMaj source) {
 		//no training needed. If unset just preserve dimension
 		if (dimProj == -1)
 			this.dimProj = source.getNumRows();
+		
+		return true;
 	}
 
 	@Override

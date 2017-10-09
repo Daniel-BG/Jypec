@@ -57,7 +57,7 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
 
 	//https://www.researchgate.net/profile/Angelo_Palombo/publication/224354550_Experimental_Approach_to_the_Selection_of_the_Components_in_the_Minimum_Noise_Fraction/links/02bfe51064486871c4000000.pdf
 	@Override
-	public void doTrain(FMatrixRMaj data) {
+	public boolean doTrain(FMatrixRMaj data) {
 		if (this.reductionInTrainingRequested()) {
 			data = EJMLExtensions.getSubSet(data, percentTraining);
 		}
@@ -86,7 +86,12 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
         //decompose sigma noise as noise = U*W*U^t
         Logger.getLogger().log("Applying SVD to noise...");
         SingularValueDecomposition_F32<FMatrixRMaj> svd = DecompositionFactory_FDRM.svd(dimOrig, dimOrig, true, false, false);
-        Logger.getLogger().log("Decomposition yielded: " + svd.decompose(sigmaNoise));
+        boolean decompRes = svd.decompose(sigmaNoise);
+        if (!decompRes) {
+        	Logger.getLogger().log("Decomposition of noise failed!");
+        	return false;
+        }
+        
         FMatrixRMaj B = svd.getU(null, false);
         FMatrixRMaj lambda = svd.getW(null);
         
@@ -110,7 +115,11 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
         //decompose sigma temp as noise = U*W*U^t
         Logger.getLogger().log("Applying SVD to noiseless data...");
         svd = DecompositionFactory_FDRM.svd(dimOrig, dimOrig, true, true, false);
-        Logger.getLogger().log("Decomposition yielded: " + svd.decompose(sigmaTransformed));
+        decompRes = svd.decompose(sigmaTransformed);
+        if (!decompRes) {
+        	Logger.getLogger().log("Decomposition of noiseless data failed!");
+        	return false;
+        }
         FMatrixRMaj D = svd.getU(null, false);
         
         this.projectionMatrix = new FMatrixRMaj(dimOrig, dimOrig);
@@ -128,6 +137,8 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
         CommonOps_FDRM.transpose(this.unprojectionMatrix);
         this.unprojectionMatrix = new FMatrixRMaj(this.unprojectionMatrix); //ensure internal buffer size is the right shape
         Logger.getLogger().log("Finished");
+        
+        return true;
 	}
 
 

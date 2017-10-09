@@ -76,10 +76,11 @@ public abstract class DimensionalityReduction {
 	 * with calls to {@link #reduce(FMatrixRMaj, FMatrixRMaj)}.
 	 * <br>
 	 * samples are assumed to be the <b>columns</b> of source
+	 * @return true if training was sucessful
 	 */
-	public final void train(FMatrixRMaj source) {
+	public final boolean train(FMatrixRMaj source) {
 		FMatrixRMaj res = this.preprocess(source);
-		this.doTrain(res);
+		return this.doTrain(res);
 	}
 	
 	
@@ -87,8 +88,9 @@ public abstract class DimensionalityReduction {
 	 * Do the actual training after potentially reducing
 	 * the number of input data with {@link #preprocess(FMatrixRMaj)}
 	 * @param source
+	 * @return true if training was sucessful
 	 */
-	public abstract void doTrain(FMatrixRMaj source);
+	public abstract boolean doTrain(FMatrixRMaj source);
 	
 	
 	/**

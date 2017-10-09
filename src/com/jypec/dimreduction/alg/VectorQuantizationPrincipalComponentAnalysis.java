@@ -11,6 +11,9 @@ import com.jypec.arithco.predict.PredictiveArithmeticCodec;
 import com.jypec.arithco.predict.functions.Basic1DPredictiveFunction;
 import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.dimreduction.JSATWrapper;
+import com.jypec.dimreduction.SMILEWrapper;
+import com.jypec.dimreduction.SMILEWrapper.CentroidWrapper;
+import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.debug.Logger;
@@ -20,6 +23,7 @@ import jsat.classifiers.DataPoint;
 import jsat.clustering.ClustererBase;
 import jsat.clustering.KClusterer;
 import jsat.clustering.kmeans.ElkanKMeans;
+import smile.clustering.KMeans;
 
 /**
  * Implements the VQPCA algorithm from 
@@ -27,12 +31,16 @@ import jsat.clustering.kmeans.ElkanKMeans;
  * @author Daniel
  */
 public class VectorQuantizationPrincipalComponentAnalysis extends DimensionalityReduction {
+	
+	private enum Library {JSAT, SMILE};
+	private Library library = Library.SMILE;
 
 	private int dimOrig;			//number of components in the original space
 	private int numClusters;		//number of clusters to split the original space into
 	private int[] classification;	//classes of the training points
 	private FMatrixRMaj trainedWith;//check that we reduce the same matrix we trained with, Otherwise the algorithm wont work
 	private ArrayList<PrincipalComponentAnalysis> pcas;
+	private CentroidWrapper centroids; 	//kmeans algorithm result from SMILE library
 	
 	/**
 	 * Default constructor
@@ -47,7 +55,56 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	}
 
 	@Override
-	public void doTrain(FMatrixRMaj source) {
+	public boolean doTrain(FMatrixRMaj source) {
+		if (library == Library.SMILE) {
+			return this.doTrainSMILE(source);
+		} else {
+			return this.doTrainJSAT(source);
+		}
+	}
+	
+	
+	private boolean doTrainSMILE(FMatrixRMaj source) {
+		this.trainedWith = source;
+		if (this.reductionInTrainingRequested()) {
+			source = EJMLExtensions.getSubSet(source, percentTraining);
+		}
+		
+		/** Initialization */
+		Logger.getLogger().log("Initializing VQPCA...");
+		double[][] dataSet = SMILEWrapper.toDoubleMatrix(source);
+		this.pcas = new ArrayList<PrincipalComponentAnalysis>(this.numClusters);
+		this.dimOrig = source.getNumRows();
+		
+		/** Cluster the data */
+		Logger.getLogger().log("Clustering data...");
+		KMeans kmeans = new KMeans(dataSet, this.numClusters); //self trains when built
+		this.centroids = new SMILEWrapper.CentroidWrapper(kmeans.centroids());
+		int[] partialClassification = kmeans.getClusterLabel();
+		
+		/** Perform PCA for each cluster */
+		Logger.getLogger().log("Performing " + this.numClusters + " PCAs");
+		int fails = 0;
+		for (int i = 0; i < this.numClusters; i++) {
+			FMatrixRMaj cluster = SMILEWrapper.getDatapointsFromCluster(i + fails, partialClassification, source);
+			Logger.getLogger().log("Cluster #" + i + " has size: " + cluster.getNumCols());
+			PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
+			pca.setNumComponents(dimProj);
+			pca.setPercentTraining(percentTraining);
+			if (!pca.train(cluster)) {
+				Logger.getLogger().log("Could not train PCA since cluster was not big enough. Reducing in 1 number of clusters...");
+				this.centroids.deleteCentroid(i);
+				i--; fails++;
+				this.numClusters--;
+			} else {
+				pcas.add(pca);
+			}
+		}
+		
+		return this.numClusters == 0 ? false : true; 
+	}
+	
+	private boolean doTrainJSAT(FMatrixRMaj source) {
 		/** Initialization */
 		Logger.getLogger().log("Initializing VQPCA...");
 		SimpleDataSet dataSet = JSATWrapper.toDataSet(source);
@@ -72,6 +129,8 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 			pca.train(JSATWrapper.toFMatrixRMaj(new SimpleDataSet(l)));
 			pcas.add(pca);
 		}
+		
+		return true;
 	}
 
 	@Override
@@ -82,10 +141,19 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 		}
 		/** initialize stuff */
 		FMatrixRMaj res = new FMatrixRMaj(this.dimProj, source.getNumCols());
+		this.classification = new int[source.getNumCols()];
 		
 		/** Reduce each sample with its cluster's PCA */
 		for (int i = 0; i < source.getNumCols(); i++) {
-			PrincipalComponentAnalysis pca = this.pcas.get(this.classification[i]);
+			PrincipalComponentAnalysis pca;
+			if (library == Library.JSAT) {
+				pca = this.pcas.get(this.classification[i]);
+			} else {
+				double[] sample = SMILEWrapper.extractSample(source, i);
+				int cluster = this.centroids.predict(sample);
+				this.classification[i] = cluster;
+				pca = this.pcas.get(cluster);
+			}
 			FMatrixRMaj col = CommonOps_FDRM.extractColumn(source, i, null);
 			col = pca.reduce(col);
 			CommonOps_FDRM.insert(col, res, 0, i);

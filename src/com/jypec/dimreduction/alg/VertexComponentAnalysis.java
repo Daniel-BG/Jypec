@@ -28,7 +28,7 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 	}
 
 	@Override
-	public void doTrain(FMatrixRMaj source) {
+	public boolean doTrain(FMatrixRMaj source) {
 		/** get metadata */
 		dimOrig = source.getNumRows();
 
@@ -131,6 +131,8 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 		
 		/** adjustment is zero */
 		this.adjustment = new FMatrixRMaj(dimOrig, 1);
+		
+		return true; //TODO check if it is really true. Might not be for some small matrices
 	}
 	
 	
