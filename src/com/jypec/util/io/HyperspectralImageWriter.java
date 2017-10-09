@@ -42,8 +42,8 @@ public class HyperspectralImageWriter {
 		}
 		
 		HyperspectralImageDataWriter.writeImageData(hi.getData(), byteOffset, args.output, 
-				(BandOrdering) hi.getHeader().get(HeaderConstants.HEADER_INTERLEAVE), 
-				(ByteOrdering) hi.getHeader().get(HeaderConstants.HEADER_BYTE_ORDER));		
+				(BandOrdering) hi.getHeader().getOnce(HeaderConstants.HEADER_INTERLEAVE), 
+				(ByteOrdering) hi.getHeader().getOnce(HeaderConstants.HEADER_BYTE_ORDER));		
 	}
 
 }

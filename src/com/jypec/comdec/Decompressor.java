@@ -37,10 +37,10 @@ public class Decompressor {
 	public HyperspectralImageData decompress(ImageHeaderData ihd, BitInputStream input) throws IOException {
 		/** Need to know the image dimensions and some other values */
 		Logger.getLogger().log("Extracting image metadata...");
-		int lines = (int) ihd.get(HeaderConstants.HEADER_LINES);
-		int bands = (int) ihd.get(HeaderConstants.HEADER_BANDS);
-		int samples = (int) ihd.get(HeaderConstants.HEADER_SAMPLES);
-		ImageDataType idt = ImageDataType.fromHeaderCode((byte) ihd.get(HeaderConstants.HEADER_DATA_TYPE));
+		int lines = (int) ihd.getOnce(HeaderConstants.HEADER_LINES);
+		int bands = (int) ihd.getOnce(HeaderConstants.HEADER_BANDS);
+		int samples = (int) ihd.getOnce(HeaderConstants.HEADER_SAMPLES);
+		ImageDataType idt = ImageDataType.fromHeaderCode((byte) ihd.getOnce(HeaderConstants.HEADER_DATA_TYPE));
 		
 		/** Recover compression parameter setup */
 		Logger.getLogger().log("Loading decompression parameters...");

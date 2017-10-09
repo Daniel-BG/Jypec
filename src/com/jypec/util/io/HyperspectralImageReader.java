@@ -65,18 +65,18 @@ public class HyperspectralImageReader {
 			data = d.decompress(header, bis);
 		} else {						//load uncompressed
 			Logger.getLogger().log("Image was not compressed. Reading raw data: " + dataPath);
-			int bands = (int) header.get(HeaderConstants.HEADER_BANDS);
-			int lines = (int) header.get(HeaderConstants.HEADER_LINES);
-			int samples = (int) header.get(HeaderConstants.HEADER_SAMPLES);
-			ImageDataType type = ImageDataType.fromHeaderCode((byte) header.get(HeaderConstants.HEADER_DATA_TYPE));
+			int bands = (int) header.getOnce(HeaderConstants.HEADER_BANDS);
+			int lines = (int) header.getOnce(HeaderConstants.HEADER_LINES);
+			int samples = (int) header.getOnce(HeaderConstants.HEADER_SAMPLES);
+			ImageDataType type = ImageDataType.fromHeaderCode((byte) header.getOnce(HeaderConstants.HEADER_DATA_TYPE));
 			if (floatRep) {
 				data = new HyperspectralImageFloatData(type, bands, lines, samples);
 			} else {
 				data = new HyperspectralImageIntegerData(type, bands, lines, samples);
 			}
 			HyperspectralImageDataReader.readImageData(dataPath, offset, data,
-					(BandOrdering) header.get(HeaderConstants.HEADER_INTERLEAVE), 
-					(ByteOrdering) header.get(HeaderConstants.HEADER_BYTE_ORDER));
+					(BandOrdering) header.getOnce(HeaderConstants.HEADER_INTERLEAVE), 
+					(ByteOrdering) header.getOnce(HeaderConstants.HEADER_BYTE_ORDER));
 		}
 		
 		/** Return the hyperspectral image */

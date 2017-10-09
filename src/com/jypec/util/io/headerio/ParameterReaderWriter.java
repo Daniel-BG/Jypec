@@ -5,7 +5,6 @@ import java.io.IOException;
 import com.jypec.img.HeaderConstants;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
-import com.jypec.util.io.headerio.primitives.StringValueCompressorDecompressor;
 import com.jypec.util.io.headerio.primitives.ValueCompressorDecompressor;
 
 /**
@@ -91,7 +90,11 @@ public class ParameterReaderWriter {
 	 * @param data to be parsed
 	 */
 	public void parseData(String data) {
-		this.comDec.parse(data);
+		if (this.headerConstant == HeaderConstants.HEADER_UNKNOWN) {
+			this.comDec.parse(parameter + " = " + data);
+		} else {
+			this.comDec.parse(data);
+		}
 	}
 	
 	/**
@@ -101,11 +104,6 @@ public class ParameterReaderWriter {
 	 * @throws IOException 
 	 */
 	private void compressData(BitOutputStreamTree brw) throws IOException {
-		if (headerConstant == HeaderConstants.HEADER_UNKNOWN) {
-			StringValueCompressorDecompressor svcd = new StringValueCompressorDecompressor();
-			svcd.setObject(parameter);
-			svcd.compress(brw);
-		}
 		this.comDec.compress(brw);
 	}
 	
@@ -118,11 +116,6 @@ public class ParameterReaderWriter {
 	 * @throws IOException 
 	 */
 	public void decompressData(BitInputStream brw) throws IOException {
-		if (this.headerConstant == HeaderConstants.HEADER_UNKNOWN) {
-			StringValueCompressorDecompressor svcd = new StringValueCompressorDecompressor();
-			svcd.uncompress(brw);
-			this.parameter = (String) svcd.getObject();
-		}
 		this.comDec.uncompress(brw);
 	}
 	
@@ -139,6 +132,9 @@ public class ParameterReaderWriter {
 	 * @param data
 	 */
 	public void setData(Object data) {
+		if (this.headerConstant == HeaderConstants.HEADER_UNKNOWN && this.parameter != null) {
+			throw new UnsupportedOperationException("Cannot set data of unknown type. Use parsing");
+		}
 		this.comDec.setObject(data);
 	}
 	
@@ -152,7 +148,7 @@ public class ParameterReaderWriter {
 	@Override
 	public String toString() {
 		if (this.headerConstant == HeaderConstants.HEADER_UNKNOWN) {
-			return this.parameter + " = " + this.comDec.unParse();
+			return this.comDec.unParse();
 		} else {
 			return this.headerConstant.toString() + " = " + this.comDec.unParse();
 		}
