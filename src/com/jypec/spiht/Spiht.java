@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import javax.xml.soap.Node;
+
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.ebc.data.CodingPlane;
 import com.jypec.util.Pair;
 import com.jypec.util.bits.Bit;
+import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStream;
 
 /**
@@ -47,12 +50,32 @@ public class Spiht {
 		int k = 0;
 		while (k < block.getMagnitudeBitPlaneNumber()) {
 			cp = block.getBitPlane(block.getMagnitudeBitPlaneNumber() - 1 - k); 
-			this.significancePass(cp, bos);
-			this.refinementPass(cp, bos);
+			this.codeSignificancePass(cp, bos);
+			this.codeRefinementPass(cp, bos);
 			k++;
 		}
 	}
 	
+	/**
+	 * Decode the given inputstream into the given block
+	 * @param block
+	 * @param bis
+	 * @param partitionsX
+	 * @param partitionsY
+	 * @throws IOException
+	 */
+	public void deCode(BitInputStream bis, CodingBlock block, int[] partitionsX, int[] partitionsY) throws IOException {
+		this.initialize(block, partitionsX, partitionsY);
+		CodingPlane cp;
+		int k = 0;
+		while (k < block.getMagnitudeBitPlaneNumber()) {
+			cp = block.getBitPlane(block.getMagnitudeBitPlaneNumber() - 1 - k); 
+			this.decodeSignificancePass(cp, bis);
+			this.decodeRefinementPass(cp, bis);
+			k++;
+		}
+	}
+
 	/**
 	 * Initialize the coding lists and partition arrays prior to coding
 	 * @param block
@@ -98,21 +121,26 @@ public class Spiht {
 	 * @param bos
 	 * @throws IOException
 	 */
-	private void significancePass(CodingPlane cp, BitOutputStream bos) throws IOException {
+	private void codeSignificancePass(CodingPlane cp, BitOutputStream bos) throws IOException {
 		this.plsc = this.lsc;
 		this.lsc = new Stack<TreeNode>();
 		
-		while (!lic.isEmpty()) {
-			TreeNode c = lic.pop();
-			Bit bit = c.getBitOf(cp);
+		Stack<TreeNode> newLic = new Stack<TreeNode>();
+		for (TreeNode tn: lic) {
+			Bit bit = tn.getBitOf(cp);
 			this.output(bit, bos);
 			if (bit == Bit.BIT_ONE) {
-				this.output(c.getSignBitOf(cp), bos);
-				this.lsc.push(c);
+				this.output(tn.getSignBitOf(cp), bos);
+				this.lsc.push(lic.pop()); //reorder
+			} else {
+				newLic.push(tn);
 			}
 		}
-		while (!lis.isEmpty()) {
-			Pair<TreeNode, SpihtType> pct = lis.pop();
+		lic = newLic;
+		
+		Stack<Pair<TreeNode, SpihtType>> newLisBack = new Stack<Pair<TreeNode, SpihtType>>();
+		Stack<Pair<TreeNode, SpihtType>> newLisFront = new Stack<Pair<TreeNode, SpihtType>>();
+		for (Pair<TreeNode, SpihtType> pct: lis)
 			switch(pct.second()) {
 			case TYPE_A:
 				boolean oneInDescendants = pct.first().oneInDescendants(cp);
@@ -130,7 +158,9 @@ public class Spiht {
 					}
 					if (pct.first().hasGrandChildren()) {
 						//comes back as a type b
-						lis.push(new Pair<TreeNode, SpihtType>(pct.first(), SpihtType.TYPE_B));
+						newLisBack.push(new Pair<TreeNode, SpihtType>(pct.first(), SpihtType.TYPE_B));
+					} else {
+						newLisFront.push(pct);
 					}
 				}
 				break;
@@ -139,7 +169,7 @@ public class Spiht {
 				this.output(Bit.fromBoolean(oneInGrandChildren), bos);
 				if (oneInGrandChildren) {
 					for (TreeNode c: pct.first().children) {
-						lis.push(new Pair<TreeNode, SpihtType>(c, SpihtType.TYPE_A));
+						newLisBack.push(new Pair<TreeNode, SpihtType>(c, SpihtType.TYPE_A));
 					}
 				}
 				break;
@@ -148,17 +178,76 @@ public class Spiht {
 			}
 		}		
 	}
+
+	private void decodeSignificancePass(CodingPlane cp, BitInputStream bis) throws IOException {
+		this.plsc = this.lsc;
+		this.lsc = new Stack<TreeNode>();
+		
+		while (!lic.isEmpty()) {
+			TreeNode c = lic.peek();
+			Bit bit = this.input(bis);
+			c.setBitOf(cp, bit);
+			if (bit == Bit.BIT_ONE) {
+				c.setSignBitOf(cp, this.input(bis));
+				this.lsc.push(lic.pop()); //move to the end
+			}
+		}
+		while (!lis.isEmpty()) {
+			Pair<TreeNode, SpihtType> pct = lis.peek();
+			switch(pct.second()) {
+			case TYPE_A:
+				boolean oneInDescendants = this.input(bis).toBoolean();
+				if (oneInDescendants) {
+					for (TreeNode c: pct.first().children) {
+						Bit bit = this.input(bis);
+						c.setBitOf(cp, bit);
+						if (bit == Bit.BIT_ZERO) {
+							lic.push(c);
+						} else {
+							c.setSignBitOf(cp, this.input(bis));
+							lsc.push(c);
+						}
+					}
+					lis.pop(); //remove coefficient
+					if (pct.first().hasGrandChildren()) {
+						//comes back as a type b
+						lis.push(new Pair<TreeNode, SpihtType>(pct.first(), SpihtType.TYPE_B));
+					} 
+				}
+				break;
+			case TYPE_B:
+				boolean oneInGrandChildren = this.input(bis).toBoolean();
+				if (oneInGrandChildren) {
+					for (TreeNode c: pct.first().children) {
+						lis.push(new Pair<TreeNode, SpihtType>(c, SpihtType.TYPE_A));
+					}
+					lis.pop(); //delete parent
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException();
+			}
+		}	
+	}
 	
+
 	/**
 	 * Perform a refinement pass over the given plane. Any bits output go to bos
 	 * @param cp
 	 * @param bos
 	 * @throws IOException
 	 */
-	private void refinementPass(CodingPlane cp, BitOutputStream bos) throws IOException {
+	private void codeRefinementPass(CodingPlane cp, BitOutputStream bos) throws IOException {
 		while (!this.plsc.isEmpty()) {
 			TreeNode c = this.plsc.pop();
 			this.output(c.getBitOf(cp), bos);
+		}
+	}
+	
+	
+	private void decodeRefinementPass(CodingPlane cp, BitInputStream bis) throws IOException {
+		while (!this.plsc.isEmpty()) {
+			this.plsc.pop().setBitOf(cp, this.input(bis));
 		}
 	}
 
@@ -172,6 +261,17 @@ public class Spiht {
 	private void output(Bit b, BitOutputStream bos) throws IOException {
 		bos.writeBit(b);
 	}
+	
+	/**
+	 * Input a bit from the inputStream
+	 * @param bis
+	 * @return
+	 * @throws IOException 
+	 */
+	private Bit input(BitInputStream bis) throws IOException {
+		return bis.readBit();
+	}
+
 	
 	
 	private class TreeNode {
@@ -405,11 +505,11 @@ public class Spiht {
 		}
 		
 		/**
-		 * @param bp
+		 * @param plane
 		 * @return The sign of the sample at this Node's coordinates in the given plane
 		 */
-		public Bit getSignBitOf(CodingPlane bp) {
-			return Bit.fromBoolean(bp.isNegativeAt(this.y, this.x));
+		public Bit getSignBitOf(CodingPlane plane) {
+			return Bit.fromBoolean(plane.isNegativeAt(this.y, this.x));
 		}
 
 		/**
@@ -418,6 +518,24 @@ public class Spiht {
 		 */
 		public Bit getBitOf(CodingPlane plane) {
 			return plane.getSymbolAt(this.y, this.x);
+		}
+		
+		/**
+		 * Set the given bit in this {@link TreeNode}'s position in the plane
+		 * @param plane
+		 * @param bit
+		 */
+		public void setBitOf(CodingPlane plane, Bit bit) {
+			plane.setSymbolAt(this.y, this.x, bit);
+		}
+
+		/**
+		 * Set the given sign in this {@link TreeNode}'s position in the plane
+		 * @param plane
+		 * @param sign
+		 */
+		public void setSignBitOf(CodingPlane plane, Bit sign) {
+			plane.setSignAt(this.y, this.x, sign);			
 		}
 
 		/**

@@ -73,7 +73,7 @@ public class BitInputStream extends InputStream {
 	 * @return the next bit from the input stream
 	 * @throws IOException 
 	 */
-	public Bit getBit() throws IOException {
+	public Bit readBit() throws IOException {
 		return Bit.fromInteger(this.readBitAsInt());
 	}
 	

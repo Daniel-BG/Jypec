@@ -52,4 +52,11 @@ public enum Bit {
 	public static Bit fromBoolean(boolean value) {
 		return value ? BIT_ONE : BIT_ZERO;
 	}
+
+	/**
+	 * @return true if this bit is a {@link #BIT_ONE}
+	 */
+	public boolean toBoolean() {
+		return this == BIT_ONE;
+	}
 }
