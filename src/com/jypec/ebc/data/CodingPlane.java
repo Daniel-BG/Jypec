@@ -27,6 +27,16 @@ public class CodingPlane {
 	 * @param planeOffset offset (from the LSB) that this plane refers to
 	 */
 	public CodingPlane(CodingBlock block, int planeOffset) {
+		this(block, planeOffset, false);
+	}
+	
+	/**
+	 * Creates a coding plane 
+	 * @param block
+	 * @param planeOffset
+	 * @param lightWeight
+	 */
+	public CodingPlane(CodingBlock block, int planeOffset, boolean lightWeight) {
 		if (planeOffset < 0 && planeOffset > 30) {
 			throw new IllegalArgumentException("Planeoffset out of range");
 		}
@@ -40,7 +50,9 @@ public class CodingPlane {
 		this.bitMask = 0x1 << planeOffset;
 		this.signMask = this.block.getSignMask();
 		
-		this.codingStatus = new boolean[rows][columns]; //defaulted to false
+		if (!lightWeight) {
+			this.codingStatus = new boolean[rows][columns]; //defaulted to false
+		}
 	}
 	
 	

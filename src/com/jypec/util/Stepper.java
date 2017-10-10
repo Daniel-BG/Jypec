@@ -21,5 +21,22 @@ public class Stepper {
 		}
 		return res;
 	}
+	
+	
+	/**
+	 * Same as {@link #getStepSizes(int, int)} but returns
+	 * the list in the reverse order
+	 * @param size
+	 * @param steps
+	 * @return a list of steps in increasing value
+	 */
+	public static int[] getReverseStepSizes(int size, int steps) {
+		int[] res = getStepSizes(size, steps);
+		int[] fixed = new int[res.length];
+		for (int i = 0; i < fixed.length; i++) {
+			fixed[i] = res[res.length - 1 - i];
+		}
+		return fixed;
+	}
 
 }

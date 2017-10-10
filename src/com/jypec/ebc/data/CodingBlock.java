@@ -110,10 +110,20 @@ public class CodingBlock {
 	 * @return the ith bit plane within this block
 	 */
 	public CodingPlane getBitPlane(int i) {
+		return this.getBitPlane(i, false);
+	}
+	
+	/**
+	 * Gets the ith bitPlane from within this codeBlock
+	 * @param i the index of the bitplane to get
+	 * @param lightWeight if the codingPlane is lightweight (does not have a status matrix)
+	 * @return the ith bit plane within this block
+	 */
+	public CodingPlane getBitPlane(int i, boolean lightWeight) {
 		if (i < 0 || i >= this.magnitudeBitPlanes) {
-			throw new IllegalArgumentException("Requested plane does not exist. Available: [0," + (this.magnitudeBitPlanes - 1) + "]");
+			throw new IllegalArgumentException("Requested plane (" + i + ") does not exist. Available: [0," + (this.magnitudeBitPlanes - 1) + "]");
 		}
-		return new CodingPlane(this, i);
+		return new CodingPlane(this, i, lightWeight);
 	}
 	
 	/**
