@@ -74,7 +74,7 @@ public class Compressor {
 			/** Apply the wavelet transform */
 			Logger.getLogger().log("\tApplying wavelet... ");
 			float[][] waveForm = MatrixTransforms.extractBand(reduced, i, numLines, numSamples);
-			bdw.forwardTransform(waveForm, numLines, numSamples);
+			bdw.forwardTransform(waveForm, numSamples, numLines);
 			float[] minMax = MatrixOperations.minMax(waveForm);
 			
 			/** get max and min from the resulting transform, and create the best data type possible */

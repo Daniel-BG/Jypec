@@ -206,4 +206,11 @@ public class HyperspectralBandData implements IntegerMatrix {
 			return false;
 		}
 	}
+
+	/**
+	 * @return the image this band belongs to
+	 */
+	public HyperspectralImageData getImage() {
+		return this.hyimg;
+	}
 }

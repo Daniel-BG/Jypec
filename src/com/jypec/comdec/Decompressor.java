@@ -82,7 +82,7 @@ public class Decompressor {
 			
 			/** Apply the reverse wavelet transform */
 			Logger.getLogger().log("Reversing wavelet...");
-			bdw.reverseTransform(waveForm, lines, samples);
+			bdw.reverseTransform(waveForm, samples, lines);
 		}
 		
 		
