@@ -30,9 +30,25 @@ public class Pair <P1, P2> {
 	}
 	
 	/**
+	 * Set the first element of this pair
+	 * @param first
+	 */
+	public void setFirst(P1 first) {
+		this.p1 = first;
+	}
+	
+	/**
 	 * @return the second element of the pair
 	 */
 	public P2 second() {
 		return this.p2;
+	}
+
+	/**
+	 * Set the second element of this pair
+	 * @param second
+	 */
+	public void setSecond(P2 second) {
+		this.p2 = second;
 	}
 }

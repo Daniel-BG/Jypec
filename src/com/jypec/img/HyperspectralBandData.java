@@ -1,8 +1,10 @@
 package com.jypec.img;
 
+
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.util.datastructures.IntegerMatrix;
+import com.jypec.util.debug.Logger;
 
 /**
  * Class that stores one hyperspectral band and can be used for extracting blocks for coding and such
@@ -10,6 +12,7 @@ import com.jypec.util.datastructures.IntegerMatrix;
  *
  */
 public class HyperspectralBandData implements IntegerMatrix {
+
 
 	private HyperspectralImageData hyimg;
 	private int band;
@@ -180,6 +183,27 @@ public class HyperspectralBandData implements IntegerMatrix {
 	public float getTotalNumberOfSamples() {
 		return this.getNumberOfLines() * this.getNumberOfSamples();
 	}
+	
+	
 
-
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof HyperspectralBandData) {
+			HyperspectralBandData other = (HyperspectralBandData) obj;
+			if (other.getNumberOfLines() != this.getNumberOfLines() || other.getNumberOfSamples() != this.getNumberOfSamples()) {
+				return false;
+			}
+			for (int i = 0; i < this.getNumberOfLines(); i++) {
+				for (int j = 0; j < this.getNumberOfSamples(); j++) {
+					if (this.getValueAt(i, j) != other.getValueAt(i, j)) {
+						Logger.getLogger().log("Not match @ (" + i + "," + j + "): " + this.getValueAt(i, j) + "<->" + other.getValueAt(i, j));
+						return false;
+					}
+				}
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
