@@ -17,6 +17,7 @@ public class CodingPlane {
 	private int bitMask;
 	private int signMask;
 	private boolean[][] codingStatus;
+	private int planeOffset;
 	
 	private int fullStripNumber, lastStripHeight, columns;
 	
@@ -47,6 +48,7 @@ public class CodingPlane {
 		this.lastStripHeight = rows % 4;
 		this.columns = this.block.getWidth();
 		this.subBand = this.block.getSubBand();
+		this.planeOffset = planeOffset;
 		this.bitMask = 0x1 << planeOffset;
 		this.signMask = this.block.getSignMask();
 		
@@ -200,4 +202,15 @@ public class CodingPlane {
 		return -1;
 	}
 	
+	
+	/**
+	 * @return the next plane (less significant than this one)
+	 * or <code>null</code> if this is the last
+	 */
+	public CodingPlane nextPlane() {
+		if (planeOffset == 0) {
+			return null;
+		}
+		return this.block.getBitPlane(planeOffset - 1, true);
+	}
 }
