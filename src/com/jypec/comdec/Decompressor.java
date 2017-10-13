@@ -70,8 +70,8 @@ public class Decompressor {
 					outliers.add(new Pair<Float, Pair<Integer, Integer>>(
 							input.readFloat(), 
 							new Pair<Integer, Integer>(
-									input.readInt(), 
-									input.readInt())));
+									input.readVLPInt(), 
+									input.readVLPInt())));
 				}
 			}
 				

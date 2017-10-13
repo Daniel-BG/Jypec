@@ -86,8 +86,8 @@ public class Compressor {
 				banditree.writeInt(outliers.size());
 				for (Pair<Float, Pair<Integer, Integer>> p: outliers) {
 					banditree.writeFloat(p.first());
-					banditree.writeInt(p.second().first());
-					banditree.writeInt(p.second().second());
+					banditree.writeVLPInt(p.second().first());
+					banditree.writeVLPInt(p.second().second());
 				}
 				Refinements.clamp(waveForm, Refinements.getNonOutlierRange());
 			}

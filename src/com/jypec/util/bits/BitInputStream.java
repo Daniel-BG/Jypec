@@ -192,6 +192,25 @@ public class BitInputStream extends InputStream {
 	}
 	
 	/**
+	 * Reads a variable lenght POSITIVE int written with {@link BitOutputStream#writeVLPInt(int)}
+	 * @param i
+	 * @return the integer that was read
+	 * @throws IOException
+	 */
+	public int readVLPInt() throws IOException {
+		int byteRead;
+		int shift = 0;
+		int result = 0;
+		do {
+			byteRead = this.readByte() & 0xff;
+			result += (byteRead & 0x7f) << shift;
+			shift += 7;
+		} while ((byteRead & 0x80) != 0x80);
+		
+		return result;
+	}
+	
+	/**
 	 * @return a 16-bit short number
 	 * @throws IOException 
 	 */

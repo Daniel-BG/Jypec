@@ -177,6 +177,24 @@ public class BitOutputStream extends OutputStream {
 	}
 	
 	/**
+	 * Writes a variable lenght POSITIVE int. will use from 1-5 bytes, depending
+	 * on size. Use if you know you won't find big values, otherwise
+	 * don't
+	 * @param i
+	 * @throws IOException
+	 */
+	public void writeVLPInt(int i) throws IOException {
+		if (i < 0) {
+			throw new IllegalArgumentException();
+		}
+		while (i >= 1 << 7) {
+			this.writeByte((byte) (i & 0x7f));
+			i >>>= 7;
+		}
+		this.writeByte((byte) ((i & 0x7f) | 0x80));
+	}
+	
+	/**
 	 * @param i an integer containing an unsigned short in the 16 less significant
 	 * bits
 	 * @throws IOException 
