@@ -1,9 +1,11 @@
 package com.jypec.comdec;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.ejml.data.FMatrixRMaj;
 
+import com.jypec.comdec.refinement.Refinements;
 import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBandData;
@@ -11,6 +13,7 @@ import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
+import com.jypec.util.Pair;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.bits.BitOutputStreamTree;
@@ -75,22 +78,32 @@ public class Compressor {
 			Logger.getLogger().log("\tApplying wavelet... ");
 			float[][] waveForm = MatrixTransforms.extractBand(reduced, i, numLines, numSamples);
 			bdw.forwardTransform(waveForm, numSamples, numLines);
-			float[] minMax = MatrixOperations.minMax(waveForm);
 			
-			/** get max and min from the resulting transform, and create the best data type possible */
+			/** Shave the resulting limits and raw encode their values */
+			if (cp.percentOutliers > 0) {
+				Logger.getLogger().log("\tSaving outliers...");
+				List<Pair<Float, Pair<Integer, Integer>>> outliers = Refinements.findOutliers(waveForm, cp.percentOutliers);
+				banditree.writeInt(outliers.size());
+				for (Pair<Float, Pair<Integer, Integer>> p: outliers) {
+					banditree.writeFloat(p.first());
+					banditree.writeInt(p.second().first());
+					banditree.writeInt(p.second().second());
+				}
+				Refinements.clamp(waveForm, Refinements.getNonOutlierRange());
+			}
+
+			/** get the requested data type */
 			ImageDataType targetType = new ImageDataType(cp.bits, true);
 			if (cp.shaveMap.hasMappingForKey(i)) {
 				targetType.mutatePrecision(-cp.shaveMap.get(i));
 			}
 			
-			//targetType.mutatePrecision(-cp.bitReduction);
 			Logger.getLogger().log("\tApplying quantization to type: " + targetType + "...");
-			
 			/** custom quantizer for this band */
-			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.375f);
-			
+			float[] minMax = MatrixOperations.minMax(waveForm);
 			banditree.writeFloat(minMax[0]);
 			banditree.writeFloat(minMax[1]);
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.375f);
 			
 			
 			/** quantize the transform and save the quantization over the current band */

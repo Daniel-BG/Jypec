@@ -29,6 +29,8 @@ public class ComParameters {
 	public DimensionalityReduction dr;
 	/** from 0-1, percent of samples used for training */
 	public double percentTraining = 1;
+	/** from 0-1, percent of outliers that are to be rawcoded */
+	public double percentOutliers;
 
 	/**
 	 * @param args read the compression parameters from the input arguments 
@@ -42,6 +44,9 @@ public class ComParameters {
 		}
 		if (args.requestTrainingReduction) {
 			this.percentTraining = args.percentTraining;
+		}
+		if (args.requestOutliers) {
+			this.percentOutliers = args.percentOutliers;
 		}
 		this.shaveMap = args.shaves;
 		this.dr = DimensionalityReduction.loadFrom(args);
@@ -58,6 +63,7 @@ public class ComParameters {
 	public void saveTo(BitOutputStreamTree bw) throws IOException {
 		bw.addChild("wave passes").writeNBitNumber(this.wavePasses, ComDecConstants.WAVE_PASSES_BITS);
 		bw.addChild("red bits").writeNBitNumber(this.bits, ComDecConstants.REDUCTION_BITS_BITS);
+		bw.addChild("outliers").writeDouble(percentOutliers);
 		BitOutputStreamTree cbstn = bw.addChild("shave map");
 		cbstn.writeByte((byte) shaveMap.size());
 		for (Entry<Integer, Integer> e: shaveMap.entrySet()) {
@@ -76,6 +82,7 @@ public class ComParameters {
 	public void loadFrom(BitInputStream bw) throws IOException {
 		this.wavePasses = bw.readNBitNumber(ComDecConstants.WAVE_PASSES_BITS) & 0xff;
 		this.bits = bw.readNBitNumber(ComDecConstants.REDUCTION_BITS_BITS) & 0xff;
+		this.percentOutliers = bw.readDouble();
 		
 		int entries = bw.readByte();
 		this.shaveMap = new LowKeyHashMap<Integer, Integer>();

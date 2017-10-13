@@ -1,9 +1,12 @@
 package com.jypec.comdec;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.FMatrixRMaj;
 
+import com.jypec.comdec.refinement.Refinements;
 import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HeaderConstants;
@@ -13,6 +16,7 @@ import com.jypec.img.HyperspectralImageFloatData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
+import com.jypec.util.Pair;
 import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.debug.Logger;
@@ -56,6 +60,21 @@ public class Decompressor {
 		/** Proceed to uncompress the reduced image band by band */
 		for (int i = 0; i < cp.dr.getNumComponents(); i++) {
 			Logger.getLogger().log("Extracting compressed band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]");
+			/** Get the clamped values if present */
+			List<Pair<Float, Pair<Integer, Integer>>> outliers = null;
+			if (cp.percentOutliers > 0) {
+				Logger.getLogger().log("\tGetting outliers...");
+				outliers = new ArrayList<Pair<Float, Pair<Integer, Integer>>>();
+				int size = input.readInt();
+				for (int j = 0; j < size; j++) {
+					outliers.add(new Pair<Float, Pair<Integer, Integer>>(
+							input.readFloat(), 
+							new Pair<Integer, Integer>(
+									input.readInt(), 
+									input.readInt())));
+				}
+			}
+				
 			/** Get this band's max and min values, and use that to create the quantizer */
 			Logger.getLogger().log("\tLoading dequantizer...");
 			float bandMin = input.readFloat();
@@ -79,6 +98,12 @@ public class Decompressor {
 			float[][] waveForm = reduced[i];
 			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, bandMin, bandMax, 0.375f);
 			mq.dequantize(hb, waveForm, 0, 0, lines, samples);
+			
+			/** add outliers back */
+			if (cp.percentOutliers > 0) {
+				Logger.getLogger().log("\tSetting outliers back...");
+				Refinements.addOutliersBack(outliers, waveForm);
+			}
 			
 			/** Apply the reverse wavelet transform */
 			Logger.getLogger().log("Reversing wavelet...");

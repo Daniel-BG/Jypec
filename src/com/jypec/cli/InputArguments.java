@@ -62,6 +62,10 @@ public class InputArguments {
 	public boolean requestTrainingReduction;
 	/** True if we are supposed to analyze the input image */
 	public boolean analyze;
+	/** True if outlier detection is to be used */
+	public boolean requestOutliers;
+	/** Percent of outliers to be hardcoded */
+	public double percentOutliers;
 	
 	
 	/**
@@ -98,6 +102,9 @@ public class InputArguments {
 		}
 		if (args.requestTrainingReduction = line.hasOption(JypecCLI.OPTION_TRAINING_REDUCTION)) {
 			args.percentTraining = Double.parseDouble(line.getOptionValue(JypecCLI.OPTION_TRAINING_REDUCTION));
+		}
+		if (args.requestOutliers = line.hasOption(JypecCLI.OPTION_HARDCODE_OUTLIERS)) {
+			args.percentOutliers = Double.parseDouble(line.getOptionValue(JypecCLI.OPTION_HARDCODE_OUTLIERS));
 		}
 		
 		args.shaves = new LowKeyHashMap<Integer, Integer>();

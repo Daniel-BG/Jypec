@@ -47,6 +47,8 @@ public class JypecCLI {
 	public static final String OPTION_TRAINING_REDUCTION = "train_reduction";
 	/** Flag to indicate if we want to analyze a single image */
 	public static final String OPTION_ANALYZE = "analyze";
+	/** Option to hardcode outliers and thus refine more the coding of normal samples */
+	public static final String OPTION_HARDCODE_OUTLIERS = "hardcode_outliers";
 	
 	/* Options for jypec */
 	private static Options jypecOptions;
@@ -140,6 +142,14 @@ public class JypecCLI {
 				.longOpt(OPTION_TRAINING_REDUCTION)
 				.build();
 		
+		Option hardcodeOutliers = Option
+				.builder()
+				.desc("Hardcode the outliers instead of quantizing a big range")
+				.hasArg()
+				.argName("percentage")
+				.longOpt(OPTION_HARDCODE_OUTLIERS)
+				.build();
+		
 		jypecOptions = new Options();
 		
 		jypecOptions.addOption(bits);
@@ -161,6 +171,7 @@ public class JypecCLI {
 		jypecOptions.addOption(tree);
 		jypecOptions.addOption(trainingReduction);
 		jypecOptions.addOption(analyze);
+		jypecOptions.addOption(hardcodeOutliers);
 	}
 	
 	
