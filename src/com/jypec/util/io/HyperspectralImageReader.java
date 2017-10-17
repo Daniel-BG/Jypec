@@ -68,6 +68,7 @@ public class HyperspectralImageReader {
 			int bands = (int) header.getOnce(HeaderConstants.HEADER_BANDS);
 			int lines = (int) header.getOnce(HeaderConstants.HEADER_LINES);
 			int samples = (int) header.getOnce(HeaderConstants.HEADER_SAMPLES);
+			Logger.getLogger().log("Image size is: " + bands + "bands x " + lines + "lines x " + samples + "samples");
 			ImageDataType type = ImageDataType.fromHeaderCode((byte) header.getOnce(HeaderConstants.HEADER_DATA_TYPE));
 			if (floatRep) {
 				data = new HyperspectralImageFloatData(type, bands, lines, samples);

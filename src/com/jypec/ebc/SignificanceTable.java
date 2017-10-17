@@ -54,6 +54,7 @@ public class SignificanceTable {
 	//inner storage
 	private SignificanceValue[][] table;
 	private boolean[][] firstRefinement;
+	private byte[][] sumHPrecalc, sumVPrecalc, sumDPrecalc;
 	private int height, width;
 	
 	/**
@@ -67,6 +68,9 @@ public class SignificanceTable {
 		this.height = height;
 		this.table = new SignificanceValue[height][width];
 		this.firstRefinement = new boolean[height][width];
+		this.sumVPrecalc = new byte[height][width];
+		this.sumHPrecalc = new byte[height][width];
+		this.sumDPrecalc = new byte[height][width];
 		//initialize just in case
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
@@ -83,10 +87,39 @@ public class SignificanceTable {
 	 * @param isNegative set significant negative if this flag is true, positive if false
 	 */
 	public void setSignificant(int row, int column, boolean isNegative) {
+		//set significance table
 		if (!isNegative) {
 			this.table[row][column] = SignificanceValue.SIGNIFICANT_POSITIVE;
 		} else {
 			this.table[row][column] = SignificanceValue.SIGNIFICANT_NEGATIVE;
+		}
+		
+		//set buffer tables
+		if (column > 0) {
+			this.sumHPrecalc[row][column-1]++;
+			if (row > 0) {
+				this.sumDPrecalc[row-1][column-1]++;
+			}
+			if (row < height - 1) {
+				this.sumDPrecalc[row+1][column-1]++;
+			}
+		}
+		
+		if (column < width - 1) {
+			this.sumHPrecalc[row][column+1]++;
+			if (row > 0) {
+				this.sumDPrecalc[row-1][column+1]++;
+			}
+			if (row < height - 1) {
+				this.sumDPrecalc[row+1][column+1]++;
+			}
+		}
+		
+		if (row > 0) {
+			this.sumVPrecalc[row-1][column]++;
+		}
+		if (row < height - 1) {
+			this.sumVPrecalc[row+1][column]++;
 		}
 	}
 	
@@ -98,53 +131,6 @@ public class SignificanceTable {
 	 */
 	public boolean isSignificant(int row, int column) {
 		return this.table[row][column].isSignificant();
-	}
-	
-	/**
-	 * Set the value at the given position as insignificant
-	 * @param column
-	 * @param row
-	 */
-	public void setInsignificant(int row, int column) {
-		this.table[row][column] = SignificanceValue.INSIGNIFICANT;
-	}
-	
-	/**
-	 * Returns an array with 3 elements:
-	 * 	sumH, sumV, sumD
-	 * @param column
-	 * @param row
-	 * @return
-	 */
-	private int[] getLocalSums(int row, int column) {
-		int sumH = 0, sumD = 0, sumV = 0;
-		
-		if (column > 0) {
-			sumH += this.table[row][column-1].getValue();
-			if (row > 0) {
-				sumD += this.table[row-1][column-1].getValue();
-			}
-			if (row < height - 1) {
-				sumD += this.table[row+1][column-1].getValue();
-			}
-		}
-		if (column < width - 1) {
-			sumH += this.table[row][column+1].getValue();
-			if (row > 0) {
-				sumD += this.table[row-1][column+1].getValue();
-			}
-			if (row < height - 1) {
-				sumD += this.table[row+1][column+1].getValue();
-			}
-		}
-		if (row > 0) {
-			sumV += this.table[row-1][column].getValue();
-		}
-		if (row < height - 1) {
-			sumV += this.table[row+1][column].getValue();
-		}
-		
-		return new int[]{sumH, sumV, sumD};
 	}
 	
 	/**
@@ -162,8 +148,9 @@ public class SignificanceTable {
 		//basically add together the significance of the vertical,
 		//horitonztal, and diagonal neighbors
 		int sumH, sumV, sumD;
-		int[] sums = getLocalSums(row, column);
-		sumH = sums[0]; sumV = sums[1]; sumD = sums[2];
+		sumH = sumHPrecalc[row][column];
+		sumV = sumVPrecalc[row][column]; 
+		sumD = sumDPrecalc[row][column];
 		
 		//Depending on which subband we are coding, the context
 		//will be different
@@ -306,8 +293,11 @@ public class SignificanceTable {
 	 * the first refinement context is separated from subsequent ones
 	 */
 	public ContextLabel getMagnitudeRefinementContextAt(int row, int column) {
-		int[] sums = getLocalSums(row, column);
-		int totalSum = sums[0] + sums[1] + sums[2];
+		int sumH, sumV, sumD;
+		sumH = sumHPrecalc[row][column];
+		sumV = sumVPrecalc[row][column]; 
+		sumD = sumDPrecalc[row][column];
+		int totalSum = sumH + sumV + sumD;
 		if (this.firstRefinement[row][column]) {
 			//refine it
 			this.firstRefinement[row][column] = false;
