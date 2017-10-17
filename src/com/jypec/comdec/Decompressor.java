@@ -39,6 +39,7 @@ public class Decompressor {
 	 * @throws IOException 
 	 */
 	public HyperspectralImageData decompress(ImageHeaderData ihd, BitInputStream input) throws IOException {
+		Logger.getLogger().profileStart();
 		/** Need to know the image dimensions and some other values */
 		Logger.getLogger().log("Extracting image metadata...");
 		int lines = (int) ihd.getOnce(HeaderConstants.HEADER_LINES);
@@ -121,6 +122,7 @@ public class Decompressor {
 		
 		
 		//image is decompressed now
+		Logger.getLogger().profileEnd();
 		return srcImg;
 	}
 }

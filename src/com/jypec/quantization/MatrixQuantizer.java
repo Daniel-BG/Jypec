@@ -1,6 +1,7 @@
 package com.jypec.quantization;
 
 import com.jypec.util.datastructures.IntegerMatrix;
+import com.jypec.util.debug.Logger;
 
 /**
  * Matrix quantizer
@@ -36,11 +37,13 @@ public class MatrixQuantizer {
 	 * @param cols second dimension length of the matrix
 	 */
 	public void quantize(float[][] input, IntegerMatrix output, int rowOffset, int colOffset, int rows, int cols) {
+		Logger.getLogger().profileStart();
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
 				output.setDataAt(this.quantizer.normalizeAndQuantize(input[rowOffset + i][colOffset + j]), rowOffset + i, colOffset + j);
 			}
 		}
+		Logger.getLogger().profileEnd();
 	}
 	
 	/**

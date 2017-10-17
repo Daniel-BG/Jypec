@@ -1,5 +1,7 @@
 package com.jypec.util.arrays;
 
+import com.jypec.util.debug.Logger;
+
 /**
  * Some operations over matrices
  * @author Daniel
@@ -11,6 +13,7 @@ public class MatrixOperations {
 	 * @return the min and max values found in the source
 	 */
 	public static float[] minMax(float[][] source) {
+		Logger.getLogger().profileStart();
 		float[] minMax = new float[2];
 		int rows = source.length;
 		int cols = source[0].length;
@@ -27,6 +30,7 @@ public class MatrixOperations {
 				}
 			}
 		}
+		Logger.getLogger().profileEnd();
 		return minMax;
 	}
 

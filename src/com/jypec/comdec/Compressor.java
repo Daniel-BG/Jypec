@@ -47,6 +47,7 @@ public class Compressor {
 	 * @throws IOException 
 	 */
 	public void compress(HyperspectralImageData srcImg, BitOutputStreamTree output) throws IOException {
+		Logger.getLogger().profileStart();
 		/** Get some values we are gonna need */
 		int numLines = srcImg.getNumberOfLines();
 		int numSamples = srcImg.getNumberOfSamples();
@@ -120,6 +121,7 @@ public class Compressor {
 			Logger.getLogger().log("\tCurrent size: " + output.getTreeBits() + " bits (+" + (output.getTreeBits() - lastBits) + ")");
 			lastBits = output.getTreeBits();
 		}
+		Logger.getLogger().profileEnd();
 	}
 	
 }

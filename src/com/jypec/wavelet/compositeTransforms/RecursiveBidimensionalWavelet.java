@@ -1,6 +1,7 @@
 package com.jypec.wavelet.compositeTransforms;
 
 import com.jypec.util.Stepper;
+import com.jypec.util.debug.Logger;
 import com.jypec.wavelet.BidimensionalWavelet;
 
 /**
@@ -26,11 +27,13 @@ public class RecursiveBidimensionalWavelet implements BidimensionalWavelet {
 
 	@Override
 	public void forwardTransform(float[][] s, int width, int height) {
+		Logger.getLogger().profileStart();
 		int[] widths = Stepper.getStepSizes(width, this.steps);
 		int[] heights = Stepper.getStepSizes(height, this.steps);
 		for (int i = 0; i < steps; i++) {
 			this.bdw.forwardTransform(s, widths[i], heights[i]);
 		}
+		Logger.getLogger().profileEnd();
 	}
 
 	@Override

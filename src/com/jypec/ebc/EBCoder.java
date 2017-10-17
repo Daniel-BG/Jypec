@@ -9,6 +9,7 @@ import com.jypec.ebc.mq.MQArithmeticCoder;
 import com.jypec.util.Pair;
 import com.jypec.util.bits.Bit;
 import com.jypec.util.bits.BitOutputStreamTree;
+import com.jypec.util.debug.Logger;
 
 /**
  * MQCoder that given an input block codes it into the
@@ -41,6 +42,7 @@ public class EBCoder {
 	 * @throws IOException 
 	 */ 
 	public void code(CodingBlock block, BitOutputStreamTree output) throws IOException {
+		Logger.getLogger().profileStart();
 		this.initialize(block.getWidth(), block.getHeight());
 		
 		int numberOfBitPlanes = block.getMagnitudeBitPlaneNumber();
@@ -58,6 +60,7 @@ public class EBCoder {
 		//and marking the end of the stream
 		this.coder.dumpRemainingBits(output);
 		this.coder.markEndOfStream(output);
+		Logger.getLogger().profileEnd();
 	}
 	
 	/**
