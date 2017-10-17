@@ -11,6 +11,7 @@ import com.jypec.util.Pair;
 import com.jypec.util.bits.Bit;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitStreamConstants;
+import com.jypec.util.debug.Profiler;
 
 /**
  * MQDecoder dual to the MQcoder
@@ -69,6 +70,7 @@ public class EBDecoder {
 	
 
 	private void decodeCleanup(BitInputStream input, CodingPlane plane) throws IOException {
+		Profiler.getProfiler().profileStart();
 		//code full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -109,6 +111,7 @@ public class EBDecoder {
 				}
 			}
 		}
+		Profiler.getProfiler().profileEnd();
 	}
 	
 	/**
@@ -134,6 +137,7 @@ public class EBDecoder {
 	 * @throws IOException 
 	 */
 	private void decodeRefinement(BitInputStream input, CodingPlane plane) throws IOException {
+		Profiler.getProfiler().profileStart();
 		//decode full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -153,6 +157,7 @@ public class EBDecoder {
 				}
 			}
 		}
+		Profiler.getProfiler().profileEnd();
 	}
 	
 	/**
@@ -194,6 +199,7 @@ public class EBDecoder {
 	 * @throws IOException 
 	 */
 	private void decodeSignificance(BitInputStream input, CodingPlane plane) throws IOException {
+		Profiler.getProfiler().profileStart();
 		//decode full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -213,6 +219,7 @@ public class EBDecoder {
 				}
 			}
 		}
+		Profiler.getProfiler().profileEnd();
 	}
 	
 	/**

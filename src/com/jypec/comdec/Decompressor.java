@@ -8,7 +8,6 @@ import org.ejml.data.FMatrixRMaj;
 
 import com.jypec.comdec.refinement.Refinements;
 import com.jypec.ebc.EBDecoder;
-import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HeaderConstants;
 import com.jypec.img.HyperspectralBandData;
 import com.jypec.img.HyperspectralImageData;
@@ -90,10 +89,8 @@ public class Decompressor {
 			/** Now divide into blocks and decode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
 			Logger.getLogger().log("\tDecoding " + blocker.size() + "blocks");
-			for (CodingBlock block: blocker) {			
-				block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
-				decoder.decode(input, block);
-			}
+			blocker.decode(input, targetType, decoder);
+
 			
 			/** dequantize the wave */
 			Logger.getLogger().log("\tDequantizing...");

@@ -56,11 +56,13 @@ public class MatrixQuantizer {
 	 * @param cols
 	 */
 	public void dequantize(IntegerMatrix input, float[][] output, int rowOffset, int colOffset, int rows, int cols) {
+		Profiler.getProfiler().profileStart();
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
 				output[rowOffset + i][colOffset + j] = this.quantizer.deQuantizeAndDenormalize(input.getDataAt(rowOffset + i, colOffset + j));
 			}
 		}
+		Profiler.getProfiler().profileEnd();
 	}
 	
 	

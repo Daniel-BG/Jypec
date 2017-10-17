@@ -103,9 +103,11 @@ public abstract class DimensionalityReduction {
 	 * {@link #doTrain(FMatrixRMaj)} has a easier time training
 	 */
 	public FMatrixRMaj preprocess(FMatrixRMaj source) {
+		Profiler.getProfiler().profileStart();
 		if (this.reductionInTrainingRequested()) {
-			return EJMLExtensions.getSubSet(source, percentTraining);
+			source = EJMLExtensions.getSubSet(source, percentTraining);
 		}
+		Profiler.getProfiler().profileEnd();
 		return source;
 	}
 	

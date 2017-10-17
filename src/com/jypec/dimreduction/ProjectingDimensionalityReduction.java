@@ -8,6 +8,7 @@ import org.ejml.dense.row.CommonOps_FDRM;
 import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
+import com.jypec.util.debug.Profiler;
 
 /**
  * Parent class for all your projecting dimensionality needs
@@ -62,17 +63,21 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	
 	@Override
 	public FMatrixRMaj reduce(FMatrixRMaj img) {
+		Profiler.getProfiler().profileStart();
 		EJMLExtensions.subColumnVector(img, adjustment);
 		FMatrixRMaj res = new FMatrixRMaj(dimProj, img.getNumCols());
 		CommonOps_FDRM.mult(projectionMatrix, img, res);
+		Profiler.getProfiler().profileEnd();
 		return res;
 	}
 
 	@Override
 	public FMatrixRMaj boost(FMatrixRMaj src) {
+		Profiler.getProfiler().profileStart();
 		FMatrixRMaj res = new FMatrixRMaj(dimOrig, src.getNumCols());
 		CommonOps_FDRM.mult(unprojectionMatrix, src, res);
 		EJMLExtensions.addColumnVector(res, adjustment);
+		Profiler.getProfiler().profileEnd();
 		return res;
 	}
 	

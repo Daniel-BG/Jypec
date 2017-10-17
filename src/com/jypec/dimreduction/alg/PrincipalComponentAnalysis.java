@@ -15,6 +15,7 @@ import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.Pair;
 import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.debug.Logger;
+import com.jypec.util.debug.Profiler;
 
 /**
  * PCA implementation for dimensionality reduction
@@ -35,6 +36,7 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
 
 	@Override
 	public boolean doTrain(FMatrixRMaj data) {
+		Profiler.getProfiler().profileStart();
 		if (this.reductionInTrainingRequested()) {
 			data = EJMLExtensions.getSubSet(data, percentTraining);
 		}
@@ -54,6 +56,7 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
         boolean res = dec.decompose(s);
         if (!res) {
         	Logger.getLogger().log("Decomposition failed");
+        	Profiler.getProfiler().profileEnd();
         	return false;
         }
         
@@ -83,7 +86,7 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
         
         unprojectionMatrix = new FMatrixRMaj(projectionMatrix);
         CommonOps_FDRM.transpose(unprojectionMatrix);
-        
+        Profiler.getProfiler().profileEnd();
         return true;
 	}
 	

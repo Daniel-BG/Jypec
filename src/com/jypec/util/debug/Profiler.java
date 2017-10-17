@@ -28,7 +28,7 @@ public class Profiler {
 	private Precision precision;
 	
 	private Profiler() {
-		this.profileTree = new ProfileTree("Program", null);
+		this.profileTree = new ProfileTree("Program", "", null);
 		this.profileTree.startTiming();
 		this.setSecondFractionPrecision(3);
 		this.setPrecision(Precision.MINUTE);
@@ -93,11 +93,12 @@ public class Profiler {
 		
 		StackTraceElement ste = Thread.currentThread().getStackTrace()[2]; //0 is Thread, 1 is this log, 2 is the caller
 		String funcTrace = InfoFormatter.reducedQualifiedName(ste.getClassName(), ste.getMethodName());
+		String lineInfo = "(" + ste.getFileName() + ":" + ste.getLineNumber() + ")";
 		
 		if (this.profileTree.getChildren(funcTrace) != null) {
 			this.profileTree = this.profileTree.getChildren(funcTrace);
 		} else {
-			this.profileTree = this.profileTree.addChildren(funcTrace);
+			this.profileTree = this.profileTree.addChildren(funcTrace, lineInfo);
 		}
 		this.profileTree.startTiming();
 	}
@@ -124,13 +125,15 @@ public class Profiler {
 	private class ProfileTree {
 
 		private String name;
+		private String lineInfo;
 		private long accTime;
 		private long stTime = -1;
 		private HashMap<String, ProfileTree> children; 
 		private ProfileTree parent;
 		
-		public ProfileTree(String name, ProfileTree parent) {
+		public ProfileTree(String name, String lineInfo, ProfileTree parent) {
 			this.name = name;
+			this.lineInfo = lineInfo;
 			this.children = new HashMap<String, ProfileTree>();
 			this.parent = parent;
 			this.accTime = 0;
@@ -165,8 +168,8 @@ public class Profiler {
 			return this.accTime;
 		}
 		
-		public ProfileTree addChildren(String name) {
-			ProfileTree tree = new ProfileTree(name, this);
+		public ProfileTree addChildren(String name, String lineInfo) {
+			ProfileTree tree = new ProfileTree(name, lineInfo, this);
 			this.children.put(name, tree);
 			return tree;
 		}
@@ -195,7 +198,7 @@ public class Profiler {
 				for (int i = 0; i < level - 1; i++) {
 					System.out.print("           ");
 				}
-				System.out.println(String.format("%08.5f", percent) + "% [" + InfoFormatter.timeToString(this.accTime, secondFractionPrecision, precision) + "]" + this.name);	
+				System.out.println(String.format("%08.5f", percent) + "% [" + InfoFormatter.timeToString(this.accTime, secondFractionPrecision, precision) + "]" + this.name + " " + this.lineInfo);	
 			}
 			
 			//get profiling entries

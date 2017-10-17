@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import com.jypec.ebc.EBCoder;
+import com.jypec.ebc.EBDecoder;
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBandData;
 import com.jypec.img.ImageDataType;
 import com.jypec.util.Stepper;
+import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.bits.BitTwiddling;
 import com.jypec.util.debug.Profiler;
@@ -135,6 +137,23 @@ public class Blocker extends ArrayList<CodingBlock> {
 		for (CodingBlock block: this) {
 			block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
 			coder.code(block, bost.addChild(block.toString()));
+		}
+		Profiler.getProfiler().profileEnd();
+	}
+
+	/**
+	 * Decode the array of blocks that form this blocker from the input stream with the
+	 * given data type and decoder
+	 * @param input
+	 * @param targetType
+	 * @param decoder
+	 * @throws IOException
+	 */
+	public void decode(BitInputStream input, ImageDataType targetType, EBDecoder decoder) throws IOException {
+		Profiler.getProfiler().profileStart();
+		for (CodingBlock block: this) {			
+			block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
+			decoder.decode(input, block);
 		}
 		Profiler.getProfiler().profileEnd();
 	}
