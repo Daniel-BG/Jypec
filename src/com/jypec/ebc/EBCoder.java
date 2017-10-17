@@ -9,7 +9,7 @@ import com.jypec.ebc.mq.MQArithmeticCoder;
 import com.jypec.util.Pair;
 import com.jypec.util.bits.Bit;
 import com.jypec.util.bits.BitOutputStreamTree;
-import com.jypec.util.debug.Logger;
+import com.jypec.util.debug.Profiler;
 
 /**
  * MQCoder that given an input block codes it into the
@@ -42,7 +42,6 @@ public class EBCoder {
 	 * @throws IOException 
 	 */ 
 	public void code(CodingBlock block, BitOutputStreamTree output) throws IOException {
-		Logger.getLogger().profileStart();
 		this.initialize(block.getWidth(), block.getHeight());
 		
 		int numberOfBitPlanes = block.getMagnitudeBitPlaneNumber();
@@ -60,7 +59,6 @@ public class EBCoder {
 		//and marking the end of the stream
 		this.coder.dumpRemainingBits(output);
 		this.coder.markEndOfStream(output);
-		Logger.getLogger().profileEnd();
 	}
 	
 	/**
@@ -72,6 +70,7 @@ public class EBCoder {
 	 * @throws IOException 
 	 */
 	private void codeCleanup(CodingPlane plane, BitOutputStreamTree output) throws IOException {
+		Profiler.getProfiler().profileStart();
 		//code full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -114,6 +113,7 @@ public class EBCoder {
 				}
 			}
 		}
+		Profiler.getProfiler().profileEnd();
 	}
 	
 
@@ -159,6 +159,7 @@ public class EBCoder {
 	 * @throws IOException 
 	 */
 	private void codeSignificance(CodingPlane plane, BitOutputStreamTree output) throws IOException {
+		Profiler.getProfiler().profileStart();
 		//code full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -178,6 +179,7 @@ public class EBCoder {
 				}
 			}
 		}
+		Profiler.getProfiler().profileEnd();
 	}
 	
 	/**
@@ -200,6 +202,7 @@ public class EBCoder {
 	 * @throws IOException 
 	 */
 	private void codeRefinement(CodingPlane plane, BitOutputStreamTree output) throws IOException {
+		Profiler.getProfiler().profileStart();
 		//code full strips within the block
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
@@ -219,6 +222,7 @@ public class EBCoder {
 				}
 			}
 		}
+		Profiler.getProfiler().profileEnd();
 	}
 
 }

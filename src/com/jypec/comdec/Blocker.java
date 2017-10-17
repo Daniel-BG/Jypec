@@ -1,12 +1,17 @@
 package com.jypec.comdec;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import com.jypec.ebc.EBCoder;
 import com.jypec.ebc.SubBand;
 import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBandData;
+import com.jypec.img.ImageDataType;
 import com.jypec.util.Stepper;
+import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.bits.BitTwiddling;
+import com.jypec.util.debug.Profiler;
 
 /**
  * @author Daniel
@@ -116,6 +121,22 @@ public class Blocker extends ArrayList<CodingBlock> {
 			this.blockSameSubBandRegion(hb, sb, strow + this.expectedBlockDim, stcol, rows - this.expectedBlockDim, this.expectedBlockDim);
 			this.blockSameSubBandRegion(hb, sb, strow + this.expectedBlockDim, stcol + this.expectedBlockDim, rows - this.expectedBlockDim, cols - this.expectedBlockDim);
 		}
+	}
+
+	/**
+	 * Code the blocks that make up this blocker with the given coder and type in the given bost
+	 * @param targetType
+	 * @param coder
+	 * @param bost
+	 * @throws IOException 
+	 */
+	public void code(ImageDataType targetType, EBCoder coder, BitOutputStreamTree bost) throws IOException {
+		Profiler.getProfiler().profileStart();
+		for (CodingBlock block: this) {
+			block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
+			coder.code(block, bost.addChild(block.toString()));
+		}
+		Profiler.getProfiler().profileEnd();
 	}
 	
 }

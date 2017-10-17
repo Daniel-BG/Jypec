@@ -20,6 +20,7 @@ import com.jypec.util.Pair;
 import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.debug.Logger;
+import com.jypec.util.debug.Profiler;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
@@ -39,7 +40,7 @@ public class Decompressor {
 	 * @throws IOException 
 	 */
 	public HyperspectralImageData decompress(ImageHeaderData ihd, BitInputStream input) throws IOException {
-		Logger.getLogger().profileStart();
+		Profiler.getProfiler().profileStart();
 		/** Need to know the image dimensions and some other values */
 		Logger.getLogger().log("Extracting image metadata...");
 		int lines = (int) ihd.getOnce(HeaderConstants.HEADER_LINES);
@@ -122,7 +123,7 @@ public class Decompressor {
 		
 		
 		//image is decompressed now
-		Logger.getLogger().profileEnd();
+		Profiler.getProfiler().profileEnd();
 		return srcImg;
 	}
 }

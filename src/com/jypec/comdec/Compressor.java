@@ -7,7 +7,6 @@ import org.ejml.data.FMatrixRMaj;
 
 import com.jypec.comdec.refinement.Refinements;
 import com.jypec.ebc.EBCoder;
-import com.jypec.ebc.data.CodingBlock;
 import com.jypec.img.HyperspectralBandData;
 import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
@@ -18,6 +17,7 @@ import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.debug.Logger;
+import com.jypec.util.debug.Profiler;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
@@ -47,7 +47,7 @@ public class Compressor {
 	 * @throws IOException 
 	 */
 	public void compress(HyperspectralImageData srcImg, BitOutputStreamTree output) throws IOException {
-		Logger.getLogger().profileStart();
+		Profiler.getProfiler().profileStart();
 		/** Get some values we are gonna need */
 		int numLines = srcImg.getNumberOfLines();
 		int numSamples = srcImg.getNumberOfSamples();
@@ -114,14 +114,11 @@ public class Compressor {
 			/** Now divide into blocks and encode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
 			Logger.getLogger().log("\tEncoding in " + blocker.size() + " blocks");
-			for (CodingBlock block: blocker) {
-				block.setDepth(targetType.getBitDepth()); //depth adjusted since there might be more bits
-				coder.code(block, banditree.addChild(block.toString()));
-			}
+			blocker.code(targetType, coder, banditree);
 			Logger.getLogger().log("\tCurrent size: " + output.getTreeBits() + " bits (+" + (output.getTreeBits() - lastBits) + ")");
 			lastBits = output.getTreeBits();
 		}
-		Logger.getLogger().profileEnd();
+		Profiler.getProfiler().profileEnd();
 	}
 	
 }

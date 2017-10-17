@@ -16,7 +16,7 @@ import com.jypec.dimreduction.alg.VertexComponentAnalysis;
 import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
-import com.jypec.util.debug.Logger;
+import com.jypec.util.debug.Profiler;
 
 /**
  * @author Daniel
@@ -64,10 +64,10 @@ public abstract class DimensionalityReduction {
 	 * @return the reduced matrix after training with source
 	 */
 	public FMatrixRMaj trainReduce(FMatrixRMaj source) {
-		Logger.getLogger().profileStart();
+		Profiler.getProfiler().profileStart();
 		this.train(source);
 		FMatrixRMaj res = this.reduce(source);
-		Logger.getLogger().profileEnd();
+		Profiler.getProfiler().profileEnd();
 		return res;
 	}
 	
