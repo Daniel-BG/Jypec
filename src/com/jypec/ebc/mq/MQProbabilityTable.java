@@ -51,8 +51,7 @@ public class MQProbabilityTable {
 	 * Create the table with the initial value
 	 */
 	public MQProbabilityTable() {
-		this.prediction = INITIAL_BIT;
-		this.state = INITIAL_STATE;
+		this(INITIAL_STATE, INITIAL_BIT);
 	}
 	
 	/**

@@ -12,7 +12,7 @@ import com.jypec.util.bits.Bit;
 public class SignificanceTable {
 	/**
 	 * Possible values for the inner table of this class,
-	 * along with methods to treat htem
+	 * along with methods to treat them
 	 * @author Daniel
 	 *
 	 */
