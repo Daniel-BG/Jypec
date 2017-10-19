@@ -12,8 +12,6 @@ import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
-import com.jypec.quantization.SplitLinearSqrtPrequantization;
-import com.jypec.quantization.SqrtPrequantization;
 import com.jypec.util.Pair;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.arrays.MatrixTransforms;
@@ -21,7 +19,6 @@ import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.debug.Logger;
 import com.jypec.util.debug.Profiler;
 import com.jypec.wavelet.BidimensionalWavelet;
-import com.jypec.wavelet.PrequantizationTransform;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
@@ -85,13 +82,14 @@ public class Compressor {
 			
 			/** Shave the resulting limits and raw encode their values */
 			if (cp.percentOutliers > 0) {
+				BitOutputStreamTree outlierTree = banditree.addChild("outliers");
 				Logger.getLogger().log("\tSaving outliers...");
 				List<Pair<Float, Pair<Integer, Integer>>> outliers = Refinements.findOutliers(waveForm, cp.percentOutliers);
-				banditree.writeInt(outliers.size());
+				outlierTree.writeInt(outliers.size());
 				for (Pair<Float, Pair<Integer, Integer>> p: outliers) {
-					banditree.writeFloat(p.first());
-					banditree.writeVLPInt(p.second().first());
-					banditree.writeVLPInt(p.second().second());
+					outlierTree.writeFloat(p.first());
+					outlierTree.writeVLPInt(p.second().first());
+					outlierTree.writeVLPInt(p.second().second());
 				}
 				Refinements.clamp(waveForm, Refinements.getNonOutlierRange());
 			}
@@ -104,16 +102,14 @@ public class Compressor {
 			
 			Logger.getLogger().log("\tApplying quantization to type: " + targetType + "...");
 			/** custom quantizer for this band */
-			float avg = MatrixOperations.avg(waveForm);
-			float std = MatrixOperations.std(waveForm);
-			banditree.writeFloat(avg);
-			banditree.writeFloat(std);
-			PrequantizationTransform lt = new PrequantizationTransform(new SplitLinearSqrtPrequantization(avg, std));
-			//lt.forwardTransform(waveForm, numSamples, numLines);
+			cp.pt.train(waveForm);
+			cp.pt.saveTo(banditree.addChild("PreQuantizationTransform"));
+			cp.pt.forwardTransform(waveForm, numSamples, numLines);
 			
 			float[] minMax = MatrixOperations.minMax(waveForm);
-			banditree.writeFloat(minMax[0]);
-			banditree.writeFloat(minMax[1]);
+			BitOutputStreamTree minMaxTree = banditree.addChild("minmax");
+			minMaxTree.writeFloat(minMax[0]);
+			minMaxTree.writeFloat(minMax[1]);
 			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.375f);
 			
 			
@@ -124,7 +120,7 @@ public class Compressor {
 			/** Now divide into blocks and encode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);
 			Logger.getLogger().log("\tEncoding in " + blocker.size() + " blocks");
-			blocker.code(targetType, coder, banditree);
+			blocker.code(targetType, coder, banditree.addChild("Blocks"));
 			Logger.getLogger().log("\tCurrent size: " + output.getTreeBits() + " bits (+" + (output.getTreeBits() - lastBits) + ")");
 			lastBits = output.getTreeBits();
 		}

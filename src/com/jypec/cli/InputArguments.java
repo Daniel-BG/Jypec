@@ -66,6 +66,10 @@ public class InputArguments {
 	public boolean requestOutliers;
 	/** Percent of outliers to be hardcoded */
 	public double percentOutliers;
+	/** True if prequantization transform was asked for */
+	public boolean requestPrequantization;
+	/** List of arguments for the prequantization transform */
+	public String[] prequantizationArgs;
 	
 	
 	/**
@@ -105,6 +109,9 @@ public class InputArguments {
 		}
 		if (args.requestOutliers = line.hasOption(JypecCLI.OPTION_HARDCODE_OUTLIERS)) {
 			args.percentOutliers = Double.parseDouble(line.getOptionValue(JypecCLI.OPTION_HARDCODE_OUTLIERS));
+		}
+		if (args.requestPrequantization = line.hasOption(JypecCLI.OPTION_PREQUANTIZE)) {
+			args.prequantizationArgs = line.getOptionValues(JypecCLI.OPTION_PREQUANTIZE);
 		}
 		
 		args.shaves = new LowKeyHashMap<Integer, Integer>();

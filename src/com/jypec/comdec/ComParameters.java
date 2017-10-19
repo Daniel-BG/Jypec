@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import com.jypec.cli.InputArguments;
 import com.jypec.dimreduction.DimensionalityReduction;
+import com.jypec.quantization.PrequantizationTransformer;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.datastructures.LowKeyHashMap;
@@ -27,6 +28,8 @@ public class ComParameters {
 	public LowKeyHashMap<Integer, Integer> shaveMap;
 	/** Dimensionality reduction algorithm */
 	public DimensionalityReduction dr;
+	/** Prequantization algorithm */
+	public PrequantizationTransformer pt;
 	/** from 0-1, percent of samples used for training */
 	public double percentTraining = 1;
 	/** from 0-1, percent of outliers that are to be rawcoded */
@@ -50,6 +53,7 @@ public class ComParameters {
 		}
 		this.shaveMap = args.shaves;
 		this.dr = DimensionalityReduction.loadFrom(args);
+		this.pt = PrequantizationTransformer.loadFrom(args);
 	}
 	
 	/** Create empty parameters to be loaded from {@link #loadFrom(BitInputStream)}*/
@@ -71,6 +75,7 @@ public class ComParameters {
 			cbstn.writeByte((byte) (int)e.getValue());
 		}
 		dr.saveTo(bw.addChild("dim red"));
+		//pt is not saved since it is band-dependent
 	}
 	
 	
@@ -90,6 +95,7 @@ public class ComParameters {
 			this.shaveMap.put((int) bw.readByte(), (int) bw.readByte());
 		}
 		this.dr = DimensionalityReduction.loadFrom(bw);
+		//pt is not loaded since it is band-dependent
 	}
 	
 	

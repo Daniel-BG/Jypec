@@ -47,6 +47,10 @@ public class MatrixOperations {
 	}
 
 
+	/**
+	 * @param waveForm
+	 * @return the standard deviation of the given waveForm
+	 */
 	public static float std(float[][] waveForm) {
 		float avg = avg(waveForm);
 		double acc = 0;
@@ -58,8 +62,6 @@ public class MatrixOperations {
 		}
 		acc /= (float) (waveForm.length * waveForm[0].length);
 		
-		
-		// TODO Auto-generated method stub
 		return (float) Math.sqrt(acc);
 	}
 

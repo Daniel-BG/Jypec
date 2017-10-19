@@ -1,10 +1,15 @@
 package com.jypec.quantization;
 
+import java.io.IOException;
+
+import com.jypec.util.arrays.MatrixOperations;
+import com.jypec.util.bits.BitOutputStreamTree;
+
 /**
  * Does a log based transformation of the input. 
  * @author Daniel
  */
-public class LogPrequantization implements PrequantizationTransformer {
+public class LogPrequantization extends PrequantizationTransformer {
 
 	
 	private float avg; //average of the distribution being transformed
@@ -14,9 +19,17 @@ public class LogPrequantization implements PrequantizationTransformer {
 	 * @param distributionAverage the average of the <b>original</b> samples being transformed
 	 */
 	public LogPrequantization(float distributionAverage) {
+		super(PrequantizationTypes.PREQUANT_LOG);
 		this.avg = distributionAverage;
 	}
 	
+	/**
+	 * Default constructor with average 0
+	 */
+	public LogPrequantization() {
+		this(0);
+	}
+
 	@Override
 	public float forward(float input) {
 		if (input > avg) {
@@ -37,6 +50,16 @@ public class LogPrequantization implements PrequantizationTransformer {
 		} else {
 			return avg;
 		}
+	}
+
+	@Override
+	public void doSaveTo(BitOutputStreamTree bost) throws IOException {
+		bost.writeFloat(avg);
+	}
+
+	@Override
+	public void train(float[][] s) {
+		this.avg = MatrixOperations.avg(s);
 	}
 
 }

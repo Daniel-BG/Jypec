@@ -49,6 +49,8 @@ public class JypecCLI {
 	public static final String OPTION_ANALYZE = "analyze";
 	/** Option to hardcode outliers and thus refine more the coding of normal samples */
 	public static final String OPTION_HARDCODE_OUTLIERS = "hardcode_outliers";
+	/** Option to prequantize the transform so that non uniform quantization is done */
+	public static final String OPTION_PREQUANTIZE = "prequantize";
 	
 	/* Options for jypec */
 	private static Options jypecOptions;
@@ -108,6 +110,14 @@ public class JypecCLI {
 				.hasArgs()
 				.argName("args[]")
 				.longOpt(OPTION_REDUCTION)
+				.build();
+		
+		Option prequantization = Option
+				.builder()
+				.desc("prequantization transformation algorithm")
+				.hasArgs()
+				.argName("args[]")
+				.longOpt(OPTION_PREQUANTIZE)
 				.build();
 		
 		Option wavelet = Option
@@ -172,6 +182,7 @@ public class JypecCLI {
 		jypecOptions.addOption(trainingReduction);
 		jypecOptions.addOption(analyze);
 		jypecOptions.addOption(hardcodeOutliers);
+		jypecOptions.addOption(prequantization);
 	}
 	
 	

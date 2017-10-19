@@ -154,7 +154,7 @@ public abstract class DimensionalityReduction {
 	/**
 	 * Loads the necessary data from the BitStream so as to be able to {@link #boost(FMatrixRMaj)}
 	 * an matrix into its original space. The given BitStream must've been filled with 
-	 * {@link #saveTo(BitStreamDataReaderWriter)}
+	 * {@link #doSaveTo(BitStreamDataReaderWriter)}
 	 * @param bw The BitStream handler that encapsulates the BitStream
 	 * @return the proper dimensionality reduction algorithm
 	 * @throws IOException 
