@@ -2,7 +2,9 @@ package com.jypec.quantization;
 
 import java.io.IOException;
 
-import com.jypec.util.arrays.MatrixOperations;
+import org.ejml.data.FMatrixRMaj;
+
+import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.bits.BitOutputStreamTree;
 
 /**
@@ -58,8 +60,8 @@ public class LogPrequantization extends PrequantizationTransformer {
 	}
 
 	@Override
-	public void train(float[][] s) {
-		this.avg = MatrixOperations.avg(s);
+	public void train(FMatrixRMaj s) {
+		this.avg = EJMLExtensions.avg(s);
 	}
 
 }

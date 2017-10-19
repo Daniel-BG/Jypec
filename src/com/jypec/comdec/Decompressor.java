@@ -54,7 +54,7 @@ public class Decompressor {
 		cp.loadFrom(input);
 		
 		/** Uncompress the data stream */
-		float[][][] reduced = new float[cp.dr.getNumComponents()][lines][samples];
+		ArrayList<FMatrixRMaj> reduced = new ArrayList<FMatrixRMaj>(cp.dr.getNumComponents());
 
 		EBDecoder decoder = new EBDecoder();
 		BidimensionalWavelet bdw = new RecursiveBidimensionalWavelet(new OneDimensionalWaveletExtender(new LiftingCdf97WaveletTransform()), cp.wavePasses);
@@ -99,9 +99,9 @@ public class Decompressor {
 			
 			/** dequantize the wave */
 			Logger.getLogger().log("\tDequantizing...");
-			float[][] waveForm = reduced[i];
+			FMatrixRMaj waveForm = new FMatrixRMaj(lines, samples);
 			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, bandMin, bandMax, 0.375f);
-			mq.dequantize(hb, waveForm, 0, 0, lines, samples);
+			mq.dequantize(hb, waveForm);
 			
 			/** add outliers back */
 			if (cp.percentOutliers > 0) {
@@ -111,8 +111,9 @@ public class Decompressor {
 			
 			/** Apply the reverse wavelet transform */
 			Logger.getLogger().log("Reversing wavelet...");
-			pt.reverseTransform(waveForm, samples, lines);
-			bdw.reverseTransform(waveForm, samples, lines);
+			pt.reverseTransform(waveForm);
+			bdw.reverseTransform(waveForm, lines, samples);
+			reduced.add(waveForm);
 		}
 		
 		

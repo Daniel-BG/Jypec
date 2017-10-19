@@ -1,6 +1,8 @@
 package com.jypec.wavelet.compositeTransforms;
 
-import com.jypec.util.arrays.MatrixTransforms;
+import org.ejml.data.FMatrixRMaj;
+import org.ejml.dense.row.CommonOps_FDRM;
+
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.Wavelet;
 
@@ -23,36 +25,48 @@ public class OneDimensionalWaveletExtender implements BidimensionalWavelet {
 	
 	
 	@Override
-	public void forwardTransform(float[][] s, int width, int height) {
+	public void forwardTransform(FMatrixRMaj s, int height, int width) {
 		//transform along one axis
 		for (int i = 0; i < height; i++) {
-			this.baseWavelet.forwardTransform(s[i], width);
+			FMatrixRMaj subMat = CommonOps_FDRM.extractRow(s, i, null);
+			float[] row = subMat.getData();
+			this.baseWavelet.forwardTransform(row, width);
+			CommonOps_FDRM.insert(subMat, s, i, 0);
 		}
 		//transpose and transform along the other axis
-		float[][] tmp = new float[width][height];
-		MatrixTransforms.transpose(s, tmp, width, height);
+		CommonOps_FDRM.transpose(s);
 		for (int j = 0; j < width; j++) {
-			this.baseWavelet.forwardTransform(tmp[j], height);
+			FMatrixRMaj subMat = CommonOps_FDRM.extractRow(s, j, null);
+			float[] row = subMat.getData();
+			this.baseWavelet.forwardTransform(row, height);
+			CommonOps_FDRM.insert(subMat, s, j, 0);
 		}
 		//retranspose and return
-		MatrixTransforms.transpose(tmp, s, height, width);
+		CommonOps_FDRM.transpose(s);
 	}
 
 	@Override
-	public void reverseTransform(float[][] s, int width, int height) {
+	public void reverseTransform(FMatrixRMaj s, int height, int width) {
 		//transform along one axis
 		for (int i = 0; i < height; i++) {
-			this.baseWavelet.reverseTransform(s[i], width);
+			FMatrixRMaj subMat = CommonOps_FDRM.extractRow(s, i, null);
+			float[] row = subMat.getData();
+			this.baseWavelet.reverseTransform(row, width);
+			CommonOps_FDRM.insert(subMat, s, i, 0);
 		}
 		//transpose and transform along the other axis
-		float[][] tmp = new float[width][height];
-		MatrixTransforms.transpose(s, tmp, width, height);
+		CommonOps_FDRM.transpose(s);
 		for (int j = 0; j < width; j++) {
-			this.baseWavelet.reverseTransform(tmp[j], height);
+			FMatrixRMaj subMat = CommonOps_FDRM.extractRow(s, j, null);
+			float[] row = subMat.getData();
+			this.baseWavelet.reverseTransform(row, height);
+			CommonOps_FDRM.insert(subMat, s, j, 0);
 		}
 		//retranspose and return
-		MatrixTransforms.transpose(tmp, s, height, width);
+		CommonOps_FDRM.transpose(s);
 	}
+	
+	
 	
 	
 }

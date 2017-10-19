@@ -9,24 +9,6 @@ import com.jypec.util.datastructures.IntegerMatrix;
  * Helper functions that can be used across various tests
  */
 public class TestHelpers {
-
-	
-	/**
-	 * @param dst matrix to be filled
-	 * @param rLim row limit
-	 * @param cLim column limit
-	 * @param r random generator
-	 * @param std standard deviation for the gaussian function
-	 * @param mean mean for the gaussian function
-	 */
-	public static void randomGaussianFillMatrix(float[][] dst, int rLim, int cLim, Random r, float std, float mean) {
-		for (int k = 0; k < rLim; k++) {
-			for (int j = 0; j < cLim; j++) {
-				dst[k][j] = (float) r.nextGaussian() * std + mean;
-			}
-		}
-	}
-	
 	
 	/**
 	 * @param dst array to be filled

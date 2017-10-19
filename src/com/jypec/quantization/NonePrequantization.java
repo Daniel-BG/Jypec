@@ -2,6 +2,8 @@ package com.jypec.quantization;
 
 import java.io.IOException;
 
+import org.ejml.data.FMatrixRMaj;
+
 import com.jypec.util.bits.BitOutputStreamTree;
 
 /**
@@ -11,12 +13,12 @@ import com.jypec.util.bits.BitOutputStreamTree;
 public class NonePrequantization extends PrequantizationTransformer {
 
 	@Override
-	public void forwardTransform(float[][] s, int width, int height) {
+	public void forwardTransform(FMatrixRMaj s) {
 		return;
 	}
 
 	@Override
-	public void reverseTransform(float[][] s, int width, int height) {
+	public void reverseTransform(FMatrixRMaj s) {
 		return;
 	}
 
@@ -43,7 +45,7 @@ public class NonePrequantization extends PrequantizationTransformer {
 	}
 
 	@Override
-	public void train(float[][] s) {
+	public void train(FMatrixRMaj s) {
 		//nothing to do
 	}
 

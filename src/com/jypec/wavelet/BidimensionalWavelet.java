@@ -1,5 +1,7 @@
 package com.jypec.wavelet;
 
+import org.ejml.data.FMatrixRMaj;
+
 /**
  * @author Daniel
  * Specifies a bidimensional wavelet interface
@@ -15,14 +17,14 @@ public interface BidimensionalWavelet {
 	 * @param width
 	 * @param height
 	 */
-	public void forwardTransform(float[][] s, int width, int height);
+	public void forwardTransform(FMatrixRMaj s, int height, int width);
 
 	/**
-	 * Reverts the process made by {@link #forwardTransform(float[][], int, int)}
+	 * Reverts the process made by {@link #forwardTransform(FMatrixRMaj, int, int)}
 	 * @param s
 	 * @param width
 	 * @param height
 	 */
-	public void reverseTransform(float[][] s, int width, int height);
+	public void reverseTransform(FMatrixRMaj s, int height, int width);
 	
 }

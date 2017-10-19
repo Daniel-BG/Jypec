@@ -2,6 +2,8 @@ package com.jypec.distortion;
 
 import org.ejml.data.FMatrixRMaj;
 
+import com.jypec.util.arrays.EJMLExtensions;
+
 /**
  * @author Daniel
  * Utilities for image comparison
@@ -31,7 +33,7 @@ public class ImageComparisons {
 	 */
 	public static float normalizedPSNR(FMatrixRMaj h1, FMatrixRMaj h2) {
 		float mse = MSE(h1, h2);
-		float[] minMax = ImageOperations.minMaxVal(h1);
+		float[] minMax = EJMLExtensions.minMax(h1);
 		float maxVal = minMax[1] - minMax[0];
 		
 		return PSNR(mse, maxVal);
@@ -43,7 +45,7 @@ public class ImageComparisons {
 	 * @return the signal noise ratio between the given images
 	 */
 	public static float SNR(FMatrixRMaj h1, FMatrixRMaj h2) {
-		float var = ImageOperations.variance(h1, null);
+		float var = EJMLExtensions.var(h1, null);
 		float mse = MSE(h1, h2);
 		return (float) (10 * Math.log10(var / mse));
 	}
@@ -54,7 +56,7 @@ public class ImageComparisons {
 	 * @return the signal noise ratio between the given images
 	 */
 	public static float powerSNR(FMatrixRMaj h1, FMatrixRMaj h2) {
-		float pow = ImageOperations.power(h1);
+		float pow = EJMLExtensions.power(h1);
 		float mse = MSE(h1, h2);
 		return (float) (10 * Math.log10(pow / mse));
 	}
@@ -110,7 +112,7 @@ public class ImageComparisons {
 	 */
 	public static float MSR (FMatrixRMaj h1, FMatrixRMaj h2) {
 		checkDimensions(h1, h2);
-		float mean = ImageOperations.averageValue(h1);
+		float mean = EJMLExtensions.avg(h1);
 		float std = (float) Math.sqrt(MSE(h1, h2));
 		return mean / std;
 	}
@@ -128,11 +130,11 @@ public class ImageComparisons {
 	public static float SSIM (FMatrixRMaj h1, FMatrixRMaj h2, float dynRange) {
 		checkDimensions(h1, h2);
 		//add up all squared differences
-		float mu1 = ImageOperations.averageValue(h1);
-		float mu2 = ImageOperations.averageValue(h2);
-		float v1 = ImageOperations.variance(h1, mu1);
-		float v2 = ImageOperations.variance(h2, mu2);
-		float sigma = ImageOperations.covariance(h1, h2, mu1, mu2);
+		float mu1 = EJMLExtensions.avg(h1);
+		float mu2 = EJMLExtensions.avg(h2);
+		float v1 = EJMLExtensions.var(h1, mu1);
+		float v2 = EJMLExtensions.var(h2, mu2);
+		float sigma = EJMLExtensions.cov(h1, h2, mu1, mu2);
 		float L = dynRange;
 		
 		float c1 = k1*k1*L*L;

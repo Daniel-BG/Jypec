@@ -1,6 +1,9 @@
 package com.jypec.quantization;
 
 import java.io.IOException;
+
+import org.ejml.data.FMatrixRMaj;
+
 import com.jypec.cli.InputArguments;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
@@ -52,12 +55,12 @@ public abstract class PrequantizationTransformer {
 	
 	/**
 	 * Train this {@link PrequantizationTransformer} so it can analyze the data 
-	 * prior to transforming it with {@link #forwardTransform(float[][], int, int)}
+	 * prior to transforming it with {@link #forwardTransform(FMatrixRMaj, int, int)}
 	 * @param s
 	 * @param width
 	 * @param height
 	 */
-	public abstract void train(float[][] s);
+	public abstract void train(FMatrixRMaj s);
 	
 	/**
 	 * Prequantize the given matrix
@@ -65,10 +68,10 @@ public abstract class PrequantizationTransformer {
 	 * @param width
 	 * @param height
 	 */
-	public void forwardTransform(float[][] s, int width, int height) {
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				s[i][j] = this.forward(s[i][j]);
+	public void forwardTransform(FMatrixRMaj s) {
+		for (int i = 0; i < s.getNumRows(); i++) {
+			for (int j = 0; j < s.getNumCols(); j++) {
+				s.unsafe_set(i, j, this.forward(s.unsafe_get(i, j)));
 			}
 		}
 	}
@@ -79,10 +82,10 @@ public abstract class PrequantizationTransformer {
 	 * @param width
 	 * @param height
 	 */
-	public void reverseTransform(float[][] s, int width, int height) {
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				s[i][j] = this.reverse(s[i][j]);
+	public void reverseTransform(FMatrixRMaj s) {
+		for (int i = 0; i < s.getNumRows(); i++) {
+			for (int j = 0; j < s.getNumCols(); j++) {
+				s.unsafe_set(i, j, this.reverse(s.unsafe_get(i, j)));
 			}
 		}
 	}

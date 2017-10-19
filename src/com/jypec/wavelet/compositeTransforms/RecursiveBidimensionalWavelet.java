@@ -1,5 +1,7 @@
 package com.jypec.wavelet.compositeTransforms;
 
+import org.ejml.data.FMatrixRMaj;
+
 import com.jypec.util.Stepper;
 import com.jypec.util.debug.Profiler;
 import com.jypec.wavelet.BidimensionalWavelet;
@@ -26,22 +28,22 @@ public class RecursiveBidimensionalWavelet implements BidimensionalWavelet {
 
 
 	@Override
-	public void forwardTransform(float[][] s, int width, int height) {
+	public void forwardTransform(FMatrixRMaj s, int height, int width) {
 		Profiler.getProfiler().profileStart();
 		int[] widths = Stepper.getStepSizes(width, this.steps);
 		int[] heights = Stepper.getStepSizes(height, this.steps);
 		for (int i = 0; i < steps; i++) {
-			this.bdw.forwardTransform(s, widths[i], heights[i]);
+			this.bdw.forwardTransform(s, heights[i], widths[i]);
 		}
 		Profiler.getProfiler().profileEnd();
 	}
 
 	@Override
-	public void reverseTransform(float[][] s, int width, int height) {
+	public void reverseTransform(FMatrixRMaj s, int height, int width) {
 		int[] widths = Stepper.getStepSizes(width, this.steps);
 		int[] heights = Stepper.getStepSizes(height, this.steps);
 		for (int i = steps - 1; i >= 0; i--) {
-			this.bdw.reverseTransform(s, widths[i], heights[i]);
+			this.bdw.reverseTransform(s, heights[i], widths[i]);
 		}
 	}
 }

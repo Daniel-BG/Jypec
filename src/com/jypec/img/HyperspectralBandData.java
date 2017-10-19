@@ -68,17 +68,6 @@ public class HyperspectralBandData implements IntegerMatrix {
 	}
 	
 	/**
-	 * sets the given value at the given position
-	 * @see HyperspectralImageIntegerData
-	 * @param value value to set
-	 * @param line
-	 * @param sample
-	 */
-	private void setValueAt(float value, int line, int sample) {
-		this.hyimg.setValueAt(value, this.band, line, sample);
-	}
-	
-	/**
 	 * @return the number of lines this band has
 	 */
 	public int getNumberOfLines() {
@@ -120,44 +109,6 @@ public class HyperspectralBandData implements IntegerMatrix {
 		}
 			
 		return new CodingBlock(this, height, width, rowOffset, colOffset, this.depth, band);
-	}
-	
-
-	/**
-	 * @param lineOffset skip this number of lines before filling the returned value
-	 * @param sampleOffset same as lineOffset but for samples
-	 * @param lines number of lines to be returned
-	 * @param samples number of samples to be returned
-	 * @return the internal information in float precision format for wave analysis
-	 */
-	public float[][] toWave(int lineOffset, int sampleOffset, int lines, int samples) {
-		float[][] wave = new float[lines][samples];
-		
-		for (int i = 0; i < lines; i++) {
-			for (int j = 0; j  < samples; j++) {
-				wave[i][j] = this.getValueAt(i + lineOffset, j + sampleOffset);
-			}
-		}
-		
-		return wave;
-	}
-
-	/**
-	 * Fill this image with the values from the float matrix. They are converted
-	 * to the data type of the encompassing image and then set into the inner array
-	 * @see HyperspectralImageIntegerData
-	 * @param waveForm from where to take the data
-	 * @param lineOffset starting line for filling the data in
-	 * @param sampleOffset starting sample for filling the data in
-	 * @param lines number of lines in waveForm
-	 * @param samples number of samples in waveForm
-	 */
-	public void fromWave(float[][] waveForm, int lineOffset, int sampleOffset, int lines, int samples) {
-		for (int i = 0; i < lines; i++) {
-			for (int j = 0; j  < samples; j++) {
-				this.setValueAt(waveForm[i][j], i, j);
-			}
-		}
 	}
 	
 	/**

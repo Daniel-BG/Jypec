@@ -1,12 +1,12 @@
 package test;
 
+import org.ejml.data.FMatrixRMaj;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.jypec.util.arrays.ArrayTransforms;
-import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.wavelet.Wavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
@@ -87,16 +87,15 @@ public class TestWaveletTransform {
 		OneDimensionalWaveletExtender biTestWavelet = new OneDimensionalWaveletExtender(testWavelet);
 		Random r = new Random();
 		for (int i = 1; i < 50; i++) {
-			float[][] s = new float[i][i*2];
-			float[][] res = new float[i][i*2];
-			TestHelpers.randomGaussianFillMatrix(s, i, i*2, r, 1000, 0);
-			MatrixTransforms.copy(s, res, i, i*2);
+			FMatrixRMaj s = new FMatrixRMaj(i, i*2);
+			TestHelpers.randomGaussianFillArray(s.data, i*i*2, r, 1000, 0);
+			FMatrixRMaj res = new FMatrixRMaj(s);
 			
 			biTestWavelet.forwardTransform(res, i, i);
 			biTestWavelet.reverseTransform(res, i, i);
 			
 			for (int k = 0; k < i; k++) {
-				assertArrayEquals(s[k], res[k], 0.01f);
+				assertArrayEquals(s.data, res.data, 0.01f);
 			}
 		}
 	}

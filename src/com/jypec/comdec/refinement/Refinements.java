@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.ejml.data.FMatrixRMaj;
+
 import com.jypec.util.Pair;
 
 /**
@@ -22,7 +24,7 @@ public class Refinements {
 	 * @return a list of top <code>percentOutliers</code> in the given matrix.
 	 * These are the highest or lowest values
 	 */
-	public static List<Pair<Float, Pair<Integer, Integer>>> findOutliers(float[][] waveForm, double percentOutliers) {
+	public static List<Pair<Float, Pair<Integer, Integer>>> findOutliers(FMatrixRMaj waveForm, double percentOutliers) {
 		List<Pair<Float, Pair<Integer, Integer>>> list = Refinements.toSortedByValuePositionalArray(waveForm);
 		List<Pair<Float, Pair<Integer, Integer>>> res = new ArrayList<Pair<Float, Pair<Integer, Integer>>>();
 		int lowIndex = 0, highIndex = list.size() - 1;
@@ -55,21 +57,21 @@ public class Refinements {
 	}
 	
 	/**
-	 * Call after {@link #findOutliers(float[][], double)}. 
+	 * Call after {@link #findOutliers(FMatrixRmaj, double)}. 
 	 * @return the range [min, max] of the non-outlier part of the 
-	 * waveform sent to {@link #findOutliers(float[][], double)}
+	 * waveform sent to {@link #findOutliers(FMatrixRmaj, double)}
 	 */
 	public static float[] getNonOutlierRange() {
 		return Refinements.nonOutlierRange;
 	}
 
 	
-	private static List<Pair<Float, Pair<Integer, Integer>>> toSortedByValuePositionalArray(float[][] waveForm) {
+	private static List<Pair<Float, Pair<Integer, Integer>>> toSortedByValuePositionalArray(FMatrixRMaj waveForm) {
 		List<Pair<Float, Pair<Integer, Integer>>> list = new ArrayList<Pair<Float, Pair<Integer, Integer>>>();
 		
-		for (int i = 0; i < waveForm.length; i++) {
-			for (int j = 0; j < waveForm[0].length; j++) {
-				list.add(new Pair<Float, Pair<Integer, Integer>>(waveForm[i][j], new Pair<Integer, Integer>(i, j)));
+		for (int i = 0; i < waveForm.getNumRows(); i++) {
+			for (int j = 0; j < waveForm.getNumCols(); j++) {
+				list.add(new Pair<Float, Pair<Integer, Integer>>(waveForm.get(i, j), new Pair<Integer, Integer>(i, j)));
 			}
 		}
 		
@@ -89,13 +91,13 @@ public class Refinements {
 	 * @param waveForm
 	 * @param range
 	 */
-	public static void clamp(float[][] waveForm, float[] range) {
-		for (int i = 0; i < waveForm.length; i++) {
-			for (int j = 0; j < waveForm[0].length; j++) {
-				if (waveForm[i][j] < range[0]) {
-					waveForm[i][j] = range[0];
-				} else if (waveForm[i][j] > range[1]) {
-					waveForm[i][j] = range[1];
+	public static void clamp(FMatrixRMaj waveForm, float[] range) {
+		for (int i = 0; i < waveForm.getNumRows(); i++) {
+			for (int j = 0; j < waveForm.getNumCols(); j++) {
+				if (waveForm.unsafe_get(i, j) < range[0]) {
+					waveForm.unsafe_set(i, j, range[0]);
+				} else if (waveForm.unsafe_get(i, j) > range[1]) {
+					waveForm.unsafe_set(i, j, range[1]);
 				}
 			}
 		}
@@ -106,9 +108,9 @@ public class Refinements {
 	 * @param outliers
 	 * @param waveForm
 	 */
-	public static void addOutliersBack(List<Pair<Float, Pair<Integer, Integer>>> outliers, float[][] waveForm) {
+	public static void addOutliersBack(List<Pair<Float, Pair<Integer, Integer>>> outliers, FMatrixRMaj waveForm) {
 		for (Pair<Float, Pair<Integer, Integer>> p: outliers) {
-			waveForm[p.second().first()][p.second().second()] = p.first();
+			waveForm.unsafe_set(p.second().first(), p.second().second(), p.first());
 		}
 	}
 }

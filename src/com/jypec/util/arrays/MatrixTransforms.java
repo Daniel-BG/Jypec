@@ -1,5 +1,7 @@
 package com.jypec.util.arrays;
 
+import java.util.List;
+
 import org.ejml.data.FMatrixRMaj;
 
 /**
@@ -7,38 +9,6 @@ import org.ejml.data.FMatrixRMaj;
  * Useful matrix transforms are written here
  */
 public class MatrixTransforms {
-
-	/**
-	 * Transpose the matrix source and leave it in dest
-	 * @param source
-	 * @param dest
-	 * @param width
-	 * @param height
-	 */
-	public static void transpose(float[][]source, float[][]dest, int width, int height) {
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				dest[j][i] = source[i][j];
-			}
-		}
-	}
-	
-	
-	
-	/**
-	 * @param src source of the data
-	 * @param dst where the data is to be copied
-	 * @param rows number of rows to be copied
-	 * @param cols number of columns to be copied
-	 */
-	public static void copy(float[][] src, float[][] dst, int rows, int cols) {
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				dst[i][j] = src[i][j];
-			}
-		}
-	}
-	
 	
 	/**
 	 * @param src source of the data
@@ -83,11 +53,11 @@ public class MatrixTransforms {
 	 * @param samples
 	 * @return the extracted band
 	 */
-	public static float[][] extractBand(FMatrixRMaj source, int band, int lines, int samples) {
-		float[][] res = new float[lines][samples];
+	public static FMatrixRMaj extractBand(FMatrixRMaj source, int band, int lines, int samples) {
+		FMatrixRMaj res = new FMatrixRMaj(lines, samples);
 		for (int i = 0; i < lines; i++) {
 			for (int j = 0; j < samples; j++) {
-				res[i][j] = source.get(band, i*samples + j);
+				res.unsafe_set(i, j, source.get(band, i*samples + j));
 			}
 		}
 		return res;
@@ -100,12 +70,13 @@ public class MatrixTransforms {
 	 * @param samples 
 	 * @return the parameter "src" as a FMatrixRMaj
 	 */
-	public static FMatrixRMaj getMatrix(float[][][] src, int bands, int lines, int samples) {
+	public static FMatrixRMaj getMatrix(List<FMatrixRMaj> src, int bands, int lines, int samples) {
 		FMatrixRMaj res = new FMatrixRMaj(bands, lines*samples);
 		for (int i = 0; i < bands; i++) {
+			FMatrixRMaj curr = src.get(i);
 			for (int j = 0; j < lines; j++) {
 				for (int k = 0; k < samples; k++) {
-					res.set(i, j*samples+k, src[i][j][k]);
+					res.unsafe_set(i, j*samples+k, curr.unsafe_get(j, k));
 				}
 			}
 		}

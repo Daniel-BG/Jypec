@@ -13,7 +13,7 @@ import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
 import com.jypec.util.Pair;
-import com.jypec.util.arrays.MatrixOperations;
+import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.debug.Logger;
@@ -77,8 +77,8 @@ public class Compressor {
 			
 			/** Apply the wavelet transform */
 			Logger.getLogger().log("\tApplying wavelet... ");
-			float[][] waveForm = MatrixTransforms.extractBand(reduced, i, numLines, numSamples);
-			bdw.forwardTransform(waveForm, numSamples, numLines);
+			FMatrixRMaj waveForm = MatrixTransforms.extractBand(reduced, i, numLines, numSamples);
+			bdw.forwardTransform(waveForm, numLines, numSamples);
 			
 			/** Shave the resulting limits and raw encode their values */
 			if (cp.percentOutliers > 0) {
@@ -104,9 +104,9 @@ public class Compressor {
 			/** custom quantizer for this band */
 			cp.pt.train(waveForm);
 			cp.pt.saveTo(banditree.addChild("PreQuantizationTransform"));
-			cp.pt.forwardTransform(waveForm, numSamples, numLines);
+			cp.pt.forwardTransform(waveForm);
 			
-			float[] minMax = MatrixOperations.minMax(waveForm);
+			float[] minMax = EJMLExtensions.minMax(waveForm);
 			BitOutputStreamTree minMaxTree = banditree.addChild("minmax");
 			minMaxTree.writeFloat(minMax[0]);
 			minMaxTree.writeFloat(minMax[1]);
@@ -115,7 +115,7 @@ public class Compressor {
 			
 			/** quantize the transform and save the quantization over the current band */
 			HyperspectralBandData hb = HyperspectralBandData.generateRogueBand(targetType, numLines, numSamples);
-			mq.quantize(waveForm, hb, 0, 0, numLines, numSamples);
+			mq.quantize(waveForm, hb);
 			
 			/** Now divide into blocks and encode it*/
 			Blocker blocker = new Blocker(hb, cp.wavePasses, Blocker.DEFAULT_EXPECTED_DIM, Blocker.DEFAULT_MAX_BLOCK_DIM);

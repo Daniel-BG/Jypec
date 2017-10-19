@@ -1,5 +1,7 @@
 package com.jypec.quantization;
 
+import org.ejml.data.FMatrixRMaj;
+
 import com.jypec.util.datastructures.IntegerMatrix;
 import com.jypec.util.debug.Profiler;
 
@@ -31,16 +33,12 @@ public class MatrixQuantizer {
 	 * Quantizes the input
 	 * @param input
 	 * @param output where to put the result
-	 * @param rowOffset
-	 * @param colOffset
-	 * @param rows first dimension length of the matrix
-	 * @param cols second dimension length of the matrix
 	 */
-	public void quantize(float[][] input, IntegerMatrix output, int rowOffset, int colOffset, int rows, int cols) {
+	public void quantize(FMatrixRMaj input, IntegerMatrix output) {
 		Profiler.getProfiler().profileStart();
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				output.setDataAt(this.quantizer.normalizeAndQuantize(input[rowOffset + i][colOffset + j]), rowOffset + i, colOffset + j);
+		for (int i = 0; i < input.getNumRows(); i++) {
+			for (int j = 0; j < input.getNumCols(); j++) {
+				output.setDataAt(this.quantizer.normalizeAndQuantize(input.unsafe_get(i, j)), i, j);
 			}
 		}
 		Profiler.getProfiler().profileEnd();
@@ -55,11 +53,11 @@ public class MatrixQuantizer {
 	 * @param rows
 	 * @param cols
 	 */
-	public void dequantize(IntegerMatrix input, float[][] output, int rowOffset, int colOffset, int rows, int cols) {
+	public void dequantize(IntegerMatrix input, FMatrixRMaj output) {
 		Profiler.getProfiler().profileStart();
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				output[rowOffset + i][colOffset + j] = this.quantizer.deQuantizeAndDenormalize(input.getDataAt(rowOffset + i, colOffset + j));
+		for (int i = 0; i < output.getNumRows(); i++) {
+			for (int j = 0; j < output.getNumCols(); j++) {
+				output.unsafe_set(i, j, this.quantizer.deQuantizeAndDenormalize(input.getDataAt(i, j)));
 			}
 		}
 		Profiler.getProfiler().profileEnd();
