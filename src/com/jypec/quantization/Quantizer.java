@@ -56,7 +56,7 @@ public class Quantizer {
 			throw new IllegalArgumentException("Guard not in the allowed range");
 		}
 		if (sampleLowerLimit >= sampleUpperLimit) {
-			throw new IllegalArgumentException("Limits must define a non-empty interval");
+			throw new IllegalArgumentException("Limits must define a non-empty interval, you sent: " + sampleLowerLimit + "," + sampleUpperLimit);
 		}
 		if (reconstructionOffset < -1.0 || reconstructionOffset > 1.0) {
 			throw new IllegalArgumentException("Reconstruction offset not in the allowed range");

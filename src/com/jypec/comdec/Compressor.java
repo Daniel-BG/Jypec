@@ -12,6 +12,8 @@ import com.jypec.img.HyperspectralImageData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
+import com.jypec.quantization.SplitLinearSqrtPrequantization;
+import com.jypec.quantization.SqrtPrequantization;
 import com.jypec.util.Pair;
 import com.jypec.util.arrays.MatrixOperations;
 import com.jypec.util.arrays.MatrixTransforms;
@@ -19,6 +21,7 @@ import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.debug.Logger;
 import com.jypec.util.debug.Profiler;
 import com.jypec.wavelet.BidimensionalWavelet;
+import com.jypec.wavelet.PrequantizationTransform;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
@@ -101,6 +104,13 @@ public class Compressor {
 			
 			Logger.getLogger().log("\tApplying quantization to type: " + targetType + "...");
 			/** custom quantizer for this band */
+			float avg = MatrixOperations.avg(waveForm);
+			float std = MatrixOperations.std(waveForm);
+			banditree.writeFloat(avg);
+			banditree.writeFloat(std);
+			PrequantizationTransform lt = new PrequantizationTransform(new SplitLinearSqrtPrequantization(avg, std));
+			//lt.forwardTransform(waveForm, numSamples, numLines);
+			
 			float[] minMax = MatrixOperations.minMax(waveForm);
 			banditree.writeFloat(minMax[0]);
 			banditree.writeFloat(minMax[1]);

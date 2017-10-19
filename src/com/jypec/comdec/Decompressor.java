@@ -15,12 +15,14 @@ import com.jypec.img.HyperspectralImageFloatData;
 import com.jypec.img.ImageDataType;
 import com.jypec.img.ImageHeaderData;
 import com.jypec.quantization.MatrixQuantizer;
+import com.jypec.quantization.SplitLinearSqrtPrequantization;
 import com.jypec.util.Pair;
 import com.jypec.util.arrays.MatrixTransforms;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.debug.Logger;
 import com.jypec.util.debug.Profiler;
 import com.jypec.wavelet.BidimensionalWavelet;
+import com.jypec.wavelet.PrequantizationTransform;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
@@ -61,6 +63,11 @@ public class Decompressor {
 		/** Proceed to uncompress the reduced image band by band */
 		for (int i = 0; i < cp.dr.getNumComponents(); i++) {
 			Logger.getLogger().log("Extracting compressed band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]");
+			/** Get the avg values */
+			float avg = input.readFloat();
+			float std = input.readFloat();
+			PrequantizationTransform lt = new PrequantizationTransform(new SplitLinearSqrtPrequantization(avg, std));
+			
 			/** Get the clamped values if present */
 			List<Pair<Float, Pair<Integer, Integer>>> outliers = null;
 			if (cp.percentOutliers > 0) {
@@ -106,6 +113,7 @@ public class Decompressor {
 			
 			/** Apply the reverse wavelet transform */
 			Logger.getLogger().log("Reversing wavelet...");
+			//lt.reverseTransform(waveForm, samples, lines);
 			bdw.reverseTransform(waveForm, samples, lines);
 		}
 		

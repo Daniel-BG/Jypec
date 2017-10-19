@@ -29,5 +29,38 @@ public class MatrixOperations {
 		}
 		return minMax;
 	}
+	
+	
+	/**
+	 * @param source
+	 * @return the average value of the given matrix (assumed to be rectangular)
+	 */
+	public static float avg(float[][] source) {
+		double acc = 0;
+		for (int j = 0; j < source.length; j++) {
+			for (int k = 0; k < source[0].length; k++) {
+				acc += (double) source[j][k];
+			}
+		}
+		acc /= (double) (source.length * source[0].length);
+		return (float) acc;
+	}
+
+
+	public static float std(float[][] waveForm) {
+		float avg = avg(waveForm);
+		double acc = 0;
+		for (int j = 0; j < waveForm.length; j++) {
+			for (int k = 0; k < waveForm[0].length; k++) {
+				float val = (float) waveForm[j][k] - avg;
+				acc += val * val;
+			}
+		}
+		acc /= (float) (waveForm.length * waveForm[0].length);
+		
+		
+		// TODO Auto-generated method stub
+		return (float) Math.sqrt(acc);
+	}
 
 }
