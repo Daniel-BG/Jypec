@@ -87,6 +87,10 @@ public class SignificanceTable {
 	 * @param isNegative set significant negative if this flag is true, positive if false
 	 */
 	public void setSignificant(int row, int column, boolean isNegative) {
+		if (this.table[row][column] != SignificanceValue.INSIGNIFICANT) {
+			return; //already set
+		}
+		
 		//set significance table
 		if (!isNegative) {
 			this.table[row][column] = SignificanceValue.SIGNIFICANT_POSITIVE;

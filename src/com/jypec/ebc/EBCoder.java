@@ -62,9 +62,7 @@ public class EBCoder {
 	}
 	
 	/**
-	 * Code the given plane in the cleanup pass. This function may look innocent
-	 * but it is hard to understand because it uses weird flow control to allow
-	 * for code reutilization
+	 * Code the given plane in the cleanup pass. 
 	 * @param plane
 	 * @param output
 	 * @throws IOException 

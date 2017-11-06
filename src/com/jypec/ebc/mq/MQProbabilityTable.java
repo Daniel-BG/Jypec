@@ -33,7 +33,6 @@ public class MQProbabilityTable {
 		false, false, false, false, true, false, false, false, false, false,
 		false, false, false, false, false, false, false, false, false, false,
 		false, false, false, false, false, false, false, false, false, false,
-		false, false, false, false, false, false, false, false, false, false,
 		false, false, false, false, false, false, false};
 	//normalized probability estimates for all 47 states
 	private static final int[] P_ESTIMATE = 

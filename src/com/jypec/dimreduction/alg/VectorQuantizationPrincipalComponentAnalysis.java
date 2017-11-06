@@ -17,6 +17,7 @@ import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.bits.BitInputStream;
 import com.jypec.util.bits.BitOutputStreamTree;
 import com.jypec.util.debug.Logger;
+import com.jypec.util.debug.Profiler;
 
 import jsat.SimpleDataSet;
 import jsat.classifiers.DataPoint;
@@ -148,6 +149,7 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 			System.err.println("The matrix to be reduced must be the same one this was trained with. Won't work otherwise. "
 					+ "Note that this is only a shallow chech for object equality, same contents with different objects will print this");
 		}
+		Logger.getLogger().log("Reducing dimensionality VQPCA...");
 		/** initialize stuff */
 		FMatrixRMaj res = new FMatrixRMaj(this.dimProj, source.getNumCols());
 		this.classification = new int[source.getNumCols()];
@@ -189,6 +191,7 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 
 	@Override
 	public void doSaveTo(BitOutputStreamTree bw) throws IOException {
+		Profiler.getProfiler().profileStart();
 		/** write metadata */
 		bw.addChild("dim proj").writeInt(this.dimProj);
 		bw.addChild("dim orig").writeInt(this.dimOrig);
@@ -207,6 +210,7 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
     	for (PrincipalComponentAnalysis pca: pcas) {
     		pca.doSaveTo(bw.addChild("dr#"));
     	}
+    	Profiler.getProfiler().profileEnd();
 	}
 
 	@Override
