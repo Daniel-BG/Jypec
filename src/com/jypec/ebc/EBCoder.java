@@ -162,7 +162,7 @@ public class EBCoder {
 		for (int s = 0; s < plane.getFullStripsNumber(); s++) {
 			for (int i = 0; i < plane.getWidth(); i++) {
 				for (int j = 0; j < 4; j++) {
-					if (this.sigTable.getSignificancePropagationContextAt(j + 4*s, i, plane.getSubBand()) != ContextLabel.ZERO) {
+					if (!this.sigTable.isSignificant(j + 4*s, i) && this.sigTable.getSignificancePropagationContextAt(j + 4*s, i, plane.getSubBand()) != ContextLabel.ZERO) {
 						this.codeSignificanceBit(plane, output, j + 4*s, i, false);
 					}
 				}
@@ -172,7 +172,7 @@ public class EBCoder {
 		//code remaining values at the end (not in 4-high strips)
 		for (int i = 0; i < plane.getWidth(); i++) {
 			for (int j = 0; j < plane.getLastStripHeight(); j++) {
-				if (this.sigTable.getSignificancePropagationContextAt(j + 4*plane.getFullStripsNumber(), i, plane.getSubBand()) != ContextLabel.ZERO) {
+				if (!this.sigTable.isSignificant(j, i) && this.sigTable.getSignificancePropagationContextAt(j + 4*plane.getFullStripsNumber(), i, plane.getSubBand()) != ContextLabel.ZERO) {
 					this.codeSignificanceBit(plane, output, j + 4*plane.getFullStripsNumber(), i, false);
 				}
 			}
