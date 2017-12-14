@@ -24,6 +24,7 @@ import com.jypec.util.debug.Profiler;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
+import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
 
 /**
@@ -63,8 +64,8 @@ public class Decompressor {
 		for (int i = 0; i < cp.dr.getNumComponents(); i++) {
 			Logger.getLogger().log("Extracting compressed band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]");
 			
-			float min = input.readFloat();
-			float max = input.readFloat();
+			float prenormalizationMin = input.readFloat();
+			float prenormalizationMax = input.readFloat();
 			
 			/** Get the clamped values if present */
 			List<Pair<Float, Pair<Integer, Integer>>> outliers = null;
@@ -86,8 +87,6 @@ public class Decompressor {
 				
 			/** Get this band's max and min values, and use that to create the quantizer */
 			Logger.getLogger().log("\tLoading dequantizer...");
-			float bandMin = input.readFloat();
-			float bandMax = input.readFloat();
 			ImageDataType targetType = new ImageDataType(cp.bits, true);
 			if (cp.shaveMap.hasMappingForKey(i)) {
 				targetType.mutatePrecision(-cp.shaveMap.get(i));
@@ -103,7 +102,7 @@ public class Decompressor {
 			/** dequantize the wave */
 			Logger.getLogger().log("\tDequantizing...");
 			FMatrixRMaj waveForm = new FMatrixRMaj(lines, samples);
-			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, bandMin, bandMax, 0.375f);
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 2, 0, 1, -0.5f, 0.5f, 0.375f); //one guard bit just in case
 			mq.dequantize(hb, waveForm);
 			
 			/** add outliers back */
@@ -116,7 +115,7 @@ public class Decompressor {
 			Logger.getLogger().log("Reversing wavelet...");
 			pt.reverseTransform(waveForm);
 			bdw.reverseTransform(waveForm, lines, samples);
-			MatrixTransforms.normalize(waveForm, -0.5f, 0.5f, min, max);
+			MatrixTransforms.normalize(waveForm, -0.5f, 0.5f, prenormalizationMin, prenormalizationMax);
 			
 			reduced.add(waveForm);
 		}

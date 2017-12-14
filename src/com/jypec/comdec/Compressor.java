@@ -21,6 +21,7 @@ import com.jypec.util.debug.Profiler;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
+import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
 
 /**
@@ -83,7 +84,7 @@ public class Compressor {
 			banditree.writeFloat(minMax[0]);
 			banditree.writeFloat(minMax[1]);
 			MatrixTransforms.normalize(waveForm, minMax[0], minMax[1], -0.5f, 0.5f);
-			
+			minMax = EJMLExtensions.minMax(waveForm);
 			bdw.forwardTransform(waveForm, numLines, numSamples);
 			
 			/** Shave the resulting limits and raw encode their values */
@@ -112,11 +113,8 @@ public class Compressor {
 			cp.pt.saveTo(banditree.addChild("PreQuantizationTransform"));
 			cp.pt.forwardTransform(waveForm);
 			
-			minMax = EJMLExtensions.minMax(waveForm);
-			BitOutputStreamTree minMaxTree = banditree.addChild("minmax");
-			minMaxTree.writeFloat(minMax[0]);
-			minMaxTree.writeFloat(minMax[1]);
-			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 0, minMax[0], minMax[1], 0.375f);
+			//use one guard bit just in case for the wavelet transform
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 2, 0, 1, -0.5f, 0.5f, 0.375f);
 			
 			
 			/** quantize the transform and save the quantization over the current band */

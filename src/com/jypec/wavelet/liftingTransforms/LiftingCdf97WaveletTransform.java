@@ -17,7 +17,10 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 	private static final float COEFF_PREDICT_2 = 0.8829110762f; 
 	private static final float COEFF_UPDATE_1= -0.05298011854f;
 	private static final float COEFF_UPDATE_2 = 0.4435068522f;
-	private static final float COEFF_SCALE = 1/1.149604398f;
+
+	private static final float COEFF_K = 1.230174105f;
+	private static final float COEFF_K0 = 1.0f/COEFF_K;
+	private static final float COEFF_K1 = COEFF_K/2.0f;
 	
 	/**
 	 * Adds to each odd indexed sample its neighbors multiplied by the given coefficient
@@ -69,12 +72,12 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 	 * @param n the length of s
 	 * @param COEFF the coefficient applied
 	 */
-	private void scale(float[] s, int n, float COEFF) {
+	private void scale(float[] s, int n, float kEven, float kOdd) {
 		for (int i = 0; i < n; i++) {
 			if (i%2 == 1) { 
-				s[i] *= COEFF;
+				s[i] *= kOdd;
 			} else {
-				s[i] /= COEFF;
+				s[i] *= kEven;
 			}
 		}
 	}
@@ -88,7 +91,7 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 		predict(s, n, LiftingCdf97WaveletTransform.COEFF_PREDICT_2);	
 		update(s, n, LiftingCdf97WaveletTransform.COEFF_UPDATE_2);
 		//scale values
-		scale(s, n, LiftingCdf97WaveletTransform.COEFF_SCALE);
+		scale(s, n, LiftingCdf97WaveletTransform.COEFF_K0, LiftingCdf97WaveletTransform.COEFF_K1);
 		//pack values (low freq first, high freq last)
 		ArrayTransforms.pack(s, n);
 	}
@@ -98,7 +101,7 @@ public class LiftingCdf97WaveletTransform implements Wavelet {
 		//unpack values
 		ArrayTransforms.unpack(s, n);
 		//unscale values
-		scale(s, n, 1/LiftingCdf97WaveletTransform.COEFF_SCALE);
+		scale(s, n, 1/LiftingCdf97WaveletTransform.COEFF_K0, 1/LiftingCdf97WaveletTransform.COEFF_K1);
 		//unpredict and unupdate
 		update(s, n, -LiftingCdf97WaveletTransform.COEFF_UPDATE_2);
 		predict(s, n, -LiftingCdf97WaveletTransform.COEFF_PREDICT_2);
