@@ -83,4 +83,38 @@ public class MatrixTransforms {
 		return res;
 	}
 	
+	
+	
+	/**
+	 * Normalizes the input matrix in place so that 
+	 * the old minimum and maximum values are now the targets given,
+	 * and all other samples lie between them, maintaining their
+	 * relative differences
+	 * @param source the matrix to be normalized
+	 * @param min the minimum value found in source. Cannot be NaN or Inf
+	 * @param max the maximum value found in source. Cannot be NaN or Inf
+	 * @param targetMin the desired minimum value
+	 * @param targetMax the desired maximum value
+	 * @return the given matrix modified in place
+	 */
+	public static FMatrixRMaj normalize(FMatrixRMaj source, float min, float max, float targetMin, float targetMax) {
+		if (min >= max || targetMin >= targetMax) {
+			throw new IllegalArgumentException("Ranges when normalizing a matrix must be non-empty intervals!");
+		}
+		//generate ranges
+		float initialRange = max - min;
+		float targetRange = targetMax - targetMin;
+		//recalculate every sample
+		for (int i = 0; i < source.getNumRows(); i++) {
+			for (int j = 0; j < source.getNumCols(); j++) {
+				float value = source.get(i, j);
+				value = ((value - min) / initialRange);		//value is in [0, 1]
+				value = value * targetRange + targetMin;	//value is in targetMin, targetMax
+				source.set(i, j, value);
+			}
+		}
+		
+		return source;
+	}
+	
 }

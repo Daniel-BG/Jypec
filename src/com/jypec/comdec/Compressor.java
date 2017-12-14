@@ -78,6 +78,12 @@ public class Compressor {
 			/** Apply the wavelet transform */
 			Logger.getLogger().log("\tApplying wavelet... ");
 			FMatrixRMaj waveForm = MatrixTransforms.extractBand(reduced, i, numLines, numSamples);
+			
+			float[] minMax = EJMLExtensions.minMax(waveForm);
+			banditree.writeFloat(minMax[0]);
+			banditree.writeFloat(minMax[1]);
+			MatrixTransforms.normalize(waveForm, minMax[0], minMax[1], -0.5f, 0.5f);
+			
 			bdw.forwardTransform(waveForm, numLines, numSamples);
 			
 			/** Shave the resulting limits and raw encode their values */
@@ -106,7 +112,7 @@ public class Compressor {
 			cp.pt.saveTo(banditree.addChild("PreQuantizationTransform"));
 			cp.pt.forwardTransform(waveForm);
 			
-			float[] minMax = EJMLExtensions.minMax(waveForm);
+			minMax = EJMLExtensions.minMax(waveForm);
 			BitOutputStreamTree minMaxTree = banditree.addChild("minmax");
 			minMaxTree.writeFloat(minMax[0]);
 			minMaxTree.writeFloat(minMax[1]);

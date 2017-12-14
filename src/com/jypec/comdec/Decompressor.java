@@ -63,6 +63,9 @@ public class Decompressor {
 		for (int i = 0; i < cp.dr.getNumComponents(); i++) {
 			Logger.getLogger().log("Extracting compressed band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]");
 			
+			float min = input.readFloat();
+			float max = input.readFloat();
+			
 			/** Get the clamped values if present */
 			List<Pair<Float, Pair<Integer, Integer>>> outliers = null;
 			if (cp.percentOutliers > 0) {
@@ -113,6 +116,8 @@ public class Decompressor {
 			Logger.getLogger().log("Reversing wavelet...");
 			pt.reverseTransform(waveForm);
 			bdw.reverseTransform(waveForm, lines, samples);
+			MatrixTransforms.normalize(waveForm, -0.5f, 0.5f, min, max);
+			
 			reduced.add(waveForm);
 		}
 		
