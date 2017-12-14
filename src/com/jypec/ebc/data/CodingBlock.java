@@ -1,6 +1,7 @@
 package com.jypec.ebc.data;
 
 import com.jypec.ebc.SubBand;
+import com.jypec.util.bits.BitTwiddling;
 import com.jypec.util.datastructures.BidimensionalArrayIntegerMatrix;
 import com.jypec.util.datastructures.IntegerMatrix;
 
@@ -12,11 +13,31 @@ import com.jypec.util.datastructures.IntegerMatrix;
  */
 public class CodingBlock {
 	
+	class CodingBlockDataView {
+		private CodingBlock block;
+		public CodingBlockDataView(CodingBlock block) {
+			this.block = block;
+		}
+		
+		@Override
+		public String toString() {
+			String res = "";
+			for (int i = 0; i < block.getHeight(); i++) {
+				for (int j = 0; j < block.getWidth(); j++) {
+					res += block.getMagnitudeAt(i, j) + ",";
+				}
+				res += "\n";
+			}
+			return res;
+		}
+	}
+	
 	@Override
 	public String toString() {
 		return "(" + rows + "x" + columns + ") @ (" + rowOffset + "," + columnOffset + ") [" + band.name() + "]";
 	}
 
+	private CodingBlockDataView cbdv;
 	private IntegerMatrix data;
 	private int rows, columns;
 	private int rowOffset = 0, columnOffset = 0;
@@ -67,6 +88,7 @@ public class CodingBlock {
 		this.columnOffset = columnOffset;
 		this.setDepth(depth);
 		this.band = band;
+		this.cbdv = new CodingBlockDataView(this);
 	}
 
 	/**
@@ -103,6 +125,23 @@ public class CodingBlock {
 	public int getMagnitudeBitPlaneNumber() {
 		return this.magnitudeBitPlanes;
 	}
+	
+	/**
+	 * @return the real number of bitplanes needed to encode this block 
+	 * (e.g: if the max value is 5, then we only need to encode three bitplanes)
+	 */
+	public int getMaxMagnitudeBitPlaneNumber() {
+		int max = 0;
+		for (int i = 0; i < this.getHeight(); i++) {
+			for (int j = 0; j < this.getWidth(); j++) {
+				int magnitude = this.getMagnitudeAt(i, j);
+				max = Math.max(max, BitTwiddling.bitsOf(magnitude));
+			}
+		}
+		return max;
+	}
+
+
 
 	/**
 	 * Gets the ith bitPlane from within this codeBlock
@@ -141,6 +180,17 @@ public class CodingBlock {
 	public int getDataAt(int row, int column) {
 		return this.data.getDataAt(row + rowOffset, column + columnOffset);
 	}
+	
+	/**
+	 * @param i
+	 * @param j
+	 * @return the magnitude of the value at the specified position
+	 */
+	private int getMagnitudeAt(int row, int column) {
+		return this.data.getDataAt(row + rowOffset, column + columnOffset) & ~this.getSignMask();
+	}
+	
+	
 	
 	/**
 	 * Sets the value given at the given position, overwriting existing data!
@@ -188,5 +238,6 @@ public class CodingBlock {
 		return row >= this.rowOffset && row < this.rowOffset + this.rows &&
 				column >= this.columnOffset && column < this.columnOffset + this.columns;
 	}
+
 	
 }

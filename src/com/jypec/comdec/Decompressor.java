@@ -102,7 +102,7 @@ public class Decompressor {
 			/** dequantize the wave */
 			Logger.getLogger().log("\tDequantizing...");
 			FMatrixRMaj waveForm = new FMatrixRMaj(lines, samples);
-			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 2, 0, 1, -0.5f, 0.5f, 0.375f); //one guard bit just in case
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 1, -0.5f, 0.5f, 0.375f); //one guard bit just in case
 			mq.dequantize(hb, waveForm);
 			
 			/** add outliers back */

@@ -52,8 +52,12 @@ public class EBDecoder {
 	 * @throws IOException 
 	 */
 	public void decode(BitInputStream input, CodingBlock output) throws IOException {
+		//int numberOfBitPlanes = output.getMagnitudeBitPlaneNumber();
+		int numberOfBitPlanes = input.readByte();
+		
 		this.initialize(input, output);
-		int numberOfBitPlanes = output.getMagnitudeBitPlaneNumber();
+		
+		
 		
 		//decode over all planes
 		for (int i = numberOfBitPlanes - 1; i >= 0; i--) {

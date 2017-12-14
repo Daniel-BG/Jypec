@@ -114,7 +114,7 @@ public class Compressor {
 			cp.pt.forwardTransform(waveForm);
 			
 			//use one guard bit just in case for the wavelet transform
-			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 2, 0, 1, -0.5f, 0.5f, 0.375f);
+			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 1, -0.5f, 0.5f, 0.375f);
 			
 			
 			/** quantize the transform and save the quantization over the current band */

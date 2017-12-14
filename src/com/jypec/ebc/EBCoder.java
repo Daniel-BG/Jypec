@@ -42,9 +42,11 @@ public class EBCoder {
 	 * @throws IOException 
 	 */ 
 	public void code(CodingBlock block, BitOutputStreamTree output) throws IOException {
-		this.initialize(block.getWidth(), block.getHeight());
+		//int numberOfBitPlanes = block.getMagnitudeBitPlaneNumber();
+		int numberOfBitPlanes = block.getMaxMagnitudeBitPlaneNumber(); //use only as many as needed
+		output.writeByte((byte) numberOfBitPlanes);
 		
-		int numberOfBitPlanes = block.getMagnitudeBitPlaneNumber();
+		this.initialize(block.getWidth(), block.getHeight());
 		
 		//all planes coded with a three pass scheme except the first one
 		for (int i = numberOfBitPlanes - 1; i >= 0; i--) {
