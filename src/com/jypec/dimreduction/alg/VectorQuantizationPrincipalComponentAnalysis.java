@@ -76,6 +76,10 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	
 	private boolean doTrainSMILE(FMatrixRMaj source) {
 		this.trainedWith = source;
+		if (this.reductionInTrainingRequested()) {
+			source = EJMLExtensions.getSubSet(source, percentTraining);
+		}
+		
 		/** Initialization */
 		Logger.getLogger().log("Initializing VQPCA...");
 		double[][] dataSet = SMILEWrapper.toDoubleMatrix(source);
@@ -148,7 +152,9 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 		Logger.getLogger().log("Reducing dimensionality VQPCA...");
 		/** initialize stuff */
 		FMatrixRMaj res = new FMatrixRMaj(this.dimProj, source.getNumCols());
-		this.classification = new int[source.getNumCols()];
+		if (library == Library.SMILE) { //JSAT already has this calculated
+			this.classification = new int[source.getNumCols()];
+		}
 		
 		/** Reduce each sample with its cluster's PCA */
 		for (int i = 0; i < source.getNumCols(); i++) {
