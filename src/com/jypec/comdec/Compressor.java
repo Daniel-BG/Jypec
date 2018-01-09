@@ -21,7 +21,6 @@ import com.jypec.util.debug.Profiler;
 import com.jypec.wavelet.BidimensionalWavelet;
 import com.jypec.wavelet.compositeTransforms.OneDimensionalWaveletExtender;
 import com.jypec.wavelet.compositeTransforms.RecursiveBidimensionalWavelet;
-import com.jypec.wavelet.kernelTransforms.cdf97.KernelCdf97WaveletTransform;
 import com.jypec.wavelet.liftingTransforms.LiftingCdf97WaveletTransform;
 
 /**

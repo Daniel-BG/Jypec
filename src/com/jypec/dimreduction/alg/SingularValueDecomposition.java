@@ -31,10 +31,6 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 
 	@Override
 	public boolean doTrain(FMatrixRMaj data) {
-		if (this.reductionInTrainingRequested()) {
-			data = EJMLExtensions.getSubSet(data, percentTraining);
-		}
-		
 		Logger.getLogger().log("Taking samples...");
 		dimOrig = data.getNumRows();
 		

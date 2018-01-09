@@ -57,11 +57,7 @@ public class MinimumNoiseFraction extends ProjectingDimensionalityReduction {
 
 	//https://www.researchgate.net/profile/Angelo_Palombo/publication/224354550_Experimental_Approach_to_the_Selection_of_the_Components_in_the_Minimum_Noise_Fraction/links/02bfe51064486871c4000000.pdf
 	@Override
-	public boolean doTrain(FMatrixRMaj data) {
-		if (this.reductionInTrainingRequested()) {
-			data = EJMLExtensions.getSubSet(data, percentTraining);
-		}
-		
+	public boolean doTrain(FMatrixRMaj data) {	
 		//initialize values
 		dimOrig = data.getNumRows();
 		//find out data and noise. The data is NOT zero-meaned,

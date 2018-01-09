@@ -76,10 +76,6 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	
 	private boolean doTrainSMILE(FMatrixRMaj source) {
 		this.trainedWith = source;
-		if (this.reductionInTrainingRequested()) {
-			source = EJMLExtensions.getSubSet(source, percentTraining);
-		}
-		
 		/** Initialization */
 		Logger.getLogger().log("Initializing VQPCA...");
 		double[][] dataSet = SMILEWrapper.toDoubleMatrix(source);

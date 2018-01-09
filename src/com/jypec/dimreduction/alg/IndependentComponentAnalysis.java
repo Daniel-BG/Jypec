@@ -29,10 +29,6 @@ public class IndependentComponentAnalysis extends ProjectingDimensionalityReduct
 
 	@Override
 	public boolean doTrain(FMatrixRMaj source) {	
-		if (this.reductionInTrainingRequested()) {
-			source = EJMLExtensions.getSubSet(source, percentTraining);
-		}
-		
 		dimOrig = source.getNumRows();
 		/** Get mean first, since we will be centering the data around zero */
 		adjustment = new FMatrixRMaj(this.dimOrig, 1);

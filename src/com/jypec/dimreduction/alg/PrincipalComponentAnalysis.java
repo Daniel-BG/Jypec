@@ -37,9 +37,6 @@ public class PrincipalComponentAnalysis extends ProjectingDimensionalityReductio
 	@Override
 	public boolean doTrain(FMatrixRMaj data) {
 		Profiler.getProfiler().profileStart();
-		if (this.reductionInTrainingRequested()) {
-			data = EJMLExtensions.getSubSet(data, percentTraining);
-		}
 		
 		Logger.getLogger().log("Taking samples...");
 		dimOrig = data.getNumRows();

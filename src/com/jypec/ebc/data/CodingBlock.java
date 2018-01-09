@@ -13,31 +13,12 @@ import com.jypec.util.datastructures.IntegerMatrix;
  */
 public class CodingBlock {
 	
-	class CodingBlockDataView {
-		private CodingBlock block;
-		public CodingBlockDataView(CodingBlock block) {
-			this.block = block;
-		}
-		
-		@Override
-		public String toString() {
-			String res = "";
-			for (int i = 0; i < block.getHeight(); i++) {
-				for (int j = 0; j < block.getWidth(); j++) {
-					res += block.getMagnitudeAt(i, j) + ",";
-				}
-				res += "\n";
-			}
-			return res;
-		}
-	}
 	
 	@Override
 	public String toString() {
 		return "(" + rows + "x" + columns + ") @ (" + rowOffset + "," + columnOffset + ") [" + band.name() + "]";
 	}
 
-	private CodingBlockDataView cbdv;
 	private IntegerMatrix data;
 	private int rows, columns;
 	private int rowOffset = 0, columnOffset = 0;
@@ -88,7 +69,6 @@ public class CodingBlock {
 		this.columnOffset = columnOffset;
 		this.setDepth(depth);
 		this.band = band;
-		this.cbdv = new CodingBlockDataView(this);
 	}
 
 	/**
