@@ -63,9 +63,6 @@ public class Decompressor {
 		for (int i = 0; i < cp.dr.getNumComponents(); i++) {
 			Logger.getLogger().log("Extracting compressed band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]");
 			
-			float prenormalizationMin = input.readFloat();
-			float prenormalizationMax = input.readFloat();
-			
 			/** Get the clamped values if present */
 			List<Pair<Float, Pair<Integer, Integer>>> outliers = null;
 			if (cp.percentOutliers > 0) {
@@ -80,6 +77,9 @@ public class Decompressor {
 									input.readVLPInt())));
 				}
 			}
+			
+			float prenormalizationMin = input.readFloat();
+			float prenormalizationMax = input.readFloat();
 			
 			/** Get the prequantization transform */
 			PrequantizationTransformer pt = PrequantizationTransformer.loadFrom(input);
@@ -104,17 +104,17 @@ public class Decompressor {
 			MatrixQuantizer mq = new MatrixQuantizer(targetType.getBitDepth() - 1, 0, 1, -0.5f, 0.5f, 0.375f); //one guard bit just in case
 			mq.dequantize(hb, waveForm);
 			
-			/** add outliers back */
-			if (cp.percentOutliers > 0) {
-				Logger.getLogger().log("\tSetting outliers back...");
-				Refinements.addOutliersBack(outliers, waveForm);
-			}
-			
 			/** Apply the reverse wavelet transform */
 			Logger.getLogger().log("Reversing wavelet...");
 			pt.reverseTransform(waveForm);
 			bdw.reverseTransform(waveForm, lines, samples);
 			MatrixTransforms.normalize(waveForm, -0.5f, 0.5f, prenormalizationMin, prenormalizationMax);
+			
+			/** add outliers back */
+			if (cp.percentOutliers > 0) {
+				Logger.getLogger().log("\tSetting outliers back...");
+				Refinements.addOutliersBack(outliers, waveForm);
+			}
 			
 			reduced.add(waveForm);
 		}

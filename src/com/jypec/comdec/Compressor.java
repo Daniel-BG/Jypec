@@ -75,16 +75,7 @@ public class Compressor {
 			BitOutputStreamTree banditree = output.addChild("code for band " + i);
 			Logger.getLogger().log("Compressing band [" + (i+1) + "/" + cp.dr.getNumComponents() + "]: ");
 			
-			/** Apply the wavelet transform */
-			Logger.getLogger().log("\tApplying wavelet... ");
 			FMatrixRMaj waveForm = MatrixTransforms.extractBand(reduced, i, numLines, numSamples);
-			
-			float[] minMax = EJMLExtensions.minMax(waveForm);
-			banditree.writeFloat(minMax[0]);
-			banditree.writeFloat(minMax[1]);
-			MatrixTransforms.normalize(waveForm, minMax[0], minMax[1], -0.5f, 0.5f);
-			minMax = EJMLExtensions.minMax(waveForm);
-			bdw.forwardTransform(waveForm, numLines, numSamples);
 			
 			/** Shave the resulting limits and raw encode their values */
 			if (cp.percentOutliers > 0) {
@@ -94,11 +85,24 @@ public class Compressor {
 				outlierTree.writeInt(outliers.size());
 				for (Pair<Float, Pair<Integer, Integer>> p: outliers) {
 					outlierTree.writeFloat(p.first());
-					outlierTree.writeVLPInt(p.second().first());
-					outlierTree.writeVLPInt(p.second().second());
+					outlierTree.writeVLPInt(p.second().first());  //x coordinate
+					outlierTree.writeVLPInt(p.second().second()); //y coordinate
 				}
 				Refinements.clamp(waveForm, Refinements.getNonOutlierRange());
 			}
+			
+			/** Apply the wavelet transform */
+			Logger.getLogger().log("\tApplying wavelet... ");
+
+			
+			float[] minMax = EJMLExtensions.minMax(waveForm);
+			banditree.writeFloat(minMax[0]);
+			banditree.writeFloat(minMax[1]);
+			MatrixTransforms.normalize(waveForm, minMax[0], minMax[1], -0.5f, 0.5f);
+			minMax = EJMLExtensions.minMax(waveForm);
+			bdw.forwardTransform(waveForm, numLines, numSamples);
+			
+
 
 			/** get the requested data type */
 			ImageDataType targetType = new ImageDataType(cp.bits, true);
