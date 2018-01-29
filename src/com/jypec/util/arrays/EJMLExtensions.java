@@ -189,7 +189,7 @@ public class EJMLExtensions {
 	 */
 	public static float avg(FMatrixRMaj h1) {
 		SimpleMatrix m = SimpleMatrix.wrap(h1);
-		return (float) (m.elementSum() / (float) m.getNumElements());
+		return (float) (m.elementSum() / (double) m.getNumElements());
 	}
 	
 	/**
@@ -201,14 +201,14 @@ public class EJMLExtensions {
 		if (avg == null) {
 			avg = avg(h1);
 		}
-		float acc = 0;
+		double acc = 0;
 		for (int j = 0; j < h1.getNumRows(); j++) {
 			for (int k = 0; k < h1.getNumCols(); k++) {
 				float val = (float) h1.get(j, k) - avg;
 				acc += val * val;
 			}
 		}
-		return acc / (float) h1.getNumElements();
+		return (float) (acc / (double) h1.getNumElements());
 	}
 	
 	/**
@@ -226,14 +226,14 @@ public class EJMLExtensions {
 		if (avg2 == null) {
 			avg2 = avg(h2);
 		}
-		float acc = 0;
+		double acc = 0;
 		for (int i = 0; i < h1.getNumRows(); i++) {
 			for (int j = 0; j < h1.getNumCols(); j++) {
 				acc += (h1.get(i, j) - avg1) * (h2.get(i, j) - avg2);
 			}
 		}
 
-		return acc / (float) h1.getNumElements();
+		return (float) (acc / (double) h1.getNumElements());
 	}
 	
 	/**
@@ -273,13 +273,13 @@ public class EJMLExtensions {
 	 * @return the power of the image (mean of the squared values)
 	 */
 	public static float power(FMatrixRMaj h1) {
-		float acc = 0;
+		double acc = 0;
 		for (int i = 0; i < h1.getNumRows(); i++) {
 			for (int j = 0; j < h1.getNumCols(); j++) {
 				acc += h1.get(i, j) * h1.get(i, j);
 			}
 		}
 		acc /= h1.getNumElements();
-		return acc;
+		return (float) acc;
 	}
 }

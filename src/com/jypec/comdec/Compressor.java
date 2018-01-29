@@ -96,8 +96,9 @@ public class Compressor {
 
 			
 			float[] minMax = EJMLExtensions.minMax(waveForm);
-			banditree.writeFloat(minMax[0]);
-			banditree.writeFloat(minMax[1]);
+			BitOutputStreamTree minmaxTree = banditree.addChild("minmax");
+			minmaxTree.writeFloat(minMax[0]);
+			minmaxTree.writeFloat(minMax[1]);
 			MatrixTransforms.normalize(waveForm, minMax[0], minMax[1], -0.5f, 0.5f);
 			minMax = EJMLExtensions.minMax(waveForm);
 			bdw.forwardTransform(waveForm, numLines, numSamples);

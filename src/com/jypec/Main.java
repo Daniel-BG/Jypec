@@ -32,7 +32,9 @@ public class Main {
 	        Logger.getLogger().setLogging(iArgs.verbose);
 	        Logger.getLogger().log("Executing args: " + String.join(" ", args));
 	        //go through options
-	        if (iArgs.compress) {
+	        if (iArgs.help) {
+	        	printHelp();
+	        } else if (iArgs.compress) {
 	        	Jypec.compress(iArgs);
 	        } else if (iArgs.decompress) {
 	        	Jypec.decompress(iArgs);
@@ -40,8 +42,6 @@ public class Main {
 	        	Jypec.compare(iArgs);
 	        } else if (iArgs.analyze) {
 	        	Jypec.analyze(iArgs);
-	        } else if (iArgs.help){
-	        	printHelp();
 	        } else {
 	        	throw new ParseException("Missing options -c -d, i don't know what to do");
 	        }

@@ -117,8 +117,8 @@ public class ImageComparisons {
 		return mean / std;
 	}
 	
-	private final static float k1 = 0.0f; //usually 0.01?
-	private final static float k2 = 0.0f; //usually 0.03?
+	private final static float k1 = 0.01f; //usually 0.01?
+	private final static float k2 = 0.03f; //usually 0.03?
 	
 	/**
 	 * @param h1

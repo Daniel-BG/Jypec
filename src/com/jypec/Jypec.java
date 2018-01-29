@@ -72,13 +72,13 @@ public class Jypec {
 		}		
 		
 		/** Show some stats */
-		if (args.showCompressionStats && args.verbose) {
+		if (args.showCompressionStats) {
 			long orsize = hi.getData().getBitSize();
 			long redsize = bstn.getTreeBits(); // output.getBitsOutput();
-			Logger.getLogger().log("Original size is: " + orsize);
-			Logger.getLogger().log("Compressed size is: " + redsize);
-			Logger.getLogger().log("Compression rate: " + (float) orsize / (float) redsize);
-			Logger.getLogger().log("Bpppb: " + redsize / (float) (hi.getData().getTotalNumberOfSamples()));
+			System.out.println("Original size is: " + orsize);
+			System.out.println("Compressed size is: " + redsize);
+			System.out.println("Compression rate: " + (float) orsize / (float) redsize);
+			System.out.println("Bpppb: " + redsize / (float) (hi.getData().getTotalNumberOfSamples()));
 		}
 		
 		/** close output streams and dump data if needed */
