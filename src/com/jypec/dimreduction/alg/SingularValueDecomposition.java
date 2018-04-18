@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_FDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_FDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition_F32;
 
+import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.arrays.ArraySortingIndexComparator;
 import com.jypec.util.arrays.EJMLExtensions;
@@ -78,10 +79,11 @@ public class SingularValueDecomposition extends ProjectingDimensionalityReductio
 
 	
 	@Override
-	protected void doLoadFrom(String[] args) {
+	public DimensionalityReduction doLoadFrom(String[] args) {
 		int dimensions = Integer.parseInt(args[0]);
 		this.setNumComponents(dimensions);
 		this.setCenter(Boolean.parseBoolean(args[1]));
+		return this;
 	}
 	
 	

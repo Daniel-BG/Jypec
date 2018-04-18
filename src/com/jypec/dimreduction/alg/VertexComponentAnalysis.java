@@ -6,6 +6,7 @@ import org.ejml.data.FMatrixRMaj;
 import org.ejml.dense.row.CommonOps_FDRM;
 import org.ejml.dense.row.NormOps_FDRM;
 
+import com.jypec.dimreduction.DimensionalityReduction;
 import com.jypec.dimreduction.ProjectingDimensionalityReduction;
 import com.jypec.util.arrays.EJMLExtensions;
 import com.jypec.util.debug.Logger;
@@ -137,12 +138,13 @@ public class VertexComponentAnalysis extends ProjectingDimensionalityReduction {
 	
 	
 	@Override
-	protected void doLoadFrom(String[] args) {
+	public DimensionalityReduction doLoadFrom(String[] args) {
 		int dimensions = Integer.parseInt(args[0]);
 		this.setNumComponents(dimensions);
 		if (args.length > 1) { // set seed
 			this.seed = Long.parseLong(args[1]);
 		}
+		return this;
 	}
 
 }

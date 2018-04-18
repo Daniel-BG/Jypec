@@ -69,10 +69,11 @@ public class DeletingDimensionalityReduction extends DimensionalityReduction {
 	}
 
 	@Override
-	protected void doLoadFrom(String[] args) {
+	public DimensionalityReduction doLoadFrom(String[] args) {
 		if (args.length > 0) {
 			this.dimProj = Integer.parseInt(args[0]);
 		}
+		return this;
 	}
 
 }

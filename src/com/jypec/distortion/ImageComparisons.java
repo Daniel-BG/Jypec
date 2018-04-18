@@ -124,7 +124,7 @@ public class ImageComparisons {
 	 * @param h1
 	 * @param h2
 	 * @param dynRange dynamic range of the data
-	 * @return the mean to noise standard deviation ratio
+	 * @return the SSIM metric
 	 * @see <a href="https://ece.uwaterloo.ca/~z70wang/publications/ssim.pdf">Article</a>
 	 */
 	public static float SSIM (FMatrixRMaj h1, FMatrixRMaj h2, float dynRange) {

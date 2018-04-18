@@ -292,9 +292,7 @@ public abstract class DimensionalityReduction {
 				default:
 					throw new UnsupportedOperationException("The algorithm: " + args.reductionArgs[0] + " requested is not available");
 			}
-			dr.doLoadFrom(Arrays.copyOfRange(args.reductionArgs, 1, args.reductionArgs.length));
-			return dr;
-			
+			return dr.doLoadFrom(Arrays.copyOfRange(args.reductionArgs, 1, args.reductionArgs.length));
 		}
 		//default to no reduction
 		return new DeletingDimensionalityReduction();
@@ -303,7 +301,9 @@ public abstract class DimensionalityReduction {
 	/**
 	 * Used to load specific parameters of algorithms, once known its type
 	 * @param args
+	 * @return the newly created algorithm. Might not be of the same type as requested 
+	 * 		if a better one is available (e.g: VQPCA with dim=1 is essentially PCA)
 	 */
-	protected abstract void doLoadFrom(String[] args);
+	public abstract DimensionalityReduction doLoadFrom(String[] args);
 
 }

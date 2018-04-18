@@ -1,5 +1,6 @@
 package com.jypec.util.io;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -24,16 +25,28 @@ import com.jypec.util.io.headerio.enums.ByteOrdering;
  */
 public class HyperspectralImageReader {
 	
-	
+	private static final String[] commonDataFormats = {"", ".rfl", ".dat"}; 
 	/**
 	 * @param path the path where the header metadata 
-	 * + image data is stored
+	 * + image data is stored. Or only the header if ending in .hdr, and the data will be looked for with no extension
 	 * @param floatRep if true the matrix read will be stored as floats (may be useful for memory reasons)
 	 * @param verbose if info is to be output when decompressing
 	 * @return the read image, containing both header and data
 	 * @throws IOException 
 	 */
 	public static HyperspectralImage read(String path, boolean floatRep) throws IOException {
+		if (path.endsWith(".hdr")) {
+			String dataPath = path.substring(0, path.length() - 4);
+			for (String s: commonDataFormats) {
+				File f = new File(dataPath + s);
+				if(f.exists() && !f.isDirectory()) { 
+					System.out.println("file " + f.toString() + "  exists");
+					return HyperspectralImageReader.read(dataPath + s, path, floatRep);
+				}
+			}
+			throw new IllegalArgumentException("Could not find associated data file with the given header");
+		}
+		
 		return HyperspectralImageReader.read(path, null, floatRep);
 	}
 

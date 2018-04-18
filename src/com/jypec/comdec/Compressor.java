@@ -108,7 +108,8 @@ public class Compressor {
 			/** get the requested data type */
 			ImageDataType targetType = new ImageDataType(cp.bits, true);
 			if (cp.shaveMap.hasMappingForKey(i)) {
-				targetType.mutatePrecision(-cp.shaveMap.get(i));
+				int shaving = Math.min(cp.shaveMap.get(i), targetType.getBitDepth() - 2);
+				targetType.mutatePrecision(-shaving);
 			}
 			
 			Logger.getLogger().log("\tApplying quantization to type: " + targetType + "...");

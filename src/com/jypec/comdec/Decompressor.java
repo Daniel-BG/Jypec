@@ -88,7 +88,8 @@ public class Decompressor {
 			Logger.getLogger().log("\tLoading dequantizer...");
 			ImageDataType targetType = new ImageDataType(cp.bits, true);
 			if (cp.shaveMap.hasMappingForKey(i)) {
-				targetType.mutatePrecision(-cp.shaveMap.get(i));
+				int shaving = Math.min(cp.shaveMap.get(i), targetType.getBitDepth() - 2);
+				targetType.mutatePrecision(-shaving);
 			}
 			
 			HyperspectralBandData hb = HyperspectralBandData.generateRogueBand(targetType, lines, samples);

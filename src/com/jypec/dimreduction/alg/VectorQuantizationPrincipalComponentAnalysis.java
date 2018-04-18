@@ -257,9 +257,17 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 	}
 
 	@Override
-	protected void doLoadFrom(String[] args) {
+	public DimensionalityReduction doLoadFrom(String[] args) {
 		int dimensions = Integer.parseInt(args[0]);
 		int clusters = Integer.parseInt(args[1]);
+		//return PCA if clusters are 1
+		if (clusters == 1) {
+			DimensionalityReduction dr = new PrincipalComponentAnalysis();
+			dr.doLoadFrom(args);
+			return dr;
+		}
+		
+		
 		if (args.length < 3) {
 			this.setLibrary(Library.SMILE);
 		} else {
@@ -268,7 +276,7 @@ public class VectorQuantizationPrincipalComponentAnalysis extends Dimensionality
 		}
 		this.setNumComponents(dimensions);
 		this.setNumClusters(clusters);
-		
+		return this;
 	}
 
 

@@ -104,8 +104,9 @@ public abstract class ProjectingDimensionalityReduction extends DimensionalityRe
 	}
 	
 	@Override
-	protected void doLoadFrom(String[] args) {
+	public DimensionalityReduction doLoadFrom(String[] args) {
 		int dimensions = Integer.parseInt(args[0]);
 		this.setNumComponents(dimensions);
+		return this;
 	}
 }
