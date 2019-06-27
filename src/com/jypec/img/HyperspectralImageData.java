@@ -159,6 +159,17 @@ public abstract class HyperspectralImageData {
 	public abstract void copyDataFrom(FMatrixRMaj source);
 	
 	/**
+	 * Generate a NEW {@link HyperspectralImageData} object with the specific new size.
+	 * If it is smaller than the current size then the original is cropped, otherwise it 
+	 * is filled with zeroes
+	 * @param bands
+	 * @param lines
+	 * @param samples
+	 * @return
+	 */
+	public abstract HyperspectralImageData resize(int bands, int lines, int samples);
+	
+	/**
 	 * @return the hyperspectral image data as a float matrix for better numerical processing.
 	 * Note that, depending on implementation, modifications to the matrix returned might 
 	 * reflect on this object

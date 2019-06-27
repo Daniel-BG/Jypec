@@ -89,5 +89,30 @@ public class HyperspectralImageIntegerData extends HyperspectralImageData {
 		this.data = null;
 	}
 
+	@Override
+	public HyperspectralImageData resize(int bands, int lines, int samples) {
+		HyperspectralImageData newImage = new HyperspectralImageIntegerData(
+				new ImageDataType(this.getDataType().getBitDepth(), this.getDataType().isSigned()), 
+				bands, lines, samples);
+		
+		int cBands = this.getNumberOfBands();
+		int cLines = this.getNumberOfLines();
+		int cSamples = this.getNumberOfSamples();
+		
+		for (int i = 0; i < bands; i++) {
+			for (int j = 0; j < lines; j++) {
+				for (int k = 0; k < samples; k++) {
+					if (i < cBands && j < cLines && k < cSamples) {
+						newImage.setDataAt(this.getDataAt(i, j, k), i, j, k);
+					} else {
+						newImage.setValueAt(0, i, j, k);
+					}
+				}
+			}
+		}
+
+		return newImage;
+	}
+
 
 }
