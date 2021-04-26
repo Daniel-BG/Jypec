@@ -20,4 +20,9 @@ public enum BitStreamConstants {
 	public static final int INT_LEFT_BIT_MASK = 0x1 << (Integer.SIZE - 1);
 	/** Mask to extract rightmost bit of an int */
 	public static final int INT_RIGHT_BIT_MASK = 0x1;
+	
+	/** Mask to extract rightmost bit of a long */
+	public static final long LONG_LEFT_BIT_MASK = 0x1l << (Long.SIZE - 1);
+	/** Mask to extract rightmost bit of a long */
+	public static final long LONG_RIGHT_BIT_MASK = 0x1l;
 }

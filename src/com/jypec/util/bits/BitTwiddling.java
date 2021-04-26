@@ -75,4 +75,20 @@ public class BitTwiddling {
 		return result;
 	}
 	
+	/**
+	 * Reverses the least 'quant' significant bits in 'bits'
+	 * @param bits
+	 * @param quant
+	 * @return
+	 */
+	public static int reverseBits(int bits, int quant) {
+		int b = 0;
+		while (quant --> 0) {
+			b <<= 1;
+			b |= (bits & 0x1);
+			bits >>>= 1;
+		}
+		return b;
+	}
+	
 }

@@ -21,6 +21,27 @@ public class BitOutputStream extends OutputStream {
 	}
 	
 	/**
+	 * Adds padding to the specified number of bytes
+	 * @param byteAmount
+	 * @throws IOException 
+	 */
+	public void addPadding(int byteAmount) throws IOException {
+		if (byteAmount > 8) {
+			throw new IllegalArgumentException("Can only pad to 8bytes max");
+		}
+		//first pad the last byte
+		if (this.bufferSize > 0) {
+			this.writeNBitNumber(0, 8 - this.bufferSize);
+		}
+		//now pad to byteAmount
+		long bytesOutput = this.bitsOutput / 8;
+		int missingBytes = (int) (byteAmount - (bytesOutput % byteAmount));
+		if (missingBytes < byteAmount) {
+			this.writeBits(0l, missingBytes*8, BitStreamConstants.ORDERING_LEFTMOST_FIRST);
+		}
+	}
+	
+	/**
 	 * Adds padding to the remaining bits (if present) to make a multiple of a byte, 
 	 * then flushes the underlying stream
 	 * @throws IOException
@@ -101,19 +122,19 @@ public class BitOutputStream extends OutputStream {
 	 * @param ordering
 	 * @throws IOException 
 	 */
-	public void writeBits(int bits, int quantity, BitStreamConstants ordering) throws IOException {
+	public void writeBits(long bits, int quantity, BitStreamConstants ordering) throws IOException {
 		switch (ordering) {
 		case ORDERING_LEFTMOST_FIRST:
 			//adjust the bits so that the first one is in the leftmost position
-			bits <<= Integer.SIZE - quantity;
+			bits <<= Long.SIZE - quantity;
 			for (int i = 0; i < quantity; i++) {
-				writeBit(Bit.fromInteger(bits & BitStreamConstants.INT_LEFT_BIT_MASK));
+				writeBit(Bit.fromLong(bits & BitStreamConstants.LONG_LEFT_BIT_MASK));
 				bits <<= 1;
 			}
 			break;
 		case ORDERING_RIGHTMOST_FIRST:
 			for (int i = 0; i < quantity; i++) {
-				writeBit(Bit.fromInteger(bits & BitStreamConstants.INT_RIGHT_BIT_MASK));
+				writeBit(Bit.fromLong(bits & BitStreamConstants.LONG_RIGHT_BIT_MASK));
 				bits >>= 1;
 			}
 			break;

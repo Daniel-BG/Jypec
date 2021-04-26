@@ -26,6 +26,14 @@ public enum Bit {
 		return integer == 0 ? BIT_ZERO : BIT_ONE;
 	}
 	
+	/** 
+	 * @param l
+	 * @return a Bit class object from a longr (if zero then BIT_ZERO, else BIT_ONE)
+	 */
+	public static Bit fromLong(long l) {
+		return l == 0l ? BIT_ZERO : BIT_ONE;
+	}
+	
 	/**
 	 * @param integer
 	 * @return if integer == 0 return 0, else return 1.
@@ -59,4 +67,6 @@ public enum Bit {
 	public boolean toBoolean() {
 		return this == BIT_ONE;
 	}
+
+
 }

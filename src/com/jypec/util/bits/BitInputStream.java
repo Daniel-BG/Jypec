@@ -1,8 +1,10 @@
 package com.jypec.util.bits;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Stack;
 
 /**
  * Wraps around an InputStream to provide bit-wise functionality
@@ -105,15 +107,24 @@ public class BitInputStream extends InputStream {
 	 * @throws IOException 
 	 */
 	public int readBits(int quantity, BitStreamConstants ordering) throws IOException {
-		int result = 0;
+		return (int) (this.readLongBits(quantity, ordering) & 0xffffffffl);
+	}
+	
+	/**
+	 * @param quantity
+	 * @param ordering
+	 * @return the specified number of bits
+	 * @throws IOException 
+	 */
+	public long readLongBits(int quantity, BitStreamConstants ordering) throws IOException {
+		long result = 0;
 		switch (ordering) {
 		case ORDERING_RIGHTMOST_FIRST:
 			for (int i = 0; i < quantity; i++) {
-				result >>= 1;
-				result &= BitStreamConstants.INT_LEFT_BIT_MASK;
-				result |= readBitAsInt() << (Integer.SIZE - 1);
+				result >>>= 1;
+				result |= ((long) readBitAsInt()) << (Long.SIZE - 1);
 			}
-			result >>>= (Integer.SIZE - quantity);
+			result >>>= (Long.SIZE - quantity);
 			break;
 		case ORDERING_LEFTMOST_FIRST:
 			for (int i = 0; i < quantity; i++) {
@@ -146,8 +157,7 @@ public class BitInputStream extends InputStream {
 		switch (ordering) {
 		case ORDERING_RIGHTMOST_FIRST:
 			for (int i = 0; i < quantity; i++) {
-				result >>= 1;
-				result &= BitStreamConstants.INT_LEFT_BIT_MASK;
+				result >>>= 1;
 				result |= readBitAsInt() << (Integer.SIZE - 1);
 			}
 			result >>>= (Integer.SIZE - quantity);
@@ -180,6 +190,15 @@ public class BitInputStream extends InputStream {
 		int leftBits = this.readInt();
 		int rightBits = this.readInt();
 		return Double.longBitsToDouble((((long) leftBits) << 32) | (((long) rightBits) & 0xffffffffl));
+	}
+	
+	/**
+	 * Reads a long value from the input stream
+	 * @return the signed long value that was read (64 bits)
+	 * @throws IOException
+	 */
+	public long readLong() throws IOException {
+		return (((long) this.readInt()) << 32) | (0xffffffffl & (long) this.readInt());
 	}
 
 	
@@ -384,6 +403,30 @@ public class BitInputStream extends InputStream {
 	public int getLastReadBits() {
 		return this.lastBitsRead;
 	}
+
+	/**
+	 * @return reads all of the bits in the stream, then reverses it
+	 * and returs a new stream that is read in the opposite order as 
+	 * the original bit-by-bit
+	 * @throws IOException 
+	 */
+	public BitInputStream createReverseStream() throws IOException {
+		Stack<Byte> byteStack = new Stack<Byte>();
+		while (this.available() > 0)
+			try {
+				byteStack.push(new Byte(this.readByte()));
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+
+		byte[] bytes = new byte[byteStack.size()];
+		for (int i = 0; i < bytes.length; i++) 
+			bytes[i] = (byte) BitTwiddling.reverseBits(byteStack.pop(), 8);
+		InputStream is = new ByteArrayInputStream(bytes);
+		return new BitInputStream(is);
+	}
+
+
 
 
 
