@@ -56,6 +56,16 @@ public class ImageHeaderData {
 		}
 		this.data.put(key, value);
 	}
+	
+	/**
+	 * Remove all values of key, then put (key, value)
+	 * @param key
+	 * @param value
+	 */
+	public void replace(HeaderConstants key, Object value) {
+		this.data.removeAll(key);
+		this.data.put(key, value);
+	}
 
 	/**
 	 * @return the set of all entries (keys with multiple values

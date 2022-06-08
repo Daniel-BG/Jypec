@@ -35,4 +35,17 @@ public class HyperspectralImage {
 	public HyperspectralImageData getData() {
 		return data;
 	}
+
+	/**
+	 * Resize the image to the given size
+	 * @param bands
+	 * @param lines
+	 * @param samples
+	 */
+	public void resize(int bands, int lines, int samples) {
+		this.data = this.data.resize(bands, lines, samples);
+		this.header.replace(HeaderConstants.HEADER_BANDS, bands);
+		this.header.replace(HeaderConstants.HEADER_LINES, lines);
+		this.header.replace(HeaderConstants.HEADER_SAMPLES, samples);
+	}
 }
